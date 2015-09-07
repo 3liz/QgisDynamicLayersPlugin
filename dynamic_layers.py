@@ -6,7 +6,7 @@
  This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
                               -------------------
         begin                : 2015-07-21
-        git sha              : $Format:%H$
+            git sha              : $Format:%H$
         copyright            : (C) 2015 by Michaël Douchin - 3liz
         email                : mdouchin@3liz.com
  ***************************************************************************/
@@ -380,6 +380,9 @@ class DynamicLayers:
         Change content of dynamic properties group inputs
         When the user selects a layer in the table
         '''
+        if not self.initDone:
+            return
+
         showLayerProperties = True
 
         # Get layers table
@@ -430,6 +433,8 @@ class DynamicLayers:
         Toggle the status "dynamicDatasourceActive" for the selected layer
         when the user uses the checkbox
         '''
+        if not self.initDone:
+            return
 
         if not self.selectedLayer:
             return
@@ -473,6 +478,8 @@ class DynamicLayers:
         Set the "Dynamic datasource" of the selected layer
         when the user change the content of the text input
         '''
+        if not self.initDone:
+            return
         if not self.selectedLayer:
             return
 
@@ -490,7 +497,8 @@ class DynamicLayers:
         '''
         Get the layer datasource and copy it in the dynamic datasource text input
         '''
-
+        if not self.initDone:
+            return
         if not self.selectedLayer:
             return
 
@@ -551,6 +559,8 @@ class DynamicLayers:
         Add a variable to the list from the text input
         when the user clicks on the corresponding button
         '''
+        if not self.initDone:
+            return
 
         # Get table and row count
         tw = self.dlg.twVariableList
@@ -605,6 +615,8 @@ class DynamicLayers:
         Remove a variable from the table
         When the users clicks on the remove button
         '''
+        if not self.initDone:
+            return
 
         # Get selected lines
         tw = self.dlg.twVariableList
@@ -633,8 +645,12 @@ class DynamicLayers:
 
     def onVariableItemChanged(self, item):
         '''
+        if not self.initDone:
+            return
         Change the variable item
         '''
+        if not self.initDone:
+            return
 
         # Get row and column
         tw = self.dlg.twVariableList
@@ -661,6 +677,9 @@ class DynamicLayers:
         '''
         Get project properties and set the input of the project tab
         '''
+        if not self.initDone:
+            return
+
         # Check if project has got some WMS capabilities
         p = QgsProject.instance()
         if not p.readEntry('WMSServiceCapabilities', "/")[1]:
@@ -721,6 +740,7 @@ class DynamicLayers:
         Fill in the project properties item
         from XML
         '''
+
         p = QgsProject.instance()
         lr = QgsMapLayerRegistry.instance()
         # Fill the property from the PluginDynamicLayers XML
@@ -730,7 +750,8 @@ class DynamicLayers:
             val = p.readEntry('PluginDynamicLayers' , xml)
             if val:
                 val = val[0]
-
+            if not val:
+                continue
             if item['wType'] in ('text', 'textarea'):
                 widget.setText( val )
             elif item['wType'] == 'spinbox':
@@ -797,6 +818,8 @@ class DynamicLayers:
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
         '''
+        if not self.initDone:
+            return
 
         # Collect variables names and values
         tw = self.dlg.twVariableList
@@ -853,6 +876,7 @@ class DynamicLayers:
         """Run method that performs all the real work"""
 
         self.initDone = False
+
         # Popuplate the layers table
         self.populateLayerTable()
 
