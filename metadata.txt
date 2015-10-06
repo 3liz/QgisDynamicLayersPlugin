@@ -10,7 +10,7 @@
 name=Dynamic Layers
 qgisMinimumVersion=2.6
 description=This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
-version=0.1
+version=0.2
 author=Michaël Douchin - 3liz
 email=mdouchin@3liz.com
 
