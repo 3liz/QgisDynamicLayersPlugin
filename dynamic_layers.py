@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon,QTableWidgetItem, QTextCursor, qApp, QColor
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject, QgsFeatureRequest, QgsExpression, QgsMessageLog, QgsLogger
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
@@ -32,6 +32,12 @@ import datetime
 from functools import partial
 import sys
 import re
+try:
+    from qgis.server import *
+except:
+    pass
+
+from dynamic_layers_engine import *
 
 class DynamicLayers:
     """QGIS Plugin Implementation."""
@@ -206,8 +212,12 @@ class DynamicLayers:
         # Actions of the Variable tab
         self.dlg.btAddVariable.clicked.connect( self.onAddVariableClicked )
         self.dlg.btRemoveVariable.clicked.connect( self.onRemoveVariableClicked )
-        self.dlg.btApplyVariables.clicked.connect( self.onApplyVariablesClicked )
-        self.dlg.btSaveChildProject.clicked.connect( self.onSaveChildProjectClicked )
+
+        # Apply buttons
+        slot = partial( self.onApplyVariablesClicked, 'table' )
+        self.dlg.btApplyVariables.clicked.connect( slot )
+        slot = partial( self.onApplyVariablesClicked, 'layer' )
+        self.dlg.btApplyFromLayer.clicked.connect( slot )
 
         # Project properties tab
         self.dlg.btCopyFromProject.clicked.connect( self.onCopyFromProjectClicked )
@@ -232,7 +242,17 @@ class DynamicLayers:
                 'widget' : self.dlg.inExtentMargin,
                 'wType': 'spinbox',
                 'xml': 'ExtentMargin'
-            }
+            },
+            'variableSourceLayer' : {
+                'widget' : self.dlg.inVariableSourceLayer,
+                'wType': 'list',
+                'xml': 'VariableSourceLayer'
+            },
+            'variableSourceLayerExpression' : {
+                'widget' : self.dlg.inVariableSourceLayerExpression,
+                'wType': 'text',
+                'xml': 'VariableSourceLayerExpression'
+            },
         }
         for key, item in self.projectPropertiesInputs.items():
             slot = partial( self.onProjectPropertyChanged, key )
@@ -711,11 +731,11 @@ class DynamicLayers:
             return
 
         widget = self.projectPropertiesInputs[prop]['widget']
-        if prop == 'title':
+        if prop in ('title', 'variableSourceLayerExpression'):
             val = widget.text()
         elif prop == 'abstract':
             val = widget.toPlainText()
-        elif prop == 'extentLayer':
+        elif prop in ('extentLayer', 'variableSourceLayer'):
             var = None
             layer = self.getQgisLayerByNameFromCombobox( widget )
             if layer:
@@ -813,7 +833,7 @@ class DynamicLayers:
     ##
     # Global actions
     ##
-    def onApplyVariablesClicked(self):
+    def onApplyVariablesClicked(self, source='table'):
         '''
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
@@ -821,27 +841,28 @@ class DynamicLayers:
         if not self.initDone:
             return
 
-        # Collect variables names and values
-        tw = self.dlg.twVariableList
-        searchAndReplaceDictionary = {}
-        for row in range( tw.rowCount() ):
-            vname = tw.item( row, 0 ).data( Qt.EditRole )
-            vvalue = tw.item( row, 1 ).data( Qt.EditRole )
-            searchAndReplaceDictionary[vname] = vvalue
-
-        # Get the layers with dynamicDatasourceActive enable
-        lr = QgsMapLayerRegistry.instance()
-        layerList = [ layer for lname,layer in lr.mapLayers().items() if layer.customProperty('dynamicDatasourceActive') == 'True' ]
+        ok = True
 
         # Use the engine class to do the job
-        from dynamic_layers_engine import *
         dle = DynamicLayersEngine()
 
         # Set the dynamic layers list
-        dle.setDynamicLayersList( layerList )
+        dle.setDynamicLayersList()
 
         # Set search and replace dictionary
-        dle.setSearchAndReplaceDictionary( searchAndReplaceDictionary )
+        # Collect variables names and values
+        if source == 'table':
+            searchAndReplaceDictionary = {}
+            tw = self.dlg.twVariableList
+            for row in range( tw.rowCount() ):
+                vname = tw.item( row, 0 ).data( Qt.EditRole )
+                vvalue = tw.item( row, 1 ).data( Qt.EditRole )
+                searchAndReplaceDictionary[vname] = vvalue
+            dle.setSearchAndReplaceDictionary( searchAndReplaceDictionary )
+        else:
+            layer = self.getQgisLayerByNameFromCombobox( self.dlg.inVariableSourceLayer )
+            exp = self.dlg.inVariableSourceLayerExpression.text()
+            dle.setSearchAndReplaceDictionaryFromLayer( layer, exp )
 
         # Change layers datasource
         dle.setDynamicLayersDatasourceFromDic( )
@@ -867,11 +888,6 @@ class DynamicLayers:
         p.setDirty( True )
 
 
-    def onSaveChildProjectClicked(self):
-        pass
-
-
-
     def run(self):
         """Run method that performs all the real work"""
 
@@ -885,6 +901,9 @@ class DynamicLayers:
 
         # Populate the extent layer list
         self.populateLayerCombobox( self.dlg.inExtentLayer, 'vector', 'all', False )
+
+        # Populate the variable source layer combobox
+        self.populateLayerCombobox(self.dlg.inVariableSourceLayer, 'vector', 'all', False )
 
         # Copy project propertie to corresponding tab
         self.populateProjectProperties()
@@ -900,3 +919,20 @@ class DynamicLayers:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+
+
+class DynamicLayersServer:
+    """Plugin for QGIS server
+    this plugin loads DynamicLayersFilter"""
+
+    def __init__(self, serverIface):
+        # Save reference to the QGIS server interface
+        self.serverIface = serverIface
+        QgsMessageLog.logMessage("SUCCESS - DynamicLayersServer init", 'plugin', QgsMessageLog.INFO)
+
+        from filters.DynamicLayersFilter import DynamicLayersFilter
+        try:
+            serverIface.registerFilter( DynamicLayersFilter(serverIface), 100 )
+        except Exception, e:
+            QgsLogger.debug("DynamicLayersServer - Error loading filter DynamicLayersServer : %s" % e )

@@ -23,8 +23,12 @@
 from PyQt4.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon,QTableWidgetItem, QTextCursor, qApp
 from PyQt4.QtXml import QDomDocument,QDomElement
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject
-from qgis.utils import iface
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog
+try:
+    from qgis.utils import iface
+except:
+    iface = None
+    pass
 
 import os.path
 import sys
@@ -71,9 +75,9 @@ class layerDataSourceModifier():
         '''
         if not layer:
             return
-        self.layer = layer
 
-        self.dynamicDatasourceActive = layer.customProperty('dynamicDatasourceActive') == 'True'
+        self.layer = layer
+        self.dynamicDatasourceActive = ( layer.customProperty('dynamicDatasourceActive') == 'True' )
         self.dynamicDatasourceContent = layer.customProperty( 'dynamicDatasourceContent')
 
 
@@ -117,6 +121,7 @@ class layerDataSourceModifier():
         XMLDocument.appendChild(XMLMapLayers)
         layer.readLayerXML(XMLMapLayer)
 
+        # Reload layer
         layer.updateExtents()
         layer.reload()
 
@@ -191,13 +196,45 @@ class DynamicLayersEngine():
         self.searchAndReplaceDictionary = searchAndReplaceDictionary
 
 
-    def setDynamicLayersList( self, layers=[] ):
+
+    def setSearchAndReplaceDictionaryFromLayer(self, layer, expression):
+        '''
+        Set the search and replace dictionary
+        from a given layer
+        and an expression.
+        The first found features is the data source
+        '''
+        searchAndReplaceDictionary = {}
+
+        # Get and validate expression
+        qExp = QgsExpression( expression )
+        if not qExp.hasParserError():
+            qReq = QgsFeatureRequest( qExp )
+            features = layer.getFeatures( qReq )
+        else:
+            QgsMessageLog.logMessage( 'An error occured while parsing the given expression: %s' % qExp.parserErrorString() )
+            features = layer.getFeatures()
+
+        # Get layer fields name
+        fields = layer.pendingFields()
+        field_names = [ field.name() for field in fields ]
+
+        # Take only first feature
+        for feat in features:
+            # Build dictionnary
+            searchAndReplaceDictionary = dict(zip(field_names, feat.attributes()))
+            break
+
+        self.searchAndReplaceDictionary = searchAndReplaceDictionary
+
+
+    def setDynamicLayersList( self ):
         '''
         Add the passed layers to the dynamic layers dictionnary
         '''
-        for layer in layers:
-            if layer.id() not in self.dynamicLayers:
-                self.dynamicLayers[ layer.id() ] = layer
+        # Get the layers with dynamicDatasourceActive enable
+        lr = QgsMapLayerRegistry.instance()
+        self.dynamicLayers = dict([ (lid,layer) for lid,layer in lr.mapLayers().items() if layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty('dynamicDatasourceContent') ])
 
 
     def setDynamicLayersDatasourceFromDic(self ):
@@ -210,16 +247,16 @@ class DynamicLayersEngine():
         if not self.searchAndReplaceDictionary or not isinstance(self.searchAndReplaceDictionary, dict):
             return
 
-        for id,layer in self.dynamicLayers.items():
-            print layer.name()
+        for lid,layer in self.dynamicLayers.items():
             a = layerDataSourceModifier( layer )
             a.setNewSourceUriFromDict( self.searchAndReplaceDictionary )
 
-        self.iface.actionDraw().trigger()
-        self.iface.mapCanvas().refresh()
+        if self.iface:
+            self.iface.actionDraw().trigger()
+            self.iface.mapCanvas().refresh()
 
 
-    def setDynamicProjectProperties(self):
+    def setDynamicProjectProperties(self, title=None, abstract=None):
         '''
         Set some project properties : title, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
@@ -233,18 +270,20 @@ class DynamicLayersEngine():
             p.writeEntry('WMSServiceCapabilities', "/", "True")
 
         # title
-        xml = 'ProjectTitle'
-        val = p.readEntry('PluginDynamicLayers' , xml)
-        if val:
-            val = val[0]
-            self.setProjectProperty( 'title', val)
+        if not title:
+            xml = 'ProjectTitle'
+            val = p.readEntry('PluginDynamicLayers' , xml)
+            if val:
+                title = val[0]
+        self.setProjectProperty( 'title', title)
 
         # abstract
-        xml = 'ProjectAbstract'
-        val = p.readEntry('PluginDynamicLayers' , xml)
-        if val:
-            val = val[0]
-            self.setProjectProperty( 'abstract', val)
+        if not abstract:
+            xml = 'ProjectAbstract'
+            val = p.readEntry('PluginDynamicLayers' , xml)
+            if val:
+                abstract = val[0]
+        self.setProjectProperty( 'abstract', abstract)
 
 
     def setProjectProperty( self, prop, val):
@@ -280,40 +319,36 @@ class DynamicLayersEngine():
         pextent = None
         if self.extentLayer:
             pextent = self.extentLayer.extent()
+            #QgsMessageLog.logMessage( 'pextent FROM layer %s' % self.extentLayer.name() )
         else:
-            pextent = self.iface.mapCanvas().extent()
-        if pextent.width() <= 0:
+            #QgsMessageLog.logMessage( 'pas d extentlayer' )
+            if self.iface:
+                #QgsMessageLog.logMessage( 'si on a du iface, on recupere extent du mapcanvas' )
+                pextent = self.iface.mapCanvas().extent()
+        if pextent and pextent.width() <= 0 and self.iface:
             pextent = self.iface.mapCanvas().extent()
 
         # Add a margin
-        if self.extentMargin:
-            marginX = pextent.width() * self.extentMargin / 100
-            marginY = pextent.height() * self.extentMargin / 100
-            margin = max( marginX, marginY )
-            pextent = pextent.buffer( margin )
+        if pextent:
+            if self.extentMargin:
+                marginX = pextent.width() * self.extentMargin / 100
+                marginY = pextent.height() * self.extentMargin / 100
+                margin = max( marginX, marginY )
 
-        # Modify OWS WMS extent
-        pWmsExtent = []
-        pWmsExtent.append(u'%s' % pextent.xMinimum())
-        pWmsExtent.append(u'%s' % pextent.yMinimum())
-        pWmsExtent.append(u'%s' % pextent.xMaximum())
-        pWmsExtent.append(u'%s' % pextent.yMaximum())
-        p.writeEntry('WMSExtent', '', pWmsExtent)
+                #QgsMessageLog.logMessage( 'margin %s' % margin )
+                pextent = pextent.buffer( margin )
 
-        # Zoom canvas to extent
-        iface.mapCanvas().setExtent( pextent )
+            # Modify OWS WMS extent
+            pWmsExtent = []
+            pWmsExtent.append(u'%s' % pextent.xMinimum())
+            pWmsExtent.append(u'%s' % pextent.yMinimum())
+            pWmsExtent.append(u'%s' % pextent.xMaximum())
+            pWmsExtent.append(u'%s' % pextent.yMaximum())
+            p.writeEntry('WMSExtent', '', pWmsExtent)
 
+            # Zoom canvas to extent
+            if self.iface:
+                iface.mapCanvas().setExtent( pextent )
 
-    def saveChildProject( self ):
-        '''
-        Save a project into a new file
-        '''
-        origFileName = QgsProject.instance().fileName()
-        if origFileName:
-            suffix = '_'.join( ["%s_%s" % (k,v) for k,v in self.searchAndReplaceDictionary.items()] )
-            newFileName = origFileName.replace('.qgs', '_%s.qgs' % suffix )
+        return pextent
 
-            QgsProject.instance().setFileName( newFileName )
-            QgsProject.instance().write()
-            QgsProject.instance().setFileName(origFileName)
-            QgsProject.instance().dirty(0)

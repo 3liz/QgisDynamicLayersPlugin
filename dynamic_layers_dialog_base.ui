@@ -59,8 +59,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>863</width>
-                <height>604</height>
+                <width>879</width>
+                <height>634</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -159,8 +159,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>879</width>
-                <height>599</height>
+                <width>290</width>
+                <height>266</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -255,15 +255,61 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>879</width>
-                <height>599</height>
+                <width>291</width>
+                <height>362</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_10">
                <item>
+                <widget class="QGroupBox" name="groupBox_4">
+                 <property name="title">
+                  <string>Set variables from a vector layer</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_14">
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_3">
+                    <item>
+                     <widget class="QComboBox" name="inVariableSourceLayer"/>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="inVariableSourceLayerExpression">
+                      <property name="toolTip">
+                       <string>Enter a QGIS valid expression</string>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Enter a valid expression</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_3">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btApplyFromLayer">
+                    <property name="text">
+                     <string>Apply on project</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
                 <widget class="QGroupBox" name="groupBox_3">
                  <property name="title">
-                  <string>Configure variables</string>
+                  <string>Set variables manually</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_9">
                   <item>
@@ -309,7 +355,11 @@
                      </widget>
                     </item>
                     <item row="1" column="0">
-                     <widget class="QLineEdit" name="inVariableName"/>
+                     <widget class="QLineEdit" name="inVariableName">
+                      <property name="placeholderText">
+                       <string>Variable name</string>
+                      </property>
+                     </widget>
                     </item>
                     <item row="1" column="2">
                      <widget class="QLineEdit" name="inVariableValue"/>
@@ -347,6 +397,13 @@
                     </item>
                    </layout>
                   </item>
+                  <item>
+                   <widget class="QPushButton" name="btApplyVariables">
+                    <property name="text">
+                     <string>Apply variables on project</string>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </widget>
                </item>
@@ -374,37 +431,6 @@
           </layout>
          </widget>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btApplyVariables">
-           <property name="text">
-            <string>Apply variables on dynamic layers</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btSaveChildProject">
-           <property name="text">
-            <string>Save current status as child project</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
