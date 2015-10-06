@@ -9,7 +9,8 @@
 [general]
 name=Dynamic Layers
 qgisMinimumVersion=2.6
-description=This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
+description=Change the datasource of chosen layers dynamically by searching and replacing user defined variables.
+about=This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables such as {$myvar} inside the layer datasource, and then define theses variables (from a table or from an input vector source). Finally you apply the variables values on every configured layer via the apply button, and you can see the changes nefore saving the project.
 version=0.2
 author=Michaël Douchin - 3liz
 email=mdouchin@3liz.com
