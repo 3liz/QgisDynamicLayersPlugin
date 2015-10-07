@@ -4,7 +4,7 @@
 
 This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents.
 
-You can use some variables such as {$myvar} inside the layer datasource template, and then define theses variables (from a table or from an input vector source). 
+You can use some variables such as {$myvar} inside the layer datasource template, and then define theses variables (from a table or from an input vector source).
 
 Finally you apply the variables values on every configured layer via the apply button, and you can see the changes before saving the project.
 
@@ -42,7 +42,7 @@ For example, if the original layer datasource for a Shapefile is
 /tmp/town_france.shp
 ```
 
-You can use a "country" variable 
+You can use a "country" variable
 
 ```
 /tmp/town_{$country}.shp
@@ -79,7 +79,7 @@ You can use the button **Copy properties from project** to get the title and des
 You can add or remove variables in the table by using the form at the bottom.
 You can also modify the variable value by entering a new value in corresponding the table cell.
 
-Once you have added your variables and added a value for each one, you can **apply variables on project** by clicking on the correspondong button. 
+Once you have added your variables and added a value for each one, you can **apply variables on project** by clicking on the correspondong button.
 
 This will replace each activated layer datasource by the dynamic datasource modified via the variables, and then zoom to the extent layer.
 
@@ -94,7 +94,7 @@ You must then use a QGIS expression to filter one line of the source layer (if m
 For example, if your source layer has this attribute table
 
 id |  year | country
-------------- | ------------- | -- 
+------------- | ------------- | ---
 1  |  2013 | Spain
 2  | 2012 | France
 3  |  2012 | Japan
@@ -110,7 +110,7 @@ You will have the following variables and values
 variable |  value
 ------------- | -------------
 id  |  3
-year  | 2012 
+year  | 2012
 country  |  Japan
 
 
