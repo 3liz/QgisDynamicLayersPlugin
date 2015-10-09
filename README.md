@@ -267,6 +267,35 @@ But if you have modified the parent project in the meantime, the plugin will det
 
 **Lizmap Web Client V3** (currently the master branch ) has the capabilities to use a parent project and to generate a new map based on the plugin **DynamicLayers.**
 
+#### Installation
+
+Of course, the QGIS plugin DynamicLayers must been installed, as described above.
+
+You must then  install the Lizmap module **dynamicLayers**. This module is shiped with Lizmap Web Client 3 and above, but is not installed by default.
+
+To do so, you must add the following line in the section **[modules]** of lizmap local configuration file. In the following example, we assume that Lizmap Web Client is already installed and working, and the root of Lizmap installation is /var/www/lizmap-web-client/
+
+```
+cd /var/www/lizmap-web-client/
+nano lizmap/var/config/localconfig.ini.php
+```
+In this file, you should see a section [modules], if not create it, and activate the module dynamicLayers by writing its access level as follow:
+
+```
+[modules]
+
+dynamicLayers.access = 2
+```
+
+Then save the file. Now you can install the module via
+
+```
+sudo lizmap/install/set_rights.sh www-data www-data
+php lizmap/install/installer.php
+```
+
+#### Usage
+
 If you have a Lizmap map corresponding to this URL
 
 ```
