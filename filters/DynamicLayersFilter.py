@@ -20,7 +20,7 @@
 """
 
 from qgis.server import *
-from qgis.core import QgsProject, QgsMessageLog, QgsLogger, QgsMapLayerRegistry, QgsLayerTreeModel, QgsLayerTreeUtils
+from qgis.core import QgsProject, QgsMessageLog, QgsLogger, QgsMapLayerRegistry, QgsLayerTreeModel, QgsLayerTreeUtils, QgsComposition
 from qgis.gui import QgsMapCanvas, QgsLayerTreeMapCanvasBridge, QgsLayerTreeView
 from DynamicLayers.dynamic_layers_engine import DynamicLayersEngine
 from PyQt4.QtCore import QFileInfo
@@ -86,10 +86,13 @@ class DynamicLayersFilter(QgsServerFilter):
         canvas.zoomToFullExtent()
         self.canvas = canvas
         self.bridge = bridge
+        self.composers = []
         self.project = p
         self.project.readProject.connect( bridge.readProject )
+        self.project.readProject.connect( self.loadComposersFromProject )
         self.project.writeProject.connect( bridge.writeProject )
         self.project.writeProject.connect( self.writeOldLegend )
+        self.project.writeProject.connect( self.writeComposers )
         
         # read project
         p.read( pfile )
@@ -276,6 +279,49 @@ class DynamicLayersFilter(QgsServerFilter):
                         self.bridge.hasCustomLayerOrder(), self.bridge.customLayerOrder() )
         doc.firstChildElement( "qgis" ).appendChild( oldLegendElem )
 
+    def loadComposersFromProject( self, doc ):
+        '''
+        Load composers from project document
+        '''
+        composerNodeList = doc.elementsByTagName( "Composer" );
+        i = 0
+        while i < composerNodeList.size() :
+            composerElem = composerNodeList.at(i).toElement()
+            title = composerElem.attribute( "title" )
+            visible = composerElem.attribute( "visible" )
+            composition = QgsComposition( self.canvas.mapSettings() );
+            compositionNodeList = composerElem.elementsByTagName( "Composition" )
+            if compositionNodeList.size() > 0 :
+                compositionElem = compositionNodeList.at( 0 ).toElement();
+                composition.readXML( compositionElem, doc );
+                atlasElem = composerElem.firstChildElement( "Atlas" );
+                composition.atlasComposition().readXML( atlasElem, doc );
+                composition.addItemsFromXML( composerElem, doc );
+                composition.atlasComposition().readXMLMapSettings( atlasElem, doc );
+            self.composers.append({
+                'title': title,
+                'visible': visible,
+                'composition': composition
+            })
+            i += 1
+
+    def writeComposers( self, doc ):
+        '''
+        Write composers to project document
+        '''
+        nl = doc.elementsByTagName( "qgis" );
+        if nl.count() < 1:
+            return
+        qgisElem = nl.at( 0 ).toElement();
+        if qgisElem.isNull():
+            return
+        for composer in self.composers:
+            composerElem = doc.createElement( "Composer" );
+            composerElem.setAttribute( "title", composer['title'] );
+            composerElem.setAttribute( "visible", composer['visible'] );
+            qgisElem.appendChild( composerElem );
+            composer['composition'].writeXML( composerElem, doc );
+            composer['composition'].atlasComposition().writeXML( composerElem, doc );
 
     def replaceLayersId( self, projectXmlString ):
         '''
