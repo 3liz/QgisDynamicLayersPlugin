@@ -109,6 +109,7 @@ class DynamicLayersFilter(QgsServerFilter):
             request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
+            request.setHeader('Content-Disposition', 'attachment; filename="DynamicLayers.json"')
             request.clearBody()
             body = {
                 'status': 0,
@@ -129,6 +130,7 @@ class DynamicLayersFilter(QgsServerFilter):
             request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
+            request.setHeader('Content-Disposition', 'attachment; filename="DynamicLayers.json"')
             request.clearBody()
             body = {
                 'status': 0,
@@ -153,6 +155,7 @@ class DynamicLayersFilter(QgsServerFilter):
                 request.setInfoFormat('text/json')
                 request.setHeader('Status', '200')
                 request.setHeader('Content-type', 'text/json')
+                request.setHeader('Content-Disposition', 'attachment; filename="DynamicLayers.json"')
                 request.clearBody()
                 body = {
                     'status': 1,
@@ -212,6 +215,7 @@ class DynamicLayersFilter(QgsServerFilter):
             request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
+            request.setHeader('Content-Disposition', 'attachment; filename="DynamicLayers.json"')
             request.clearBody()
             body = {
                 'status': 1,
@@ -225,6 +229,7 @@ class DynamicLayersFilter(QgsServerFilter):
             request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
+            request.setHeader('Content-Disposition', 'attachment; filename="DynamicLayers.json"')
             request.clearBody()
             body = {
                 'status': 0,
