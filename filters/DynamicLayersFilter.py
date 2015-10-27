@@ -54,6 +54,7 @@ class DynamicLayersFilter(QgsServerFilter):
         if 'DLSOURCELAYER' not in params or 'DLEXPRESSION' not in params:
             # Change response
             request.clearHeaders()
+            request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
             request.clearBody()
@@ -81,13 +82,17 @@ class DynamicLayersFilter(QgsServerFilter):
         canvas = QgsMapCanvas()
         treeRoot = p.layerTreeRoot()
         bridge = QgsLayerTreeMapCanvasBridge( treeRoot, canvas )
-        p.read( pfile )
         bridge.setCanvasLayers()
         canvas.zoomToFullExtent()
         self.canvas = canvas
+        self.bridge = bridge
         self.project = p
+        self.project.readProject.connect( bridge.readProject )
         self.project.writeProject.connect( bridge.writeProject )
         self.project.writeProject.connect( self.writeOldLegend )
+        
+        # read project
+        p.read( pfile )
 
         # Get an instance of engine class
         dle = DynamicLayersEngine()
@@ -98,6 +103,7 @@ class DynamicLayersFilter(QgsServerFilter):
             QgsMessageLog.logMessage( "DynamicLayers - no dynamic layers found")
             # Change response
             request.clearHeaders()
+            request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
             request.clearBody()
@@ -117,6 +123,7 @@ class DynamicLayersFilter(QgsServerFilter):
             QgsMessageLog.logMessage( "DynamicLayers - source layer not in project")
             # Change response
             request.clearHeaders()
+            request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
             request.clearBody()
@@ -140,6 +147,7 @@ class DynamicLayersFilter(QgsServerFilter):
 
                 # Change response
                 request.clearHeaders()
+                request.setInfoFormat('text/json')
                 request.setHeader('Status', '200')
                 request.setHeader('Content-type', 'text/json')
                 request.clearBody()
@@ -198,6 +206,7 @@ class DynamicLayersFilter(QgsServerFilter):
         if childProject:
             # Change response
             request.clearHeaders()
+            request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
             request.clearBody()
@@ -210,6 +219,7 @@ class DynamicLayersFilter(QgsServerFilter):
         else:
             # Change response
             request.clearHeaders()
+            request.setInfoFormat('text/json')
             request.setHeader('Status', '200')
             request.setHeader('Content-type', 'text/json')
             request.clearBody()
@@ -262,7 +272,8 @@ class DynamicLayersFilter(QgsServerFilter):
         Add old legend to project XML
         '''
         treeRoot = self.project.layerTreeRoot()
-        oldLegendElem = QgsLayerTreeUtils.writeOldLegend( doc, treeRoot, False, [] )
+        oldLegendElem = QgsLayerTreeUtils.writeOldLegend( doc, treeRoot,
+                        self.bridge.hasCustomLayerOrder(), self.bridge.customLayerOrder() )
         doc.firstChildElement( "qgis" ).appendChild( oldLegendElem )
 
 
