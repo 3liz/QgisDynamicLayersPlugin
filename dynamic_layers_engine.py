@@ -318,12 +318,10 @@ class DynamicLayersEngine():
         # Get extent from extent layer (if given)
         pextent = None
         if self.extentLayer:
+            self.extentLayer.updateExtents()
             pextent = self.extentLayer.extent()
-            #QgsMessageLog.logMessage( 'pextent FROM layer %s' % self.extentLayer.name() )
         else:
-            #QgsMessageLog.logMessage( 'pas d extentlayer' )
             if self.iface:
-                #QgsMessageLog.logMessage( 'si on a du iface, on recupere extent du mapcanvas' )
                 pextent = self.iface.mapCanvas().extent()
         if pextent and pextent.width() <= 0 and self.iface:
             pextent = self.iface.mapCanvas().extent()
@@ -334,8 +332,6 @@ class DynamicLayersEngine():
                 marginX = pextent.width() * self.extentMargin / 100
                 marginY = pextent.height() * self.extentMargin / 100
                 margin = max( marginX, marginY )
-
-                #QgsMessageLog.logMessage( 'margin %s' % margin )
                 pextent = pextent.buffer( margin )
 
             # Modify OWS WMS extent

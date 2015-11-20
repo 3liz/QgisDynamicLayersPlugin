@@ -376,6 +376,7 @@ class DynamicLayersFilter(QgsServerFilter):
             # Change extent for each layer
             for lid, layer in lr.mapLayers().items():
                 if layer.customProperty('dynamicDatasourceActive') == 'True':
+                    layer.updateExtents()
                     lExtent = layer.extent()
                     lname = "%s" % unicode( layer.name() )
                     sjson['layers'][lname]["extent"] = eval(
