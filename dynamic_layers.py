@@ -780,7 +780,9 @@ class DynamicLayers:
                 widget.setChecked(val)
             elif item['wType'] == 'list':
                 listDic = { widget.itemData(i):i for i in range( widget.count() ) }
-                widget.setCurrentIndex( listDic[val] )
+                print val
+                if val in listDic:
+                    widget.setCurrentIndex( listDic[val] )
 
 
     ##
