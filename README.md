@@ -164,6 +164,7 @@ $ sudo wget https://github.com/3liz/QgisDynamicLayersPlugin/archive/master.zip
 $ # In case unzip was not installed before:
 $ sudo apt-get install unzip
 $ sudo unzip master.zip
+$ sudo rm master.zip 
 $ sudo mv QgisDynamicLayersPlugin-master DynamicLayers
 ```
 

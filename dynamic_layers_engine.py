@@ -48,7 +48,7 @@ class dynamicLayersTools():
         if not dictionary or not isinstance( dictionary, dict ):
             return string
 
-        # Create new datasource uri from template
+        # Create new string from original string by replacing via dic
         for k, v in dictionary.items():
             # Replace search string by value
             if v:
@@ -97,6 +97,9 @@ class layerDataSourceModifier():
         # Set the layer datasource
         self.setDataSource( newUri )
 
+        # Set other properties
+        self.setDynamicLayerProperties( searchAndReplaceDictionary )
+
 
     def setDataSource( self, newSourceUri):
         '''
@@ -138,11 +141,47 @@ class layerDataSourceModifier():
         return (datasourceType,uri)
 
 
+    def setDynamicLayerProperties(self, searchAndReplaceDictionary={}):
+        '''
+        Set layer title, abstract,
+        and field aliases (for vector layers only)
+        '''
+        layer = self.layer
+        t = dynamicLayersTools()
+
+        # Set title and abstract
+        layer.setTitle(
+            u"%s" % t.searchAndReplaceStringByDictionary(
+                layer.title(),
+                searchAndReplaceDictionary
+            )
+        )
+        layer.setAbstract(
+            u"%s" % t.searchAndReplaceStringByDictionary(
+                layer.abstract(),
+                searchAndReplaceDictionary
+            )
+        )
+
+        # Set fields aliases
+        if layer.type() == QgsMapLayer.VectorLayer:
+            for fid, field in enumerate( layer.pendingFields() ):
+                alias = layer.attributeAlias( fid )
+                if not alias:
+                    continue
+                newAlias = t.searchAndReplaceStringByDictionary(
+                    alias,
+                    searchAndReplaceDictionary
+                )
+                layer.addAttributeAlias( fid, newAlias )
+
+
+
 class DynamicLayersEngine():
     '''
     Changes the layers datasource by using dynamicDatasourceContent
     as a template and replace variable with data given by the user
-    '''
+    ''' 
 
     # Layer with the location to zoom in
     extentLayer = None
@@ -248,12 +287,14 @@ class DynamicLayersEngine():
             return
 
         for lid,layer in self.dynamicLayers.items():
+            # Change datasource
             a = layerDataSourceModifier( layer )
             a.setNewSourceUriFromDict( self.searchAndReplaceDictionary )
 
         if self.iface:
             self.iface.actionDraw().trigger()
             self.iface.mapCanvas().refresh()
+
 
 
     def setDynamicProjectProperties(self, title=None, abstract=None):

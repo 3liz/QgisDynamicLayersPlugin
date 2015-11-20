@@ -38,6 +38,7 @@ class DynamicLayersFilter(QgsServerFilter):
         self.childPath = None
         self.layerIdSuffix = None
         self.extent = None
+        self.searchAndReplaceDictionary = None
 
 
 
@@ -142,6 +143,7 @@ class DynamicLayersFilter(QgsServerFilter):
 
         sourceLayer = sourceLayerList[0]
         dle.setSearchAndReplaceDictionaryFromLayer( sourceLayer, pexp )
+        self.searchAndReplaceDictionary = dle.searchAndReplaceDictionary
 
         # Get child name computed path, and check if it is already there or not
         childPath = self.getChildProjectName( pmap, player, pexp )
@@ -396,6 +398,10 @@ class DynamicLayersFilter(QgsServerFilter):
 
             # Change layer ids globally
             jsonFileContent = self.replaceLayersId( jsonFileContent )
+
+            # Search and replace variables
+            t = dynamicLayersTools()
+            jsonFileContent = t.searchAndReplaceStringByDictionary( jsonFileContent, self.searchAndReplaceDictionary ) 
 
             # Write child project config file
             with open( self.childPath + '.cfg' , 'w') as fout:
