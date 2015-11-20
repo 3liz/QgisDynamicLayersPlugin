@@ -11,7 +11,7 @@ name=Dynamic Layers
 qgisMinimumVersion=2.6
 description=Change the datasource of chosen layers dynamically by searching and replacing user defined variables.
 about=This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables such as {$myvar} inside the layer datasource, and then define theses variables (from a table or from an input vector source). Finally you apply the variables values on every configured layer via the apply button, and you can see the changes before saving the project. Documentation : https://github.com/3liz/QgisDynamicLayersPlugin/blob/master/README.md
-version=0.2
+version=0.3
 author=Michaël Douchin - 3liz
 email=mdouchin@3liz.com
 
@@ -20,7 +20,14 @@ email=mdouchin@3liz.com
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog=
+  Version 0.3
+  * First version without the experimental flag
+  * Also search & replace variables in layer title, abstract & fields aliases
+  * Check if layer exists before setting extent layer combobox
+  * Ensure layer extent is updated before using it as map extent
+  * Add documentation in the README.md file about server side usage and Lizmap Web Client
+
 
 # Tags are comma separated with spaces allowed
 tags=feature, layers, project, dynamic, datasource
@@ -31,7 +38,7 @@ repository=https://github.com/3liz/QgisDynamicLayersPlugin/issues
 category=Plugins
 icon=icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False

@@ -57,6 +57,18 @@ WHERE year = {$year}
 )" sql=
 ```
 
+#### Use variables in QGIS layer properties
+
+We have seen above that you can use variables to define a new layer datasource.
+
+You can also use variables
+
+* inside the layers **title and abstract ** : Open the vector layer properties dialog, and in the *Metadata* panel, you can use variables in the definition of the **title** and the **abstract** properties
+* in the **vector layers field aliases**: in the vector properties dialog, tab *Fields*, you can use variables inside the aliases defined for each field.
+
+**When applying variables with the plugin, all these properties will also be updated.** (See the "Set variables" chapter further on)
+
+
 ### Configure project
 
 This tab allows you to define 2 differents things:
