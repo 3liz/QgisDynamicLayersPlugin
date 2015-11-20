@@ -163,8 +163,8 @@ $ cd /opt/qgis-server/plugins
 $ sudo wget https://github.com/3liz/QgisDynamicLayersPlugin/archive/master.zip
 $ # In case unzip was not installed before:
 $ sudo apt-get install unzip
-$ sudo unzip master.zip 
-$ sudo mv QgisDynamicLayersPlugin-master QgisDynamicLayersPlugin
+$ sudo unzip master.zip
+$ sudo mv QgisDynamicLayersPlugin-master DynamicLayers
 ```
 
 #### Apache virtual host configuration
@@ -178,12 +178,12 @@ The virtual host configuration, stored in /etc/apache2/sites-available/001-qgis-
     <VirtualHost *:80>
         ServerAdmin webmaster@localhost
         DocumentRoot /var/www/html
-     
+
         ErrorLog ${APACHE_LOG_DIR}/qgis-server-error.log
         CustomLog ${APACHE_LOG_DIR}/qgis-server-access.log combined
-     
+
         # Longer timeout for WPS... default = 40
-        FcgidIOTimeout 120 
+        FcgidIOTimeout 120
         FcgidInitialEnv LC_ALL "en_US.UTF-8"
         FcgidInitialEnv PYTHONIOENCODING UTF-8
         FcgidInitialEnv LANG "en_US.UTF-8"
@@ -191,14 +191,14 @@ The virtual host configuration, stored in /etc/apache2/sites-available/001-qgis-
         FcgidInitialEnv QGIS_SERVER_LOG_FILE /tmp/qgis-000.log
         FcgidInitialEnv QGIS_SERVER_LOG_LEVEL 0
         FcgidInitialEnv QGIS_PLUGINPATH "/opt/qgis-server/plugins"
-     
+
         # ABP: needed for QGIS HelloServer plugin HTTP BASIC auth
         <IfModule mod_fcgid.c>
             RewriteEngine on
             RewriteCond %{HTTP:Authorization} .
             RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
         </IfModule>
-     
+
         ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
         <Directory "/usr/lib/cgi-bin">
             AllowOverride All
@@ -244,9 +244,9 @@ For example:
 
 ```
 {
-	"status": 1, 
-	"childProject": "someproject__variable_source_idIN3.qgs", 
-	"message": "Child project has been updated"
+        "status": 1,
+        "childProject": "someproject__variable_source_idIN3.qgs",
+        "message": "Child project has been updated"
 }
 ```
 
@@ -254,9 +254,9 @@ If the child project has already been created before, the plugin will **not** re
 
 ```
 {
-	"status": 1, 
-	"childProject": "someproject__variable_source_idIN3.qgs", 
-	"message": "Child project is already up-to-date"
+        "status": 1,
+        "childProject": "someproject__variable_source_idIN3.qgs",
+        "message": "Child project is already up-to-date"
 }
 ```
 
@@ -317,7 +317,7 @@ Lizmap will then:
 
 * Use the DynamicLayers server plugin to **create a child project**
 * Copy and adapt the **Lizmap configuration** of the parent project for the child project ( global and layers extent, etc.)
-* **Redirect to the new map**, for example to 
+* **Redirect to the new map**, for example to
 
 ```
 http://lizmap.localhost/index.php/view/map/?repository=somerepo&project=someproject__variable_source_idIN3
