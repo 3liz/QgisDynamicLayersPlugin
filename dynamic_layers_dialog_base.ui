@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>941</width>
-    <height>781</height>
+    <height>877</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>921</width>
-        <height>705</height>
+        <height>801</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -60,7 +60,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>879</width>
-                <height>634</height>
+                <height>730</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -114,24 +114,112 @@
                   <item>
                    <widget class="QCheckBox" name="cbDatasourceActive">
                     <property name="text">
-                     <string>Activate dynamic datasource </string>
+                     <string>Activate dynamic datasource and properties</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="label">
-                    <property name="text">
-                     <string>Dynamic datasource content</string>
-                    </property>
-                   </widget>
+                   <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <item>
+                     <widget class="QScrollArea" name="scrollArea_5">
+                      <property name="widgetResizable">
+                       <bool>true</bool>
+                      </property>
+                      <widget class="QWidget" name="scrollAreaWidgetContents_5">
+                       <property name="geometry">
+                        <rect>
+                         <x>0</x>
+                         <y>0</y>
+                         <width>412</width>
+                         <height>335</height>
+                        </rect>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_15">
+                        <item>
+                         <widget class="QLabel" name="label">
+                          <property name="text">
+                           <string>Datasource template</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
+                        </item>
+                        <item>
+                         <spacer name="verticalSpacer_2">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>20</width>
+                            <height>40</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                       </layout>
+                      </widget>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QScrollArea" name="scrollArea_6">
+                      <property name="widgetResizable">
+                       <bool>true</bool>
+                      </property>
+                      <widget class="QWidget" name="scrollAreaWidgetContents_6">
+                       <property name="geometry">
+                        <rect>
+                         <x>0</x>
+                         <y>0</y>
+                         <width>411</width>
+                         <height>335</height>
+                        </rect>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_16">
+                        <item>
+                         <widget class="QLabel" name="label_8">
+                          <property name="text">
+                           <string>Title template</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLineEdit" name="titleTemplate"/>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="label_9">
+                          <property name="text">
+                           <string>Abstract template</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QPlainTextEdit" name="abstractTemplate"/>
+                        </item>
+                        <item>
+                         <spacer name="verticalSpacer">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>20</width>
+                            <height>40</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                       </layout>
+                      </widget>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                   <item>
-                   <widget class="QTextEdit" name="dynamicDatasourceContent"/>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btCopyFromDatasource">
+                   <widget class="QPushButton" name="btCopyFromLayer">
                     <property name="text">
-                     <string>Copy from current datasource</string>
+                     <string>Set templates content from layer properties</string>
                     </property>
                    </widget>
                   </item>
@@ -159,8 +247,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>290</width>
-                <height>266</height>
+                <width>879</width>
+                <height>730</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -255,8 +343,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>291</width>
-                <height>362</height>
+                <width>879</width>
+                <height>730</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_10">

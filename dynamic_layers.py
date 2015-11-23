@@ -206,8 +206,30 @@ class DynamicLayers:
 
         # Actions when the layer properties are changed panel
         self.dlg.cbDatasourceActive.stateChanged.connect( self.onCbDatasourceActiveChange )
-        self.dlg.dynamicDatasourceContent.textChanged.connect( self.onDynamicDatasourceContentChange )
-        self.dlg.btCopyFromDatasource.clicked.connect( self.onCopyDatasourceToDynamicDatasource )
+        self.dlg.btCopyFromLayer.clicked.connect( self.onCopyFromLayer )
+
+        self.layerPropertiesInputs = {
+            'datasource': {
+                'widget': self.dlg.dynamicDatasourceContent,
+                'wType': 'textarea',
+                'xml': 'dynamicDatasourceContent'
+            },
+            'title': {
+                'widget': self.dlg.titleTemplate,
+                'wType': 'text',
+                'xml': 'titleTemplate'
+            },
+            'abstract': {
+                'widget': self.dlg.abstractTemplate,
+                'wType': 'textarea',
+                'xml': 'abstractTemplate'
+            }
+        }
+        for key, item in self.layerPropertiesInputs.items():
+            control = item['widget']
+            slot = partial( self.onLayerPropertyChange, key )
+            control.textChanged.connect( slot )
+
 
         # Actions of the Variable tab
         self.dlg.btAddVariable.clicked.connect( self.onAddVariableClicked )
@@ -431,7 +453,6 @@ class DynamicLayers:
             else:
                 self.selectedLayer = layer
 
-        # Refresh Style tab
         if len( lines ) != 1:
             showLayerProperties = False
 
@@ -442,7 +463,24 @@ class DynamicLayers:
         # dynamic datasource text input content
         if layer:
             isActive = layer.customProperty('dynamicDatasourceActive') == 'True'
-            self.dlg.dynamicDatasourceContent.setText( layer.customProperty('dynamicDatasourceContent') )
+            for key, item in self.layerPropertiesInputs.items():
+                widget = item['widget']
+                val = layer.customProperty( item['xml'] )
+                if not val:
+                    val = ''
+                if item['wType'] in ('text'):
+                    widget.setText( val )
+                elif item['wType'] == 'textarea':
+                    widget.setPlainText(val)
+                elif item['wType'] == 'spinbox':
+                    widget.setValue(int(val))
+                elif item['wType'] == 'checkbox':
+                    widget.setChecked(val)
+                elif item['wType'] == 'list':
+                    listDic = { widget.itemData(i):i for i in range( widget.count() ) }
+                    print val
+                    if val in listDic:
+                        widget.setCurrentIndex( listDic[val] )
 
         # "active" checkbox
         self.dlg.cbDatasourceActive.setChecked( isActive )
@@ -493,27 +531,34 @@ class DynamicLayers:
         p.setDirty( True )
 
 
-    def onDynamicDatasourceContentChange(self):
+    def onLayerPropertyChange(self, key):
         '''
-        Set the "Dynamic datasource" of the selected layer
-        when the user change the content of the text input
+        Set the layer template property
+        when the user change the content
+        of the corresponding text input
         '''
         if not self.initDone:
             return
         if not self.selectedLayer:
             return
 
-        # Get the new "Dynamic datasource" content
-        inputValue = unicode(str(self.dlg.dynamicDatasourceContent.toPlainText()).strip(' \t'))
+        # Get changed item
+        item  = self.layerPropertiesInputs[key]
+        widget = item['widget']
+
+        # Get the new value
+        inputValue = u''
+        if item['wType'] == 'textarea':
+            inputValue = widget.toPlainText()
+        if item['wType'] == 'text':
+            inputValue = widget.text()
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty( 'dynamicDatasourceContent', inputValue )
+        self.selectedLayer.setCustomProperty( item['xml'], inputValue )
         p = QgsProject.instance()
         p.setDirty( True )
 
-
-
-    def onCopyDatasourceToDynamicDatasource(self):
+    def onCopyFromLayer(self):
         '''
         Get the layer datasource and copy it in the dynamic datasource text input
         '''
@@ -527,6 +572,10 @@ class DynamicLayers:
 
         # Set the dynamic datasource content input
         self.dlg.dynamicDatasourceContent.setText( uri )
+
+        # Set templates for title and abstract
+        self.dlg.abstractTemplate.setText( self.selectedLayer.abstract() )
+        self.dlg.titleTemplate.setText( self.selectedLayer.title() )
 
 
 
@@ -587,8 +636,8 @@ class DynamicLayers:
         twRowCount = tw.rowCount()
 
         # Get input data
-        vname = str(self.dlg.inVariableName.text().encode('utf-8')).strip(' \t')
-        vvalue = str(self.dlg.inVariableValue.text().encode('utf-8')).strip(' \t')
+        vname = unicode(self.dlg.inVariableName.text()).strip(' \t')
+        vvalue = unicode(self.dlg.inVariableValue.text()).strip(' \t')
 
         # Check if the variable if not already in the list
         if vname in self.variableList:

@@ -152,13 +152,13 @@ class layerDataSourceModifier():
         # Set title and abstract
         layer.setTitle(
             u"%s" % t.searchAndReplaceStringByDictionary(
-                layer.title(),
+                layer.customProperty('titleTemplate'),
                 searchAndReplaceDictionary
             )
         )
         layer.setAbstract(
             u"%s" % t.searchAndReplaceStringByDictionary(
-                layer.abstract(),
+                layer.customProperty('abstractTemplate'),
                 searchAndReplaceDictionary
             )
         )
