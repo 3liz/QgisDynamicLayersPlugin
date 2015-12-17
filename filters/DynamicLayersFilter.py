@@ -22,7 +22,7 @@
 from qgis.server import *
 from qgis.core import QgsProject, QgsMessageLog, QgsLogger, QgsMapLayerRegistry, QgsLayerTreeModel, QgsLayerTreeUtils, QgsComposition
 from qgis.gui import QgsMapCanvas, QgsLayerTreeMapCanvasBridge, QgsLayerTreeView
-from DynamicLayers.dynamic_layers_engine import DynamicLayersEngine
+from DynamicLayers.dynamic_layers_engine import *
 from PyQt4.QtCore import QFileInfo
 from PyQt4.QtXml import QDomDocument
 import os.path, re, json, time
@@ -94,7 +94,7 @@ class DynamicLayersFilter(QgsServerFilter):
         self.project.writeProject.connect( bridge.writeProject )
         self.project.writeProject.connect( self.writeOldLegend )
         self.project.writeProject.connect( self.writeComposers )
-        
+
         # read project
         p.read( pfile )
 
@@ -375,12 +375,14 @@ class DynamicLayersFilter(QgsServerFilter):
                 pextent.yMaximum()
             ]
 
-            # Change extent for each layer
+            # Change extent, title and abstract for each layer
             for lid, layer in lr.mapLayers().items():
                 if layer.customProperty('dynamicDatasourceActive') == 'True':
                     layer.updateExtents()
                     lExtent = layer.extent()
                     lname = "%s" % unicode( layer.name() )
+
+                    # extent
                     sjson['layers'][lname]["extent"] = eval(
                         '[%s, %s, %s, %s]' % (
                             lExtent.xMinimum(),
@@ -390,6 +392,13 @@ class DynamicLayersFilter(QgsServerFilter):
                         )
                     )
 
+                    # title
+                    sjson['layers'][lname]["title"] = layer.title()
+
+                    # abstract
+                    sjson['layers'][lname]["abstract"] = layer.abstract()
+
+            # Write json content into file
             jsonFileContent = json.dumps(
                 sjson,
                 sort_keys=False,
@@ -401,7 +410,7 @@ class DynamicLayersFilter(QgsServerFilter):
 
             # Search and replace variables
             t = dynamicLayersTools()
-            jsonFileContent = t.searchAndReplaceStringByDictionary( jsonFileContent, self.searchAndReplaceDictionary ) 
+            jsonFileContent = t.searchAndReplaceStringByDictionary( jsonFileContent, self.searchAndReplaceDictionary )
 
             # Write child project config file
             with open( self.childPath + '.cfg' , 'w') as fout:
