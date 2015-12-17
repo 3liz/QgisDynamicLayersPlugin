@@ -571,10 +571,10 @@ class DynamicLayers:
         uri = self.selectedLayer.dataProvider().dataSourceUri().split('|')[0]
 
         # Set the dynamic datasource content input
-        self.dlg.dynamicDatasourceContent.setText( uri )
+        self.dlg.dynamicDatasourceContent.setPlainText( uri )
 
         # Set templates for title and abstract
-        self.dlg.abstractTemplate.setText( self.selectedLayer.abstract() )
+        self.dlg.abstractTemplate.setPlainText( self.selectedLayer.abstract() )
         self.dlg.titleTemplate.setText( self.selectedLayer.title() )
 
 
