@@ -393,7 +393,7 @@ class DynamicLayersFilter(QgsServerFilter):
                     )
 
                     # title
-                    sjson['layers'][lname]["title"] = layer.title()
+                    sjson['layers'][lname]["title"] = layer.title() if layer.title().strip() != '' else layer.name()
 
                     # abstract
                     sjson['layers'][lname]["abstract"] = layer.abstract()

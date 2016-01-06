@@ -149,16 +149,30 @@ class layerDataSourceModifier():
         layer = self.layer
         t = dynamicLayersTools()
 
-        # Set title and abstract
+        # Layer title
+        # First check that we have a title
+        sourceTitle = layer.name().strip()
+        if layer.title().strip() != '':
+            sourceTitle = layer.title().strip()
+        if layer.customProperty('titleTemplate').strip() != '':
+            sourceTitle = layer.customProperty('titleTemplate').strip()
+        # Search and replace content
         layer.setTitle(
             u"%s" % t.searchAndReplaceStringByDictionary(
-                layer.customProperty('titleTemplate'),
+                sourceTitle,
                 searchAndReplaceDictionary
             )
         )
+
+        # Abstract
+        sourceAbstract = ''
+        if layer.abstract().strip() != '':
+            sourceAbstract = layer.abstract().strip()
+        if layer.customProperty('abstractTemplate').strip() != '':
+            sourceAbstract = layer.customProperty('abstractTemplate').strip()        
         layer.setAbstract(
             u"%s" % t.searchAndReplaceStringByDictionary(
-                layer.customProperty('abstractTemplate'),
+                sourceAbstract,
                 searchAndReplaceDictionary
             )
         )
