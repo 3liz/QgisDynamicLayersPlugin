@@ -393,10 +393,32 @@ class DynamicLayersFilter(QgsServerFilter):
                     )
 
                     # title
-                    sjson['layers'][lname]["title"] = layer.title() if layer.title().strip() != '' else layer.name()
+                    newTitle = ''
+                    oldTitle =  sjson['layers'][lname]["title"]
+                    if layer.title().strip() != '':
+                        newTitle = layer.title().strip()
+                    if not newTitle:
+                        if oldTitle.strip() != '':
+                            # keep old title in config if not null
+                            newTitle = oldTitle.strip()
+                        else:
+                            # else use layer name
+                            newTitle = layer.name().strip()
+                    sjson['layers'][lname]["title"] = newTitle
 
                     # abstract
-                    sjson['layers'][lname]["abstract"] = layer.abstract()
+                    newAbstract = ''
+                    oldAbstract =  sjson['layers'][lname]["abstract"]
+                    if layer.abstract().strip() != '':
+                        newAbstract = layer.abstract().strip()
+                    if not newAbstract:
+                        if oldAbstract.strip() != '':
+                            # keep old abstract in config if not null
+                            newAbstract = oldAbstract.strip()
+                        else:
+                            # else use newTitle
+                            newAbstract = newTitle
+                    sjson['layers'][lname]["abstract"] = newAbstract
 
             # Write json content into file
             jsonFileContent = json.dumps(
