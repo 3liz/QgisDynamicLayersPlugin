@@ -124,8 +124,14 @@ class layerDataSourceModifier():
         XMLDocument.appendChild(XMLMapLayers)
         layer.readLayerXML(XMLMapLayer)
 
-        # Reload layer
+        # Update layer extent
         layer.updateExtents()
+
+        # Update graduated symbol renderer
+        if layer.rendererV2().type() == u'graduatedSymbol':
+            layer.rendererV2().updateClasses( layer, layer.rendererV2().mode(), len(layer.rendererV2().ranges()) )
+
+        #Reload layer
         layer.reload()
 
     def splitSource (self,source):
@@ -154,7 +160,7 @@ class layerDataSourceModifier():
         sourceTitle = layer.name().strip()
         if layer.title().strip() != '':
             sourceTitle = layer.title().strip()
-        if layer.customProperty('titleTemplate').strip() != '':
+        if layer.customProperty('titleTemplate') and layer.customProperty('titleTemplate').strip() != '':
             sourceTitle = layer.customProperty('titleTemplate').strip()
         # Search and replace content
         layer.setTitle(
@@ -168,7 +174,7 @@ class layerDataSourceModifier():
         sourceAbstract = ''
         if layer.abstract().strip() != '':
             sourceAbstract = layer.abstract().strip()
-        if layer.customProperty('abstractTemplate').strip() != '':
+        if layer.customProperty('abstractTemplate') and layer.customProperty('abstractTemplate').strip() != '':
             sourceAbstract = layer.customProperty('abstractTemplate').strip()        
         layer.setAbstract(
             u"%s" % t.searchAndReplaceStringByDictionary(
@@ -304,6 +310,9 @@ class DynamicLayersEngine():
             # Change datasource
             a = layerDataSourceModifier( layer )
             a.setNewSourceUriFromDict( self.searchAndReplaceDictionary )
+
+            if self.iface and layer.rendererV2().type() == u'graduatedSymbol':
+                self.iface.legendInterface().refreshLayerSymbology(layer)         
 
         if self.iface:
             self.iface.actionDraw().trigger()
