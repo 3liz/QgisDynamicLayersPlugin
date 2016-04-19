@@ -129,7 +129,8 @@ class layerDataSourceModifier():
 
         # Update graduated symbol renderer
         if layer.rendererV2().type() == u'graduatedSymbol':
-            layer.rendererV2().updateClasses( layer, layer.rendererV2().mode(), len(layer.rendererV2().ranges()) )
+            if len(layer.rendererV2().ranges()) == 1:
+                layer.rendererV2().updateClasses( layer, layer.rendererV2().mode(), len(layer.rendererV2().ranges()) )
 
         #Reload layer
         layer.reload()
