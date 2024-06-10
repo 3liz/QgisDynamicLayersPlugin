@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon,QTableWidgetItem, QTextCursor, qApp, QColor
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject, QgsFeatureRequest, QgsExpression, QgsMessageLog, QgsLogger
-# Initialize Qt resources from file resources.py
-import resources_rc
+from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
+from qgis.PyQt.QtWidgets import QTableWidgetItem, qApp
+from qgis.core import QgsMapLayer, QgsProject, QgsFeatureRequest, QgsExpression, QgsMessageLog, QgsLogger
+
 # Import the code for the dialog
-from dynamic_layers_dialog import DynamicLayersDialog
+from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 import os.path
 import datetime
 from functools import partial
@@ -36,7 +36,8 @@ try:
 except:
     pass
 
-from dynamic_layers_engine import *
+from dynamic_layers.dynamic_layers_engine import *
+
 
 class DynamicLayers:
     """QGIS Plugin Implementation."""
@@ -64,8 +65,7 @@ class DynamicLayers:
             self.translator = QTranslator()
             self.translator.load(locale_path)
 
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+            QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
         self.dlg = DynamicLayersDialog()
@@ -345,7 +345,7 @@ class DynamicLayers:
         table.setHorizontalHeaderLabels( tuple( columns ) )
 
         # load content from project layers
-        lr = QgsMapLayerRegistry.instance()
+        lr = QgsProject.instance()
         for lid in lr.mapLayers():
             layer = lr.mapLayer( lid )
 
@@ -445,7 +445,7 @@ class DynamicLayers:
 
             # Get layer
             layerId = table.item( row, 0 ).data( Qt.EditRole )
-            lr = QgsMapLayerRegistry.instance()
+            lr = QgsProject.instance()
             layer = lr.mapLayer( layerId )
             if not layer:
                 showLayerProperties = False
@@ -477,7 +477,6 @@ class DynamicLayers:
                     widget.setChecked(val)
                 elif item['wType'] == 'list':
                     listDic = { widget.itemData(i):i for i in range( widget.count() ) }
-                    print val
                     if val in listDic:
                         widget.setCurrentIndex( listDic[val] )
 
@@ -635,8 +634,8 @@ class DynamicLayers:
         twRowCount = tw.rowCount()
 
         # Get input data
-        vname = unicode(self.dlg.inVariableName.text()).strip(' \t')
-        vvalue = unicode(self.dlg.inVariableValue.text()).strip(' \t')
+        vname = str(self.dlg.inVariableName.text()).strip(' \t')
+        vvalue = str(self.dlg.inVariableValue.text()).strip(' \t')
 
         # Check if the variable if not already in the list
         if vname in self.variableList:
@@ -759,7 +758,7 @@ class DynamicLayers:
             pTitle = p.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
         if not pTitle and p.readEntry('WMSServiceTitle', "/"):
             pTitle = p.readEntry('WMSServiceTitle', "/")[0]
-        self.dlg.inProjectTitle.setText( unicode(pTitle) )
+        self.dlg.inProjectTitle.setText( str(pTitle) )
 
         # Abstract
         pAbstract = u''
@@ -767,7 +766,7 @@ class DynamicLayers:
             pAbstract = p.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
         if not pAbstract and  p.readEntry('WMSServiceAbstract', "/"):
             pAbstract = p.readEntry('WMSServiceAbstract', "/")[0]
-        self.dlg.inProjectAbstract.setText( unicode(pAbstract) )
+        self.dlg.inProjectAbstract.setText( str(pAbstract) )
 
 
     def onProjectPropertyChanged(self, prop):
@@ -810,7 +809,7 @@ class DynamicLayers:
         '''
 
         p = QgsProject.instance()
-        lr = QgsMapLayerRegistry.instance()
+        lr = QgsProject.instance()
         # Fill the property from the PluginDynamicLayers XML
         for prop, item in self.projectPropertiesInputs.items():
             widget = item['widget']
@@ -828,7 +827,6 @@ class DynamicLayers:
                 widget.setChecked(val)
             elif item['wType'] == 'list':
                 listDic = { widget.itemData(i):i for i in range( widget.count() ) }
-                print val
                 if val in listDic:
                     widget.setCurrentIndex( listDic[val] )
 
@@ -850,26 +848,25 @@ class DynamicLayers:
             # add empty item
             combobox.addItem ( '---', -1)
         # loop though the layers
-        layers = self.iface.legendInterface().layers()
-        for layer in layers:
+        for layer in QgsProject.instance().mapLayers().values():
             layerId = layer.id()
             # vector
             if layer.type() == QgsMapLayer.VectorLayer and ltype in ('all', 'vector'):
                 if not hasattr(layer, 'providerType'):
                     continue
                 if 'all' in providerTypeList or layer.providerType() in providerTypeList:
-                    combobox.addItem ( layer.name(), unicode(layerId))
+                    combobox.addItem ( layer.name(), str(layerId))
             # raster
             if layer.type() == QgsMapLayer.RasterLayer and ltype in ('all', 'raster'):
-                combobox.addItem ( layer.name(), unicode(layerId))
+                combobox.addItem ( layer.name(), str(layerId))
 
 
     def getQgisLayerByNameFromCombobox(self, layerComboBox):
         '''Get a layer chosen in a combobox'''
         returnLayer = None
-        uniqueId = unicode( layerComboBox.itemData( layerComboBox.currentIndex() ) )
+        uniqueId = str( layerComboBox.itemData( layerComboBox.currentIndex() ) )
         try:
-            lr = QgsMapLayerRegistry.instance()
+            lr = QgsProject.instance()
             layer = lr.mapLayer( uniqueId )
             if layer:
                 if layer.isValid():
@@ -984,5 +981,5 @@ class DynamicLayersServer:
         from filters.DynamicLayersFilter import DynamicLayersFilter
         try:
             serverIface.registerFilter( DynamicLayersFilter(serverIface), 100 )
-        except Exception, e:
+        except Exception as e:
             QgsLogger.debug("DynamicLayersServer - Error loading filter DynamicLayersServer : %s" % e )

@@ -2,30 +2,18 @@
 name=Dynamic Layers
 qgisMinimumVersion=3.28
 description=Change the datasource of chosen layers dynamically by searching and replacing user defined variables.
-about=This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables such as {$myvar} inside the layer datasource, and then define theses variables (from a table or from an input vector source). Finally you apply the variables values on every configured layer via the apply button, and you can see the changes before saving the project. Documentation : https://github.com/3liz/QgisDynamicLayersPlugin/blob/master/README.md
+about=This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables such as {$myvar} inside the layer datasource, and then define theses variables (from a table or from an input vector source). Finally you apply the variables values on every configured layer via the apply button, and you can see the changes before saving the project.
 # Done automatically by qgis-plugin-ci
 version=master
 commitNumber=
 commitSha1=
 dateTime=
 changelog=changelog
-# End of qgis-plugin-ciauthor=Michaël Douchin - 3liz
-email=mdouchin@3liz.com
+# End of qgis-plugin-ci
+author=3Liz
+email=info@3liz.com
 
 # End of mandatory metadata
-
-# Recommended items:
-
-# Uncomment the following line and add your changelog:
-changelog=
-  Version 0.5
-  * Graduated renderer - only update classes for layers with one classe
-  * Recalculate GraduatedRenderer classes for layers with this renderer type
-  * Server filter - Make sure Lizmap configuration has title and abstract for all layers
-  * Use parent layer title (abstract) if no dynamic title is configured
-  * Correct error when getting data from layer in dialog first tab
-  * Lizmap cfg - Ensure layers title and abstract are set
-
 
 # Tags are comma separated with spaces allowed
 tags=feature, layers, project, dynamic, datasource

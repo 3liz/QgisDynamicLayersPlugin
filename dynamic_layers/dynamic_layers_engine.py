@@ -19,10 +19,11 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon,QTableWidgetItem, QTextCursor, qApp
-from PyQt4.QtXml import QDomDocument,QDomElement
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog
+from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
+from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, qApp
+from qgis.PyQt.QtXml import QDomDocument,QDomElement
+from qgis.core import QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog
 try:
     from qgis.utils import iface
 except:
@@ -292,7 +293,7 @@ class DynamicLayersEngine():
         Add the passed layers to the dynamic layers dictionnary
         '''
         # Get the layers with dynamicDatasourceActive enable
-        lr = QgsMapLayerRegistry.instance()
+        lr = QgsProject.instance()
         self.dynamicLayers = dict([ (lid,layer) for lid,layer in lr.mapLayers().items() if layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty('dynamicDatasourceContent') ])
 
 
@@ -312,13 +313,11 @@ class DynamicLayersEngine():
             a.setNewSourceUriFromDict( self.searchAndReplaceDictionary )
 
             if self.iface and layer.rendererV2().type() == u'graduatedSymbol':
-                self.iface.legendInterface().refreshLayerSymbology(layer)         
+                layer.triggerRepaint()
 
         if self.iface:
             self.iface.actionDraw().trigger()
             self.iface.mapCanvas().refresh()
-
-
 
     def setDynamicProjectProperties(self, title=None, abstract=None):
         '''
