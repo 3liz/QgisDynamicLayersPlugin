@@ -32,6 +32,7 @@ from qgis.core import Qgis, QgsProject
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.tools import resources_path
 
 
 class DynamicLayers:
@@ -122,7 +123,7 @@ class DynamicLayers:
 
         :param icon_path: Path to the icon for this action. Can be a resource
             path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: str
+        :type icon_path: Path
 
         :param text: Text that should be shown in menu items for this action.
         :type text: str
@@ -157,7 +158,7 @@ class DynamicLayers:
         :rtype: QAction
         """
 
-        icon = QIcon(icon_path)
+        icon = QIcon(str(icon_path))
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
@@ -184,10 +185,8 @@ class DynamicLayers:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        # Fixme resources path
-        icon_path = ':/plugins/DynamicLayers/icon.png'
         self.add_action(
-            icon_path,
+            resources_path('icons', 'icon.png'),
             text=self.tr('Dynamic Layers'),
             callback=self.run,
             parent=self.iface.mainWindow())
