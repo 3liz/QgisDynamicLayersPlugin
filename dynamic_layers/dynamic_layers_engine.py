@@ -204,16 +204,16 @@ class DynamicLayersEngine:
     """
 
     # Layer with the location to zoom in
-    extentLayer = None
+    extent_layer = None
 
     # margin around the extent layer
-    extentMargin = None
+    extent_margin = None
 
     # List of dynamic layers
-    dynamicLayers = {}
+    dynamic_layers = {}
 
     # Search and replace dictionary
-    searchAndReplaceDictionary = {}
+    search_and_replace_dictionary = {}
 
     def __init__(
             self,
@@ -229,10 +229,10 @@ class DynamicLayersEngine:
             dynamic_layers = {}
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
-        self.extentLayer = extent_layer
-        self.extentMargin = extent_margin
-        self.dynamicLayers = dynamic_layers
-        self.searchAndReplaceDictionary = search_and_replace_dictionary
+        self.extent_layer = extent_layer
+        self.extent_margin = extent_margin
+        self.dynamic_layers = dynamic_layers
+        self.search_and_replace_dictionary = search_and_replace_dictionary
         self.iface = iface
 
     def set_extent_layer(self, layer):
@@ -240,7 +240,7 @@ class DynamicLayersEngine:
         Set the extent layer.
         If a layer is set, the project extent will be changed to this extent
         """
-        self.extentLayer = layer
+        self.extent_layer = layer
 
     def set_extent_margin(self, margin):
         """
@@ -249,13 +249,13 @@ class DynamicLayersEngine:
         margin = int(margin)
         if not margin:
             return
-        self.extentMargin = margin
+        self.extent_margin = margin
 
     def set_search_and_replace_dictionary(self, search_and_replace_dictionary):
         """
         Set the search and replace dictionary
         """
-        self.searchAndReplaceDictionary = search_and_replace_dictionary
+        self.search_and_replace_dictionary = search_and_replace_dictionary
 
     def set_search_and_replace_dictionary_from_layer(self, layer, expression):
         """
@@ -286,7 +286,7 @@ class DynamicLayersEngine:
             search_and_replace_dictionary = dict(zip(field_names, feat.attributes()))
             break
 
-        self.searchAndReplaceDictionary = search_and_replace_dictionary
+        self.search_and_replace_dictionary = search_and_replace_dictionary
 
     def set_dynamic_layers_list(self):
         """
@@ -294,9 +294,11 @@ class DynamicLayersEngine:
         """
         # Get the layers with dynamicDatasourceActive enable
         lr = QgsProject.instance()
-        self.dynamicLayers = {lid: layer for lid, layer in lr.mapLayers().items() if
-                                   layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty(
-                                       'dynamicDatasourceContent')}
+        self.dynamic_layers = {
+            lid: layer for lid, layer in lr.mapLayers().items() if
+            layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty(
+                'dynamicDatasourceContent')
+        }
 
     def set_dynamic_layers_datasource_from_dic(self):
         """
@@ -305,13 +307,13 @@ class DynamicLayersEngine:
         And the given search&replace dictionary
         """
 
-        if not self.searchAndReplaceDictionary or not isinstance(self.searchAndReplaceDictionary, dict):
+        if not self.search_and_replace_dictionary or not isinstance(self.search_and_replace_dictionary, dict):
             return
 
-        for lid, layer in self.dynamicLayers.items():
+        for lid, layer in self.dynamic_layers.items():
             # Change datasource
             a = LayerDataSourceModifier(layer)
-            a.set_new_source_uri_from_dict(self.searchAndReplaceDictionary)
+            a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
 
             if self.iface and layer.rendererV2().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
@@ -359,7 +361,7 @@ class DynamicLayersEngine:
 
         # Replace variable in given val via dictionary
         t = DynamicLayersTools()
-        val = t.search_and_replace_string_by_dictionary(val, self.searchAndReplaceDictionary)
+        val = t.search_and_replace_string_by_dictionary(val, self.search_and_replace_dictionary)
 
         # Title
         if prop == 'title':
@@ -378,9 +380,9 @@ class DynamicLayersEngine:
 
         # Get extent from extent layer (if given)
         p_extent = None
-        if self.extentLayer:
-            self.extentLayer.updateExtents()
-            p_extent = self.extentLayer.extent()
+        if self.extent_layer:
+            self.extent_layer.updateExtents()
+            p_extent = self.extent_layer.extent()
         else:
             if self.iface:
                 p_extent = self.iface.mapCanvas().extent()
@@ -389,9 +391,9 @@ class DynamicLayersEngine:
 
         # Add a margin
         if p_extent:
-            if self.extentMargin:
-                margin_x = p_extent.width() * self.extentMargin / 100
-                margin_y = p_extent.height() * self.extentMargin / 100
+            if self.extent_margin:
+                margin_x = p_extent.width() * self.extent_margin / 100
+                margin_y = p_extent.height() * self.extent_margin / 100
                 margin = max(margin_x, margin_y)
                 p_extent = p_extent.buffer(margin)
 
