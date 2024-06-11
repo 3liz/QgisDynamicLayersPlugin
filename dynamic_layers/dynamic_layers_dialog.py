@@ -25,7 +25,7 @@ import os
 
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox
 from qgis.core import QgsApplication
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -42,6 +42,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        self.button_box.button(QDialogButtonBox.Close).clicked.connect(self.close)
 
         self.btAddVariable.setText("")
         self.btAddVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyAdd.svg')))
