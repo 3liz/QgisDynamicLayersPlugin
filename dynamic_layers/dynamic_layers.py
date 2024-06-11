@@ -300,15 +300,15 @@ class DynamicLayers:
         del self.toolbar
 
     def clearLog(self):
-        '''
+        """
         Clear the log
-        '''
+        """
         self.dlg.txtLog.clear()
 
     def updateLog(self, msg):
-        '''
+        """
         Update the log
-        '''
+        """
         t = self.dlg.txtLog
         t.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
@@ -414,10 +414,10 @@ class DynamicLayers:
             return None
 
     def onRowSelectionChanged(self):
-        '''
+        """
         Change content of dynamic properties group inputs
         When the user selects a layer in the table
-        '''
+        """
         if not self.initDone:
             return
 
@@ -481,10 +481,10 @@ class DynamicLayers:
         self.dlg.cbDatasourceActive.setChecked(isActive)
 
     def onCbDatasourceActiveChange(self):
-        '''
+        """
         Toggle the status "dynamicDatasourceActive" for the selected layer
         when the user uses the checkbox
-        '''
+        """
         if not self.initDone:
             return
 
@@ -525,11 +525,11 @@ class DynamicLayers:
         p.setDirty(True)
 
     def onLayerPropertyChange(self, key):
-        '''
+        """
         Set the layer template property
         when the user change the content
         of the corresponding text input
-        '''
+        """
         if not self.initDone:
             return
         if not self.selectedLayer:
@@ -552,9 +552,9 @@ class DynamicLayers:
         p.setDirty(True)
 
     def onCopyFromLayer(self):
-        '''
+        """
         Get the layer datasource and copy it in the dynamic datasource text input
-        '''
+        """
         if not self.initDone:
             return
         if not self.selectedLayer:
@@ -574,9 +574,9 @@ class DynamicLayers:
     # Variables tab
     ##
     def populateVariableTable(self):
-        '''
+        """
         Fill the variable table
-        '''
+        """
         # Get the list of variable from the project
         p = QgsProject.instance()
         variableList = p.readListEntry('PluginDynamicLayers', 'VariableList')
@@ -614,10 +614,10 @@ class DynamicLayers:
         self.variableList = variableList[0]
 
     def onAddVariableClicked(self):
-        '''
+        """
         Add a variable to the list from the text input
         when the user clicks on the corresponding button
-        '''
+        """
         if not self.initDone:
             return
 
@@ -669,10 +669,10 @@ class DynamicLayers:
         p.setDirty(True)
 
     def onRemoveVariableClicked(self):
-        '''
+        """
         Remove a variable from the table
         When the users clicks on the remove button
-        '''
+        """
         if not self.initDone:
             return
 
@@ -701,11 +701,11 @@ class DynamicLayers:
         tw.removeRow(tw.currentRow())
 
     def onVariableItemChanged(self, item):
-        '''
+        """
         if not self.initDone:
             return
         Change the variable item
-        '''
+        """
         if not self.initDone:
             return
 
@@ -729,9 +729,9 @@ class DynamicLayers:
     ##
 
     def onCopyFromProjectClicked(self):
-        '''
+        """
         Get project properties and set the input of the project tab
-        '''
+        """
         if not self.initDone:
             return
 
@@ -757,10 +757,10 @@ class DynamicLayers:
         self.dlg.inProjectAbstract.setText(str(pAbstract))
 
     def onProjectPropertyChanged(self, prop):
-        '''
+        """
         Save project dynamic property in the project
         when the user changes the content
-        '''
+        """
         if not self.initDone:
             return
 
@@ -789,10 +789,10 @@ class DynamicLayers:
         p.setDirty(True)
 
     def populateProjectProperties(self):
-        '''
+        """
         Fill in the project properties item
         from XML
-        '''
+        """
 
         p = QgsProject.instance()
         lr = QgsProject.instance()
@@ -820,13 +820,15 @@ class DynamicLayers:
     # Initialization
     ##
 
-    def populateLayerCombobox(self, combobox, ltype='all', providerTypeList=['all'], addEmptyItem=True):
-        '''
+    def populateLayerCombobox(self, combobox, ltype='all', providerTypeList=None, addEmptyItem=True):
+        """
             Get the list of layers and add them to a combo box
             * ltype can be : all, vector, raster
             * providerTypeList is a list and can be : ['all'] or a list of provider keys
             as ['spatialite', 'postgres'] or ['ogr', 'postgres'], etc.
-        '''
+        """
+        if providerTypeList is None:
+            providerTypeList = ['all']
         # empty combobox
         combobox.clear()
         if addEmptyItem:
@@ -846,7 +848,7 @@ class DynamicLayers:
                 combobox.addItem(layer.name(), str(layerId))
 
     def getQgisLayerByNameFromCombobox(self, layerComboBox):
-        '''Get a layer chosen in a combobox'''
+        """Get a layer chosen in a combobox"""
         returnLayer = None
         uniqueId = str(layerComboBox.itemData(layerComboBox.currentIndex()))
         try:
@@ -863,10 +865,10 @@ class DynamicLayers:
     # Global actions
     ##
     def onApplyVariablesClicked(self, source='table'):
-        '''
+        """
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
-        '''
+        """
         if not self.initDone:
             return
 

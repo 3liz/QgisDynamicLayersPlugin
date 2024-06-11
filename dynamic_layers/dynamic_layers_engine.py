@@ -33,12 +33,14 @@ import re
 
 class dynamicLayersTools():
 
-    def searchAndReplaceStringByDictionary(self, string='', dictionary={}):
-        '''
+    def searchAndReplaceStringByDictionary(self, string='', dictionary=None):
+        """
         Get the string,
         Replace variable such as {$VAR} with passed data,
         And returns the updated string
-        '''
+        """
+        if dictionary is None:
+            dictionary = {}
         # Check everything is ok
         if not string:
             return ''
@@ -66,9 +68,9 @@ class layerDataSourceModifier():
             self,
             layer
     ):
-        '''
+        """
         Initialize class instance
-        '''
+        """
         if not layer:
             return
 
@@ -76,12 +78,14 @@ class layerDataSourceModifier():
         self.dynamicDatasourceActive = (layer.customProperty('dynamicDatasourceActive') == 'True')
         self.dynamicDatasourceContent = layer.customProperty('dynamicDatasourceContent')
 
-    def setNewSourceUriFromDict(self, searchAndReplaceDictionary={}):
-        '''
+    def setNewSourceUriFromDict(self, searchAndReplaceDictionary=None):
+        """
         Get the dynamic datasource template,
         Replace variable with passed data,
         And set the layer datasource from this content if possible
-        '''
+        """
+        if searchAndReplaceDictionary is None:
+            searchAndReplaceDictionary = {}
         # Get template uri
         uriTemplate = self.dynamicDatasourceContent
 
@@ -96,9 +100,9 @@ class layerDataSourceModifier():
         self.setDynamicLayerProperties(searchAndReplaceDictionary)
 
     def setDataSource(self, newSourceUri):
-        '''
+        """
         Method to apply a new datasource to a vector Layer
-        '''
+        """
         layer = self.layer
         newDS, newUri = self.splitSource(newSourceUri)
         newDatasourceType = newDS or layer.dataProvider().name()
@@ -130,9 +134,9 @@ class layerDataSourceModifier():
         layer.reload()
 
     def splitSource(self, source):
-        '''
+        """
         Split QGIS datasource into meaningfull components
-        '''
+        """
         if "|" in source:
             datasourceType = source.split("|")[0]
             uri = source.split("|")[1].replace('\\', '/')
@@ -141,11 +145,13 @@ class layerDataSourceModifier():
             uri = source.replace('\\', '/')
         return (datasourceType, uri)
 
-    def setDynamicLayerProperties(self, searchAndReplaceDictionary={}):
-        '''
+    def setDynamicLayerProperties(self, searchAndReplaceDictionary=None):
+        """
         Set layer title, abstract,
         and field aliases (for vector layers only)
-        '''
+        """
+        if searchAndReplaceDictionary is None:
+            searchAndReplaceDictionary = {}
         layer = self.layer
         t = dynamicLayersTools()
 
@@ -191,10 +197,10 @@ class layerDataSourceModifier():
 
 
 class DynamicLayersEngine():
-    '''
+    """
     Changes the layers datasource by using dynamicDatasourceContent
     as a template and replace variable with data given by the user
-    '''
+    """
 
     # Layer with the location to zoom in
     extentLayer = None
@@ -210,14 +216,18 @@ class DynamicLayersEngine():
 
     def __init__(
             self,
-            dynamicLayers={},
-            searchAndReplaceDictionary={},
+            dynamicLayers=None,
+            searchAndReplaceDictionary=None,
             extentLayer=None,
             extentMargin=None
     ):
-        '''
+        """
         Dynamic Layers Engine constructor
-        '''
+        """
+        if dynamicLayers is None:
+            dynamicLayers = {}
+        if searchAndReplaceDictionary is None:
+            searchAndReplaceDictionary = {}
         self.extentLayer = extentLayer
         self.extentMargin = extentMargin
         self.dynamicLayers = dynamicLayers
@@ -225,34 +235,34 @@ class DynamicLayersEngine():
         self.iface = iface
 
     def setExtentLayer(self, layer):
-        '''
+        """
         Set the extent layer.
         If a layer is set, the project extent will be changed to this extent
-        '''
+        """
         self.extentLayer = layer
 
     def setExtentMargin(self, margin):
-        '''
+        """
         Set the extent margin
-        '''
+        """
         margin = int(margin)
         if not margin:
             return
         self.extentMargin = margin
 
     def setSearchAndReplaceDictionary(self, searchAndReplaceDictionary):
-        '''
+        """
         Set the search and replace dictionary
-        '''
+        """
         self.searchAndReplaceDictionary = searchAndReplaceDictionary
 
     def setSearchAndReplaceDictionaryFromLayer(self, layer, expression):
-        '''
+        """
         Set the search and replace dictionary
         from a given layer
         and an expression.
         The first found features is the data source
-        '''
+        """
         searchAndReplaceDictionary = {}
 
         # Get and validate expression
@@ -278,9 +288,9 @@ class DynamicLayersEngine():
         self.searchAndReplaceDictionary = searchAndReplaceDictionary
 
     def setDynamicLayersList(self):
-        '''
+        """
         Add the passed layers to the dynamic layers dictionnary
-        '''
+        """
         # Get the layers with dynamicDatasourceActive enable
         lr = QgsProject.instance()
         self.dynamicLayers = dict([(lid, layer) for lid, layer in lr.mapLayers().items() if
@@ -288,11 +298,11 @@ class DynamicLayersEngine():
                                        'dynamicDatasourceContent')])
 
     def setDynamicLayersDatasourceFromDic(self):
-        '''
+        """
         For each layers with "active" status,
         Change the datasource by using the dynamicDatasourceContent
         And the given search&replace dictionnary
-        '''
+        """
 
         if not self.searchAndReplaceDictionary or not isinstance(self.searchAndReplaceDictionary, dict):
             return
@@ -310,11 +320,11 @@ class DynamicLayersEngine():
             self.iface.mapCanvas().refresh()
 
     def setDynamicProjectProperties(self, title=None, abstract=None):
-        '''
+        """
         Set some project properties : title, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
         and by using the search and replace dictionary
-        '''
+        """
         # Get project instance
         p = QgsProject.instance()
 
@@ -339,10 +349,10 @@ class DynamicLayersEngine():
         self.setProjectProperty('abstract', abstract)
 
     def setProjectProperty(self, prop, val):
-        '''
+        """
         Set a project property
         And replace variable if found in the properties
-        '''
+        """
         # Get project instance
         p = QgsProject.instance()
 
@@ -359,10 +369,10 @@ class DynamicLayersEngine():
             p.writeEntry('WMSServiceAbstract', '', u'%s' % val)
 
     def setProjectExtent(self):
-        '''
+        """
         Sets the project extent
         and corresponding XML property
-        '''
+        """
         p = QgsProject.instance()
 
         # Get extent from extent layer (if given)
