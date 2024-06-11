@@ -291,7 +291,7 @@
                      </widget>
                     </item>
                     <item row="2" column="1">
-                     <widget class="QComboBox" name="inExtentLayer"/>
+                     <widget class="QgsMapLayerComboBox" name="inExtentLayer"/>
                     </item>
                     <item row="3" column="0">
                      <widget class="QLabel" name="label_6">
@@ -357,7 +357,7 @@
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_3">
                     <item>
-                     <widget class="QComboBox" name="inVariableSourceLayer"/>
+                     <widget class="QgsMapLayerComboBox" name="inVariableSourceLayer"/>
                     </item>
                     <item>
                      <widget class="QLineEdit" name="inVariableSourceLayerExpression">
@@ -536,6 +536,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgis.gui</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

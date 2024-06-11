@@ -28,7 +28,7 @@ from functools import partial
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
 from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
-from qgis.core import QgsProject, QgsMapLayer
+from qgis.core import Qgis, QgsProject
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
@@ -771,7 +771,7 @@ class DynamicLayers:
             val = widget.toPlainText()
         elif prop in ('extentLayer', 'variableSourceLayer'):
             # var = None
-            layer = self.get_qgis_layer_by_name_from_combobox(widget)
+            layer = widget.currentLayer()
             if layer:
                 val = layer.id()
             else:
@@ -817,54 +817,6 @@ class DynamicLayers:
                     widget.setCurrentIndex(list_dic[val])
 
     ##
-    # Initialization
-    ##
-
-    @staticmethod
-    def populate_layer_combobox(combobox, l_type='all', provider_type_list=None, add_empty_item=True):
-        """
-            Get the list of layers and add them to a combo box
-            * l_type can be : all, vector, raster
-            * providerTypeList is a list and can be : ['all'] or a list of provider keys
-            as ['spatialite', 'postgres'] or ['ogr', 'postgres'], etc.
-        """
-        if provider_type_list is None:
-            provider_type_list = ['all']
-        # empty combobox
-        combobox.clear()
-        if add_empty_item:
-            # add empty item
-            combobox.addItem('---', -1)
-        # loop though the layers
-        for layer in QgsProject.instance().mapLayers().values():
-            layer_id = layer.id()
-            # vector
-            if layer.type() == QgsMapLayer.VectorLayer and l_type in ('all', 'vector'):
-                if not hasattr(layer, 'providerType'):
-                    continue
-                if 'all' in provider_type_list or layer.providerType() in provider_type_list:
-                    combobox.addItem(layer.name(), str(layer_id))
-            # raster
-            if layer.type() == QgsMapLayer.RasterLayer and l_type in ('all', 'raster'):
-                combobox.addItem(layer.name(), str(layer_id))
-
-    @staticmethod
-    def get_qgis_layer_by_name_from_combobox(layer_combo_box):
-        """Get a layer chosen in a combobox"""
-        return_layer = None
-        unique_id = str(layer_combo_box.itemData(layer_combo_box.currentIndex()))
-        # noinspection PyBroadException
-        try:
-            lr = QgsProject.instance()
-            layer = lr.mapLayer(unique_id)
-            if layer:
-                if layer.isValid():
-                    return_layer = layer
-        except Exception:
-            return_layer = None
-        return return_layer
-
-    ##
     # Global actions
     ##
     def on_apply_variables_clicked(self, source='table'):
@@ -894,7 +846,7 @@ class DynamicLayers:
                 search_and_replace_dictionary[v_name] = v_value
             dle.set_search_and_replace_dictionary(search_and_replace_dictionary)
         else:
-            layer = self.get_qgis_layer_by_name_from_combobox(self.dlg.inVariableSourceLayer)
+            layer = self.dlg.inVariableSourceLayer.currentLayer()
             exp = self.dlg.inVariableSourceLayerExpression.text()
             dle.set_search_and_replace_dictionary_from_layer(layer, exp)
 
@@ -905,7 +857,7 @@ class DynamicLayers:
         dle.set_dynamic_project_properties()
 
         # Set extent layer
-        extent_layer = self.get_qgis_layer_by_name_from_combobox(self.dlg.inExtentLayer)
+        extent_layer = self.dlg.inExtentLayer.currentLayer()
         if extent_layer:
             dle.set_extent_layer(extent_layer)
 
@@ -933,10 +885,12 @@ class DynamicLayers:
         self.populate_variable_table()
 
         # Populate the extent layer list
-        self.populate_layer_combobox(self.dlg.inExtentLayer, 'vector', 'all', False)
+        self.dlg.inExtentLayer.setFilters(Qgis.LayerFilter.VectorLayer)
+        self.dlg.inExtentLayer.setAllowEmptyLayer(False)
 
         # Populate the variable source layer combobox
-        self.populate_layer_combobox(self.dlg.inVariableSourceLayer, 'vector', 'all', False)
+        self.dlg.inVariableSourceLayer.setFilters(Qgis.LayerFilter.VectorLayer)
+        self.dlg.inVariableSourceLayer.setAllowEmptyLayer(False)
 
         # Copy project properties to corresponding tab
         self.populate_project_properties()
