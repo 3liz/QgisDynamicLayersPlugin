@@ -51,7 +51,7 @@ class DynamicLayersTools:
         for k, v in dictionary.items():
             # Replace search string by value
             if v:
-                r = re.compile('\{\$%s\}' % k, re.MULTILINE)
+                r = re.compile(r'\{\$%s\}' % k, re.MULTILINE)
                 string = r.sub('%s' % v, string)
 
         return string
@@ -126,7 +126,7 @@ class LayerDataSourceModifier:
         layer.updateExtents()
 
         # Update graduated symbol renderer
-        if layer.rendererV2().type() == u'graduatedSymbol':
+        if layer.rendererV2().type() == 'graduatedSymbol':
             if len(layer.rendererV2().ranges()) == 1:
                 layer.rendererV2().updateClasses(layer, layer.rendererV2().mode(), len(layer.rendererV2().ranges()))
 
@@ -165,7 +165,7 @@ class LayerDataSourceModifier:
             source_title = layer.customProperty('titleTemplate').strip()
         # Search and replace content
         layer.setTitle(
-            u"%s" % t.search_and_replace_string_by_dictionary(
+            "%s" % t.search_and_replace_string_by_dictionary(
                 source_title,
                 search_and_replace_dictionary
             )
@@ -178,7 +178,7 @@ class LayerDataSourceModifier:
         if layer.customProperty('abstractTemplate') and layer.customProperty('abstractTemplate').strip() != '':
             source_abstract = layer.customProperty('abstractTemplate').strip()
         layer.setAbstract(
-            u"%s" % t.search_and_replace_string_by_dictionary(
+            "%s" % t.search_and_replace_string_by_dictionary(
                 source_abstract,
                 search_and_replace_dictionary
             )
@@ -294,9 +294,9 @@ class DynamicLayersEngine:
         """
         # Get the layers with dynamicDatasourceActive enable
         lr = QgsProject.instance()
-        self.dynamicLayers = dict([(lid, layer) for lid, layer in lr.mapLayers().items() if
+        self.dynamicLayers = {lid: layer for lid, layer in lr.mapLayers().items() if
                                    layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty(
-                                       'dynamicDatasourceContent')])
+                                       'dynamicDatasourceContent')}
 
     def set_dynamic_layers_datasource_from_dic(self):
         """
@@ -313,7 +313,7 @@ class DynamicLayersEngine:
             a = LayerDataSourceModifier(layer)
             a.set_new_source_uri_from_dict(self.searchAndReplaceDictionary)
 
-            if self.iface and layer.rendererV2().type() == u'graduatedSymbol':
+            if self.iface and layer.rendererV2().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
 
         if self.iface:
@@ -363,11 +363,11 @@ class DynamicLayersEngine:
 
         # Title
         if prop == 'title':
-            p.writeEntry('WMSServiceTitle', '', u'%s' % val)
+            p.writeEntry('WMSServiceTitle', '', '%s' % val)
 
         # Abstract
         elif prop == 'abstract':
-            p.writeEntry('WMSServiceAbstract', '', u'%s' % val)
+            p.writeEntry('WMSServiceAbstract', '', '%s' % val)
 
     def set_project_extent(self):
         """
@@ -397,10 +397,10 @@ class DynamicLayersEngine:
 
             # Modify OWS WMS extent
             p_wms_extent = [
-                u'%s' % p_extent.xMinimum(),
-                u'%s' % p_extent.yMinimum(),
-                u'%s' % p_extent.xMaximum(),
-                u'%s' % p_extent.yMaximum(),
+                '%s' % p_extent.xMinimum(),
+                '%s' % p_extent.yMinimum(),
+                '%s' % p_extent.xMaximum(),
+                '%s' % p_extent.yMaximum(),
             ]
             p.writeEntry('WMSExtent', '', p_wms_extent)
 

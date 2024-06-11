@@ -54,7 +54,7 @@ class DynamicLayers:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'DynamicLayers_{}.qm'.format(locale))
+            f'DynamicLayers_{locale}.qm')
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -84,10 +84,10 @@ class DynamicLayers:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Dynamic Layers')
+        self.menu = self.tr('&Dynamic Layers')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'DynamicLayers')
-        self.toolbar.setObjectName(u'DynamicLayers')
+        self.toolbar = self.iface.addToolBar('DynamicLayers')
+        self.toolbar.setObjectName('DynamicLayers')
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -185,7 +185,7 @@ class DynamicLayers:
         icon_path = ':/plugins/DynamicLayers/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Dynamic Layers'),
+            text=self.tr('Dynamic Layers'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -289,7 +289,7 @@ class DynamicLayers:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&Dynamic Layers'),
+                self.tr('&Dynamic Layers'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -309,7 +309,7 @@ class DynamicLayers:
         t.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
         suffix = '</span>'
-        t.append('%s %s %s' % (prefix, msg, suffix))
+        t.append(f'{prefix} {msg} {suffix}')
         c = t.textCursor()
         c.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         t.setTextCursor(c)
@@ -537,7 +537,7 @@ class DynamicLayers:
         widget = item['widget']
 
         # Get the new value
-        input_value = u''
+        input_value = ''
         if item['wType'] == 'textarea':
             input_value = widget.toPlainText()
         if item['wType'] == 'text':
@@ -628,13 +628,13 @@ class DynamicLayers:
 
         # Check if the variable is not already in the list
         if v_name in self.variableList:
-            self.update_log(self.tr(u'This variable is already in the list'))
+            self.update_log(self.tr('This variable is already in the list'))
             return
 
         # Add constraint of possible input values
         p = re.compile('^[a-zA-Z]+$')
         if not p.match(v_name):
-            self.update_log(self.tr(u'The variable must contain only lower case ascii letters !'))
+            self.update_log(self.tr('The variable must contain only lower case ascii letters !'))
             return
 
         # Set table properties
@@ -642,7 +642,7 @@ class DynamicLayers:
         tw.setColumnCount(2)
 
         # Empty the name text input
-        self.dlg.inVariableName.setText(u'')
+        self.dlg.inVariableName.setText('')
 
         # Add the new "variable" item to the table
         # name
@@ -738,7 +738,7 @@ class DynamicLayers:
             p.writeEntry('WMSServiceCapabilities', "/", "True")
 
         # Title
-        p_title = u''
+        p_title = ''
         if p.readEntry('ProjectTitle', '/PluginDynamicLayers'):
             p_title = p.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
         if not p_title and p.readEntry('WMSServiceTitle', "/"):
@@ -746,7 +746,7 @@ class DynamicLayers:
         self.dlg.inProjectTitle.setText(str(p_title))
 
         # Abstract
-        p_abstract = u''
+        p_abstract = ''
         if p.readEntry('ProjectAbstract', '/PluginDynamicLayers'):
             p_abstract = p.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
         if not p_abstract and p.readEntry('WMSServiceAbstract', "/"):
