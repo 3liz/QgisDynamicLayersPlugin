@@ -1,0 +1,37 @@
+# Ruff configuration
+# See https://doc.astral.sh/ruff/configuration
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = [
+    ".venv",
+    ".local",
+    ".test/.local",
+    ".cache",
+]
+
+[tool.ruff.format]
+indent-style = "space"
+
+[tool.ruff.lint.isort]
+#lines-between-types = 1
+known-third-party = [
+    "qgis",
+]
+#combine-as-imports = true
+#split-on-trailing-comma = true
+#multi-line-output = 3
+#include-trailing-comma = true
+#use-parentheses = true
+#ensure-newline-before-comments = true
+
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
+suppress-none-returning = true
+suppress-dummy-args = true
+
+[tool.qgis-plugin-ci]
+plugin_path = "dynamic_layers"
+github_organization_slug = "3liz"
+project_slug = "QgisDynamicLayersPlugin"

@@ -2,7 +2,8 @@
 /***************************************************************************
  DynamicLayersEngine
                                  A QGIS plugin
- This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
+ This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined
+ variables.
                               -------------------
         begin                : 2015-07-21
         git sha              : $Format:%H$
@@ -19,6 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+import typing
+
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog
 
@@ -66,7 +69,7 @@ class LayerDataSourceModifier:
 
     def __init__(
             self,
-            layer
+            layer,
     ):
         """
         Initialize class instance
@@ -167,8 +170,8 @@ class LayerDataSourceModifier:
         layer.setTitle(
             "%s" % t.search_and_replace_string_by_dictionary(
                 source_title,
-                search_and_replace_dictionary
-            )
+                search_and_replace_dictionary,
+            ),
         )
 
         # Abstract
@@ -180,8 +183,8 @@ class LayerDataSourceModifier:
         layer.setAbstract(
             "%s" % t.search_and_replace_string_by_dictionary(
                 source_abstract,
-                search_and_replace_dictionary
-            )
+                search_and_replace_dictionary,
+            ),
         )
 
         # Set fields aliases
@@ -192,7 +195,7 @@ class LayerDataSourceModifier:
                     continue
                 new_alias = t.search_and_replace_string_by_dictionary(
                     alias,
-                    search_and_replace_dictionary
+                    search_and_replace_dictionary,
                 )
                 layer.addAttributeAlias(fid, new_alias)
 
@@ -210,17 +213,17 @@ class DynamicLayersEngine:
     extent_margin = None
 
     # List of dynamic layers
-    dynamic_layers = {}
+    dynamic_layers: typing.ClassVar = {}
 
     # Search and replace dictionary
-    search_and_replace_dictionary = {}
+    search_and_replace_dictionary: typing.ClassVar = {}
 
     def __init__(
             self,
             dynamic_layers=None,
             search_and_replace_dictionary=None,
             extent_layer=None,
-            extent_margin=None
+            extent_margin=None,
     ):
         """
         Dynamic Layers Engine constructor

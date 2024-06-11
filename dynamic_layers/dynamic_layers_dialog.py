@@ -2,7 +2,8 @@
 /***************************************************************************
  DynamicLayersDialog
                                  A QGIS plugin
- This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
+ This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined
+ variables.
                              -------------------
         begin                : 2015-07-21
         git sha              : $Format:%H$

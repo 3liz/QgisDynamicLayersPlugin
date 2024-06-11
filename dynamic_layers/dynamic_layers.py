@@ -2,7 +2,8 @@
 /***************************************************************************
  DynamicLayers
                                  A QGIS plugin
- This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined variables.
+ This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined
+ variables.
                               -------------------
         begin                : 2015-07-21
             git sha              : $Format:%H$
@@ -21,14 +22,16 @@
 """
 import os.path
 import sys
+import re
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
 from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
+from qgis.core import QgsProject, QgsMapLayer
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
-from dynamic_layers.dynamic_layers_engine import *
+from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
 
 
 class DynamicLayers:
@@ -71,8 +74,8 @@ class DynamicLayers:
             'attributes': [
                 {'key': 'id', 'editable': False},
                 {'key': 'name', 'editable': False, 'type': 'string'},
-                {'key': 'dynamicDatasourceActive', 'editable': False, 'type': 'string'}
-            ]
+                {'key': 'dynamicDatasourceActive', 'editable': False, 'type': 'string'},
+            ],
         }
 
         # Keep record of style widget
@@ -207,18 +210,18 @@ class DynamicLayers:
             'datasource': {
                 'widget': self.dlg.dynamicDatasourceContent,
                 'wType': 'textarea',
-                'xml': 'dynamicDatasourceContent'
+                'xml': 'dynamicDatasourceContent',
             },
             'title': {
                 'widget': self.dlg.titleTemplate,
                 'wType': 'text',
-                'xml': 'titleTemplate'
+                'xml': 'titleTemplate',
             },
             'abstract': {
                 'widget': self.dlg.abstractTemplate,
                 'wType': 'textarea',
-                'xml': 'abstractTemplate'
-            }
+                'xml': 'abstractTemplate',
+            },
         }
         for key, item in self.layerPropertiesInputs.items():
             control = item['widget']
@@ -242,32 +245,32 @@ class DynamicLayers:
             'title': {
                 'widget': self.dlg.inProjectTitle,
                 'wType': 'text',
-                'xml': 'ProjectTitle'
+                'xml': 'ProjectTitle',
             },
             'abstract': {
                 'widget': self.dlg.inProjectAbstract,
                 'wType': 'textarea',
-                'xml': 'ProjectAbstract'
+                'xml': 'ProjectAbstract',
             },
             'extentLayer': {
                 'widget': self.dlg.inExtentLayer,
                 'wType': 'list',
-                'xml': 'ExtentLayer'
+                'xml': 'ExtentLayer',
             },
             'extentMargin': {
                 'widget': self.dlg.inExtentMargin,
                 'wType': 'spinbox',
-                'xml': 'ExtentMargin'
+                'xml': 'ExtentMargin',
             },
             'variableSourceLayer': {
                 'widget': self.dlg.inVariableSourceLayer,
                 'wType': 'list',
-                'xml': 'VariableSourceLayer'
+                'xml': 'VariableSourceLayer',
             },
             'variableSourceLayerExpression': {
                 'widget': self.dlg.inVariableSourceLayerExpression,
                 'wType': 'text',
-                'xml': 'VariableSourceLayerExpression'
+                'xml': 'VariableSourceLayerExpression',
             },
         }
         for key, item in self.projectPropertiesInputs.items():
@@ -767,7 +770,7 @@ class DynamicLayers:
         elif prop == 'abstract':
             val = widget.toPlainText()
         elif prop in ('extentLayer', 'variableSourceLayer'):
-            var = None
+            # var = None
             layer = self.get_qgis_layer_by_name_from_combobox(widget)
             if layer:
                 val = layer.id()
