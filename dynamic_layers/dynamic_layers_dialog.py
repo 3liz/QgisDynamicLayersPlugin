@@ -23,8 +23,10 @@
 
 import os
 
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QDialog
+from qgis.core import QgsApplication
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'dynamic_layers_dialog_base.ui'))
@@ -40,3 +42,15 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        self.btAddVariable.setText("")
+        self.btAddVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyAdd.svg')))
+        self.btAddVariable.setToolTip("")
+
+        self.btRemoveVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyRemove.svg')))
+        self.btRemoveVariable.setText("")
+        self.btRemoveVariable.setToolTip("")
+
+        self.btRemoveVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyRemove.svg')))
+
+        self.btClearLog.setIcon(QIcon(QgsApplication.iconPath('iconClearConsole.svg')))
