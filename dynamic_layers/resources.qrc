@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/DynamicLayers" >
-        <file>icon.png</file>
-    </qresource>
-</RCC>
