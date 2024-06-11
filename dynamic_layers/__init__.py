@@ -32,14 +32,3 @@ def classFactory(iface):  # pylint: disable=invalid-name
     #
     from .dynamic_layers import DynamicLayers
     return DynamicLayers(iface)
-
-
-# noinspection PyPep8Naming
-def serverClassFactory(serverIface):
-    """Load wps4serverServer class from file DynamicLayers.
-    :param serverIface: A QGIS Server interface instance.
-    :type serverIface: QgsServerInterface
-    """
-    #
-    from .dynamic_layers import DynamicLayersServer
-    return DynamicLayersServer(serverIface)

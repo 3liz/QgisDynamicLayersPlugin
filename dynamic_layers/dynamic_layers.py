@@ -19,18 +19,19 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, qVersion, QCoreApplication
+import os.path
+import sys
+from functools import partial
+
+from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
-from qgis.PyQt.QtWidgets import QTableWidgetItem, qApp
-from qgis.core import QgsMapLayer, QgsProject, QgsFeatureRequest, QgsExpression, QgsMessageLog, QgsLogger
+from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
+
+from qgis.core import QgsLogger
 
 # Import the code for the dialog
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
-import os.path
-import datetime
-from functools import partial
-import sys
-import re
+
 try:
     from qgis.server import *
 except:
@@ -71,10 +72,10 @@ class DynamicLayers:
         self.dlg = DynamicLayersDialog()
 
         # Layers attribute that can be shown and optionally changed in the plugin
-        self.layersTable =  {
+        self.layersTable = {
             'tableWidget': self.dlg.twLayers,
             'attributes': [
-                {'key': 'id', 'editable': False },
+                {'key': 'id', 'editable': False},
                 {'key': 'name', 'editable': False, 'type': 'string'},
                 {'key': 'dynamicDatasourceActive', 'editable': False, 'type': 'string'}
             ]
@@ -109,18 +110,17 @@ class DynamicLayers:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('DynamicLayers', message)
 
-
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -201,11 +201,11 @@ class DynamicLayers:
         slot = self.onRowSelectionChanged
         table = self.layersTable['tableWidget']
         sm = table.selectionModel()
-        sm.selectionChanged.connect( slot )
+        sm.selectionChanged.connect(slot)
 
         # Actions when the layer properties are changed panel
-        self.dlg.cbDatasourceActive.stateChanged.connect( self.onCbDatasourceActiveChange )
-        self.dlg.btCopyFromLayer.clicked.connect( self.onCopyFromLayer )
+        self.dlg.cbDatasourceActive.stateChanged.connect(self.onCbDatasourceActiveChange)
+        self.dlg.btCopyFromLayer.clicked.connect(self.onCopyFromLayer)
 
         self.layerPropertiesInputs = {
             'datasource': {
@@ -226,57 +226,56 @@ class DynamicLayers:
         }
         for key, item in self.layerPropertiesInputs.items():
             control = item['widget']
-            slot = partial( self.onLayerPropertyChange, key )
-            control.textChanged.connect( slot )
-
+            slot = partial(self.onLayerPropertyChange, key)
+            control.textChanged.connect(slot)
 
         # Actions of the Variable tab
-        self.dlg.btAddVariable.clicked.connect( self.onAddVariableClicked )
-        self.dlg.btRemoveVariable.clicked.connect( self.onRemoveVariableClicked )
+        self.dlg.btAddVariable.clicked.connect(self.onAddVariableClicked)
+        self.dlg.btRemoveVariable.clicked.connect(self.onRemoveVariableClicked)
 
         # Apply buttons
-        slot = partial( self.onApplyVariablesClicked, 'table' )
-        self.dlg.btApplyVariables.clicked.connect( slot )
-        slot = partial( self.onApplyVariablesClicked, 'layer' )
-        self.dlg.btApplyFromLayer.clicked.connect( slot )
+        slot = partial(self.onApplyVariablesClicked, 'table')
+        self.dlg.btApplyVariables.clicked.connect(slot)
+        slot = partial(self.onApplyVariablesClicked, 'layer')
+        self.dlg.btApplyFromLayer.clicked.connect(slot)
 
         # Project properties tab
-        self.dlg.btCopyFromProject.clicked.connect( self.onCopyFromProjectClicked )
+        self.dlg.btCopyFromProject.clicked.connect(self.onCopyFromProjectClicked)
 
         self.projectPropertiesInputs = {
-            'title' : {
-                'widget' : self.dlg.inProjectTitle,
+            'title': {
+                'widget': self.dlg.inProjectTitle,
                 'wType': 'text',
                 'xml': 'ProjectTitle'
             },
-            'abstract' : {
-                'widget' : self.dlg.inProjectAbstract,
+            'abstract': {
+                'widget': self.dlg.inProjectAbstract,
                 'wType': 'textarea',
                 'xml': 'ProjectAbstract'
             },
-            'extentLayer' : {
-                'widget' : self.dlg.inExtentLayer,
+            'extentLayer': {
+                'widget': self.dlg.inExtentLayer,
                 'wType': 'list',
                 'xml': 'ExtentLayer'
             },
-            'extentMargin' : {
-                'widget' : self.dlg.inExtentMargin,
+            'extentMargin': {
+                'widget': self.dlg.inExtentMargin,
                 'wType': 'spinbox',
                 'xml': 'ExtentMargin'
             },
-            'variableSourceLayer' : {
-                'widget' : self.dlg.inVariableSourceLayer,
+            'variableSourceLayer': {
+                'widget': self.dlg.inVariableSourceLayer,
                 'wType': 'list',
                 'xml': 'VariableSourceLayer'
             },
-            'variableSourceLayerExpression' : {
-                'widget' : self.dlg.inVariableSourceLayerExpression,
+            'variableSourceLayerExpression': {
+                'widget': self.dlg.inVariableSourceLayerExpression,
                 'wType': 'text',
                 'xml': 'VariableSourceLayerExpression'
             },
         }
         for key, item in self.projectPropertiesInputs.items():
-            slot = partial( self.onProjectPropertyChanged, key )
+            slot = partial(self.onProjectPropertyChanged, key)
             control = item['widget']
             if item['wType'] in ('text', 'spinbox'):
                 control.editingFinished.connect(slot)
@@ -288,8 +287,7 @@ class DynamicLayers:
                 control.currentIndexChanged.connect(slot)
 
         # Log
-        self.dlg.btClearLog.clicked.connect( self.clearLog )
-
+        self.dlg.btClearLog.clicked.connect(self.clearLog)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -315,13 +313,13 @@ class DynamicLayers:
         t.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
         suffix = '</span>'
-        t.append( '%s %s %s' % (prefix, msg, suffix) )
+        t.append('%s %s %s' % (prefix, msg, suffix))
         c = t.textCursor()
         c.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
         t.setTextCursor(c)
         qApp.processEvents()
 
-    def populateLayerTable( self ):
+    def populateLayerTable(self):
         """
         Fill the table for a given layer type
         """
@@ -331,7 +329,7 @@ class DynamicLayers:
 
         attributes = lt['attributes']
 
-        headerData = [ a['key'] for a in attributes ]
+        headerData = [a['key'] for a in attributes]
 
         # empty previous content
         for row in range(table.rowCount()):
@@ -339,24 +337,24 @@ class DynamicLayers:
         table.setRowCount(0)
 
         # create columns and header row
-        columns = [ a['key'] for a in attributes ]
-        colCount = len( columns )
-        table.setColumnCount( colCount )
-        table.setHorizontalHeaderLabels( tuple( columns ) )
+        columns = [a['key'] for a in attributes]
+        colCount = len(columns)
+        table.setColumnCount(colCount)
+        table.setHorizontalHeaderLabels(tuple(columns))
 
         # load content from project layers
         lr = QgsProject.instance()
         for lid in lr.mapLayers():
-            layer = lr.mapLayer( lid )
+            layer = lr.mapLayer(lid)
 
             lineData = []
 
             # Set row and column count
             twRowCount = table.rowCount()
             # add a new line
-            table.setRowCount( twRowCount + 1 )
-            table.setColumnCount( colCount )
-            i=0
+            table.setRowCount(twRowCount + 1)
+            table.setColumnCount(colCount)
+            i = 0
 
             if layer.customProperty('dynamicDatasourceActive') == 'True':
                 bg = QColor(175, 208, 126)
@@ -365,33 +363,32 @@ class DynamicLayers:
 
             # get information
             for attr in attributes:
-                newItem = QTableWidgetItem( )
+                newItem = QTableWidgetItem()
 
                 # Is editable or not
-                if( attr['editable'] ):
-                    newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
+                if (attr['editable']):
+                    newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
                 else:
-                    newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEnabled  )
+                    newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
                 # background
-                newItem.setBackground( bg )
+                newItem.setBackground(bg)
 
                 # Item value
-                value = self.getLayerProperty( layer, attr['key'] )
-                newItem.setData( Qt.EditRole, value )
+                value = self.getLayerProperty(layer, attr['key'])
+                newItem.setData(Qt.EditRole, value)
 
                 # Add cell data to lineData
                 # encode it in the file system encoding, only if needed
-                if hasattr( value, 'encode' ):
-                    value = value.encode( sys.getfilesystemencoding() )
-                lineData.append( value )
+                if hasattr(value, 'encode'):
+                    value = value.encode(sys.getfilesystemencoding())
+                lineData.append(value)
 
                 # Add item
                 table.setItem(twRowCount, i, newItem)
-                i+=1
+                i += 1
 
-
-    def getLayerProperty( self, layer, prop ):
+    def getLayerProperty(self, layer, prop):
         """
         Get a layer property
         """
@@ -406,17 +403,17 @@ class DynamicLayers:
             return layer.dataProvider().dataSourceUri().split('|')[0]
 
         elif prop == 'dynamicDatasourceActive':
-            a = layer.customProperty( 'dynamicDatasourceActive')
+            a = layer.customProperty('dynamicDatasourceActive')
             return a
 
         elif prop == 'dynamicDatasourceContent':
-            a = layer.customProperty( 'dynamicDatasourceContent')
+            a = layer.customProperty('dynamicDatasourceContent')
             return a
 
         else:
             return None
 
-    def onRowSelectionChanged( self ):
+    def onRowSelectionChanged(self):
         '''
         Change content of dynamic properties group inputs
         When the user selects a layer in the table
@@ -444,19 +441,19 @@ class DynamicLayers:
             row = lines[0].row()
 
             # Get layer
-            layerId = table.item( row, 0 ).data( Qt.EditRole )
+            layerId = table.item(row, 0).data(Qt.EditRole)
             lr = QgsProject.instance()
-            layer = lr.mapLayer( layerId )
+            layer = lr.mapLayer(layerId)
             if not layer:
                 showLayerProperties = False
             else:
                 self.selectedLayer = layer
 
-        if len( lines ) != 1:
+        if len(lines) != 1:
             showLayerProperties = False
 
         # Toggle the layer properties group
-        self.dlg.gbLayerDynamicProperties.setEnabled( showLayerProperties )
+        self.dlg.gbLayerDynamicProperties.setEnabled(showLayerProperties)
 
         # Set the content of the layer properties inputs
         # dynamic datasource text input content
@@ -464,11 +461,11 @@ class DynamicLayers:
             isActive = layer.customProperty('dynamicDatasourceActive') == 'True'
             for key, item in self.layerPropertiesInputs.items():
                 widget = item['widget']
-                val = layer.customProperty( item['xml'] )
+                val = layer.customProperty(item['xml'])
                 if not val:
                     val = ''
                 if item['wType'] in ('text'):
-                    widget.setText( val )
+                    widget.setText(val)
                 elif item['wType'] == 'textarea':
                     widget.setPlainText(val)
                 elif item['wType'] == 'spinbox':
@@ -476,13 +473,12 @@ class DynamicLayers:
                 elif item['wType'] == 'checkbox':
                     widget.setChecked(val)
                 elif item['wType'] == 'list':
-                    listDic = { widget.itemData(i):i for i in range( widget.count() ) }
+                    listDic = {widget.itemData(i): i for i in range(widget.count())}
                     if val in listDic:
-                        widget.setCurrentIndex( listDic[val] )
+                        widget.setCurrentIndex(listDic[val])
 
         # "active" checkbox
-        self.dlg.cbDatasourceActive.setChecked( isActive )
-
+        self.dlg.cbDatasourceActive.setChecked(isActive)
 
     def onCbDatasourceActiveChange(self):
         '''
@@ -504,7 +500,7 @@ class DynamicLayers:
         lines = sm.selectedRows()
         if not lines:
             return
-        if len( lines ) != 1:
+        if len(lines) != 1:
             return
         for index in lines:
             row = index.row()
@@ -517,17 +513,16 @@ class DynamicLayers:
             bg = QColor(175, 208, 126)
         else:
             bg = Qt.transparent
-        for i in range(0,3):
-            table.item( row, i ).setBackground( bg )
+        for i in range(0, 3):
+            table.item(row, i).setBackground(bg)
 
         # Change data for the corresponding column in the layers table
-        table.item( row, 2 ).setData( Qt.EditRole, inputValue )
+        table.item(row, 2).setData(Qt.EditRole, inputValue)
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty( 'dynamicDatasourceActive', inputValue )
+        self.selectedLayer.setCustomProperty('dynamicDatasourceActive', inputValue)
         p = QgsProject.instance()
-        p.setDirty( True )
-
+        p.setDirty(True)
 
     def onLayerPropertyChange(self, key):
         '''
@@ -541,7 +536,7 @@ class DynamicLayers:
             return
 
         # Get changed item
-        item  = self.layerPropertiesInputs[key]
+        item = self.layerPropertiesInputs[key]
         widget = item['widget']
 
         # Get the new value
@@ -552,9 +547,9 @@ class DynamicLayers:
             inputValue = widget.text()
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty( item['xml'], inputValue )
+        self.selectedLayer.setCustomProperty(item['xml'], inputValue)
         p = QgsProject.instance()
-        p.setDirty( True )
+        p.setDirty(True)
 
     def onCopyFromLayer(self):
         '''
@@ -569,13 +564,11 @@ class DynamicLayers:
         uri = self.selectedLayer.dataProvider().dataSourceUri().split('|')[0]
 
         # Set the dynamic datasource content input
-        self.dlg.dynamicDatasourceContent.setPlainText( uri )
+        self.dlg.dynamicDatasourceContent.setPlainText(uri)
 
         # Set templates for title and abstract
-        self.dlg.abstractTemplate.setPlainText( self.selectedLayer.abstract() )
-        self.dlg.titleTemplate.setText( self.selectedLayer.title() )
-
-
+        self.dlg.abstractTemplate.setPlainText(self.selectedLayer.abstract())
+        self.dlg.titleTemplate.setText(self.selectedLayer.title())
 
     ##
     # Variables tab
@@ -586,7 +579,7 @@ class DynamicLayers:
         '''
         # Get the list of variable from the project
         p = QgsProject.instance()
-        variableList = p.readListEntry(  'PluginDynamicLayers' , 'VariableList')
+        variableList = p.readListEntry('PluginDynamicLayers', 'VariableList')
         if not variableList:
             return
 
@@ -597,29 +590,28 @@ class DynamicLayers:
         for row in range(tw.rowCount()):
             tw.removeRow(row)
         tw.setRowCount(0)
-        tw.setColumnCount( 2 )
+        tw.setColumnCount(2)
 
         # Fill the table
         i = 0
         for variable in variableList[0]:
-            tw.setRowCount( i +1 )
+            tw.setRowCount(i + 1)
 
             # Set name item
-            newItem = QTableWidgetItem( variable )
-            newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEnabled  )
-            tw.setItem( i, 0, newItem )
+            newItem = QTableWidgetItem(variable)
+            newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            tw.setItem(i, 0, newItem)
 
             # Set empty value item
             newItem = QTableWidgetItem()
-            newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
-            tw.setItem( i, 1, newItem )
+            newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
+            tw.setItem(i, 1, newItem)
 
             # Set the new row count
-            i+=1
+            i += 1
 
         # Set the variable list
         self.variableList = variableList[0]
-
 
     def onAddVariableClicked(self):
         '''
@@ -639,18 +631,18 @@ class DynamicLayers:
 
         # Check if the variable if not already in the list
         if vname in self.variableList:
-            self.updateLog( self.tr(u'This variable is already in the list') )
+            self.updateLog(self.tr(u'This variable is already in the list'))
             return
 
         # Add constraint of possible input values
         p = re.compile('^[a-zA-Z]+$')
-        if not p.match( vname ):
-            self.updateLog( self.tr(u'The variable must contain only lower case ascii letters !') )
+        if not p.match(vname):
+            self.updateLog(self.tr(u'The variable must contain only lower case ascii letters !'))
             return
 
         # Set table properties
         tw.setRowCount(twRowCount + 1)
-        tw.setColumnCount( 2 )
+        tw.setColumnCount(2)
 
         # Empty the name text input
         self.dlg.inVariableName.setText(u'')
@@ -658,24 +650,23 @@ class DynamicLayers:
         # Add the new "variable" item to the table
         # name
         newItem = QTableWidgetItem()
-        newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEnabled  )
-        newItem.setData( Qt.EditRole, vname )
+        newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        newItem.setData(Qt.EditRole, vname)
         tw.setItem(twRowCount, 0, newItem)
 
         # value
         newItem = QTableWidgetItem()
-        newItem.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
-        newItem.setData( Qt.EditRole, vvalue )
+        newItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
+        newItem.setData(Qt.EditRole, vvalue)
         tw.setItem(twRowCount, 1, newItem)
 
         # Add variable to the list
-        self.variableList.append( vname )
+        self.variableList.append(vname)
 
         # Add variable to the project
         p = QgsProject.instance()
-        p.writeEntry( 'PluginDynamicLayers', 'VariableList', self.variableList )
-        p.setDirty( True )
-
+        p.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        p.setDirty(True)
 
     def onRemoveVariableClicked(self):
         '''
@@ -695,20 +686,19 @@ class DynamicLayers:
         row = lines[0].row()
 
         # Get variable name
-        vname = tw.item( row, 0 ).data( Qt.EditRole )
+        vname = tw.item(row, 0).data(Qt.EditRole)
 
         # Remove variable name from list
-        self.variableList.remove( vname )
+        self.variableList.remove(vname)
 
         # Update project
         p = QgsProject.instance()
-        p.writeEntry( 'PluginDynamicLayers', 'VariableList', self.variableList )
-        p.setDirty( True )
+        p.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        p.setDirty(True)
 
         # Remove selected lines
         tw = self.dlg.twVariableList
-        tw.removeRow( tw.currentRow() )
-
+        tw.removeRow(tw.currentRow())
 
     def onVariableItemChanged(self, item):
         '''
@@ -732,9 +722,7 @@ class DynamicLayers:
         tw.clearSelection()
 
         # Get changed property
-        data = tw.item( row, col ).data( Qt.EditRole )
-
-
+        data = tw.item(row, col).data(Qt.EditRole)
 
     ##
     # Project properties tab
@@ -758,16 +746,15 @@ class DynamicLayers:
             pTitle = p.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
         if not pTitle and p.readEntry('WMSServiceTitle', "/"):
             pTitle = p.readEntry('WMSServiceTitle', "/")[0]
-        self.dlg.inProjectTitle.setText( str(pTitle) )
+        self.dlg.inProjectTitle.setText(str(pTitle))
 
         # Abstract
         pAbstract = u''
         if p.readEntry('ProjectAbstract', '/PluginDynamicLayers'):
             pAbstract = p.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
-        if not pAbstract and  p.readEntry('WMSServiceAbstract', "/"):
+        if not pAbstract and p.readEntry('WMSServiceAbstract', "/"):
             pAbstract = p.readEntry('WMSServiceAbstract', "/")[0]
-        self.dlg.inProjectAbstract.setText( str(pAbstract) )
-
+        self.dlg.inProjectAbstract.setText(str(pAbstract))
 
     def onProjectPropertyChanged(self, prop):
         '''
@@ -784,7 +771,7 @@ class DynamicLayers:
             val = widget.toPlainText()
         elif prop in ('extentLayer', 'variableSourceLayer'):
             var = None
-            layer = self.getQgisLayerByNameFromCombobox( widget )
+            layer = self.getQgisLayerByNameFromCombobox(widget)
             if layer:
                 val = layer.id()
             else:
@@ -798,9 +785,8 @@ class DynamicLayers:
 
         # Store value into the project
         xml = self.projectPropertiesInputs[prop]['xml']
-        p.writeEntry( 'PluginDynamicLayers', xml, val )
-        p.setDirty( True )
-
+        p.writeEntry('PluginDynamicLayers', xml, val)
+        p.setDirty(True)
 
     def populateProjectProperties(self):
         '''
@@ -814,22 +800,21 @@ class DynamicLayers:
         for prop, item in self.projectPropertiesInputs.items():
             widget = item['widget']
             xml = self.projectPropertiesInputs[prop]['xml']
-            val = p.readEntry('PluginDynamicLayers' , xml)
+            val = p.readEntry('PluginDynamicLayers', xml)
             if val:
                 val = val[0]
             if not val:
                 continue
             if item['wType'] in ('text', 'textarea'):
-                widget.setText( val )
+                widget.setText(val)
             elif item['wType'] == 'spinbox':
                 widget.setValue(int(val))
             elif item['wType'] == 'checkbox':
                 widget.setChecked(val)
             elif item['wType'] == 'list':
-                listDic = { widget.itemData(i):i for i in range( widget.count() ) }
+                listDic = {widget.itemData(i): i for i in range(widget.count())}
                 if val in listDic:
-                    widget.setCurrentIndex( listDic[val] )
-
+                    widget.setCurrentIndex(listDic[val])
 
     ##
     # Initialization
@@ -846,7 +831,7 @@ class DynamicLayers:
         combobox.clear()
         if addEmptyItem:
             # add empty item
-            combobox.addItem ( '---', -1)
+            combobox.addItem('---', -1)
         # loop though the layers
         for layer in QgsProject.instance().mapLayers().values():
             layerId = layer.id()
@@ -855,27 +840,24 @@ class DynamicLayers:
                 if not hasattr(layer, 'providerType'):
                     continue
                 if 'all' in providerTypeList or layer.providerType() in providerTypeList:
-                    combobox.addItem ( layer.name(), str(layerId))
+                    combobox.addItem(layer.name(), str(layerId))
             # raster
             if layer.type() == QgsMapLayer.RasterLayer and ltype in ('all', 'raster'):
-                combobox.addItem ( layer.name(), str(layerId))
-
+                combobox.addItem(layer.name(), str(layerId))
 
     def getQgisLayerByNameFromCombobox(self, layerComboBox):
         '''Get a layer chosen in a combobox'''
         returnLayer = None
-        uniqueId = str( layerComboBox.itemData( layerComboBox.currentIndex() ) )
+        uniqueId = str(layerComboBox.itemData(layerComboBox.currentIndex()))
         try:
             lr = QgsProject.instance()
-            layer = lr.mapLayer( uniqueId )
+            layer = lr.mapLayer(uniqueId)
             if layer:
                 if layer.isValid():
                     returnLayer = layer
         except:
             returnLayer = None
         return returnLayer
-
-
 
     ##
     # Global actions
@@ -901,39 +883,38 @@ class DynamicLayers:
         if source == 'table':
             searchAndReplaceDictionary = {}
             tw = self.dlg.twVariableList
-            for row in range( tw.rowCount() ):
-                vname = tw.item( row, 0 ).data( Qt.EditRole )
-                vvalue = tw.item( row, 1 ).data( Qt.EditRole )
+            for row in range(tw.rowCount()):
+                vname = tw.item(row, 0).data(Qt.EditRole)
+                vvalue = tw.item(row, 1).data(Qt.EditRole)
                 searchAndReplaceDictionary[vname] = vvalue
-            dle.setSearchAndReplaceDictionary( searchAndReplaceDictionary )
+            dle.setSearchAndReplaceDictionary(searchAndReplaceDictionary)
         else:
-            layer = self.getQgisLayerByNameFromCombobox( self.dlg.inVariableSourceLayer )
+            layer = self.getQgisLayerByNameFromCombobox(self.dlg.inVariableSourceLayer)
             exp = self.dlg.inVariableSourceLayerExpression.text()
-            dle.setSearchAndReplaceDictionaryFromLayer( layer, exp )
+            dle.setSearchAndReplaceDictionaryFromLayer(layer, exp)
 
         # Change layers datasource
-        dle.setDynamicLayersDatasourceFromDic( )
+        dle.setDynamicLayersDatasourceFromDic()
 
         # Set project properties
         dle.setDynamicProjectProperties()
 
         # Set extent layer
-        extentLayer = self.getQgisLayerByNameFromCombobox( self.dlg.inExtentLayer )
+        extentLayer = self.getQgisLayerByNameFromCombobox(self.dlg.inExtentLayer)
         if extentLayer:
-            dle.setExtentLayer( extentLayer )
+            dle.setExtentLayer(extentLayer)
 
         # Set extent margin
         extentMargin = self.dlg.inExtentMargin.value()
         if extentMargin:
-            dle.setExtentMargin( extentMargin )
+            dle.setExtentMargin(extentMargin)
 
         # Set new extent
         dle.setProjectExtent()
 
         # Set project as dirty
         p = QgsProject.instance()
-        p.setDirty( True )
-
+        p.setDirty(True)
 
     def run(self):
         """Run method that performs all the real work"""
@@ -947,10 +928,10 @@ class DynamicLayers:
         self.populateVariableTable()
 
         # Populate the extent layer list
-        self.populateLayerCombobox( self.dlg.inExtentLayer, 'vector', 'all', False )
+        self.populateLayerCombobox(self.dlg.inExtentLayer, 'vector', 'all', False)
 
         # Populate the variable source layer combobox
-        self.populateLayerCombobox(self.dlg.inVariableSourceLayer, 'vector', 'all', False )
+        self.populateLayerCombobox(self.dlg.inVariableSourceLayer, 'vector', 'all', False)
 
         # Copy project propertie to corresponding tab
         self.populateProjectProperties()
@@ -966,20 +947,3 @@ class DynamicLayers:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
-
-
-
-class DynamicLayersServer:
-    """Plugin for QGIS server
-    this plugin loads DynamicLayersFilter"""
-
-    def __init__(self, serverIface):
-        # Save reference to the QGIS server interface
-        self.serverIface = serverIface
-        QgsMessageLog.logMessage("SUCCESS - DynamicLayersServer init", 'plugin', QgsMessageLog.INFO)
-
-        from filters.DynamicLayersFilter import DynamicLayersFilter
-        try:
-            serverIface.registerFilter( DynamicLayersFilter(serverIface), 100 )
-        except Exception as e:
-            QgsLogger.debug("DynamicLayersServer - Error loading filter DynamicLayersServer : %s" % e )
