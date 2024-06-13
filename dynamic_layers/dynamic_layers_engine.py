@@ -23,7 +23,7 @@
 import typing
 
 from qgis.PyQt.QtXml import QDomDocument
-from qgis.core import QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog
+from qgis.core import QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog, QgsReadWriteContext
 
 try:
     from qgis.utils import iface
@@ -106,6 +106,7 @@ class LayerDataSourceModifier:
         """
         Method to apply a new datasource to a vector Layer
         """
+        context = QgsReadWriteContext()
         layer = self.layer
         new_ds, new_uri = self.split_source(new_source_uri)
         new_datasource_type = new_ds or layer.dataProvider().name()
@@ -116,22 +117,22 @@ class LayerDataSourceModifier:
         xml_map_layers = xml_document.createElement("maplayers")
         # XMLMapLayer = QDomElement()
         xml_map_layer = xml_document.createElement("maplayer")
-        layer.writeLayerXML(xml_map_layer, xml_document)
+        layer.writeLayerXml(xml_map_layer, xml_document, context)
 
         # apply layer definition
         xml_map_layer.firstChildElement("datasource").firstChild().setNodeValue(new_uri)
         xml_map_layer.firstChildElement("provider").firstChild().setNodeValue(new_datasource_type)
         xml_map_layers.appendChild(xml_map_layer)
         xml_document.appendChild(xml_map_layers)
-        layer.readLayerXML(xml_map_layer)
+        layer.readLayerXml(xml_map_layer, context)
 
         # Update layer extent
         layer.updateExtents()
 
         # Update graduated symbol renderer
-        if layer.rendererV2().type() == 'graduatedSymbol':
-            if len(layer.rendererV2().ranges()) == 1:
-                layer.rendererV2().updateClasses(layer, layer.rendererV2().mode(), len(layer.rendererV2().ranges()))
+        if layer.renderer().type() == 'graduatedSymbol':
+            if len(layer.renderer().ranges()) == 1:
+                layer.renderer().updateClasses(layer, layer.renderer().mode(), len(layer.renderer().ranges()))
 
         # Reload layer
         layer.reload()
@@ -189,7 +190,7 @@ class LayerDataSourceModifier:
 
         # Set fields aliases
         if layer.type() == QgsMapLayer.VectorLayer:
-            for fid, field in enumerate(layer.pendingFields()):
+            for fid, field in enumerate(layer.fields()):
                 alias = layer.attributeAlias(fid)
                 if not alias:
                     continue
@@ -197,7 +198,7 @@ class LayerDataSourceModifier:
                     alias,
                     search_and_replace_dictionary,
                 )
-                layer.addAttributeAlias(fid, new_alias)
+                layer.setFieldAlias(fid, new_alias)
 
 
 class DynamicLayersEngine:
@@ -279,14 +280,10 @@ class DynamicLayersEngine:
                 'An error occurred while parsing the given expression: %s' % q_exp.parserErrorString())
             features = layer.getFeatures()
 
-        # Get layer fields name
-        fields = layer.pendingFields()
-        field_names = [field.name() for field in fields]
-
         # Take only first feature
         for feat in features:
             # Build dictionary
-            search_and_replace_dictionary = dict(zip(field_names, feat.attributes()))
+            search_and_replace_dictionary = dict(zip(layer.fields().names(), feat.attributes()))
             break
 
         self.search_and_replace_dictionary = search_and_replace_dictionary
@@ -318,7 +315,7 @@ class DynamicLayersEngine:
             a = LayerDataSourceModifier(layer)
             a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
 
-            if self.iface and layer.rendererV2().type() == 'graduatedSymbol':
+            if self.iface and layer.renderer().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
 
         if self.iface:
@@ -398,7 +395,7 @@ class DynamicLayersEngine:
                 margin_x = p_extent.width() * self.extent_margin / 100
                 margin_y = p_extent.height() * self.extent_margin / 100
                 margin = max(margin_x, margin_y)
-                p_extent = p_extent.buffer(margin)
+                p_extent = p_extent.buffered(margin)
 
             # Modify OWS WMS extent
             p_wms_extent = [
