@@ -142,6 +142,7 @@ class LayerDataSourceModifier:
         """
         Split QGIS datasource into meaningful components
         """
+        # TODO switch to QgsProviderRegistry.instance().decodeUri(layer.dataProvider().name(), layer.source())
         if "|" in source:
             datasource_type = source.split("|")[0]
             uri = source.split("|")[1].replace('\\', '/')

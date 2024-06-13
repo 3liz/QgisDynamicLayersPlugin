@@ -618,6 +618,7 @@ class DynamicLayers:
         when the user clicks on the corresponding button
         """
         if not self.initDone:
+            self.update_log(self.tr('Init was not finished'))
             return
 
         # Get table and row count
