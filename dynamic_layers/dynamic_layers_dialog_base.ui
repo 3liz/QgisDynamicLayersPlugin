@@ -14,16 +14,18 @@
    <string>Dynamic Layers</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Dynamic layers</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -296,12 +298,15 @@
                     <item row="3" column="0">
                      <widget class="QLabel" name="label_6">
                       <property name="text">
-                       <string>Extent margin (%)</string>
+                       <string>Extent margin</string>
                       </property>
                      </widget>
                     </item>
                     <item row="3" column="1">
                      <widget class="QSpinBox" name="inExtentMargin">
+                      <property name="suffix">
+                       <string>%</string>
+                      </property>
                       <property name="singleStep">
                        <number>5</number>
                       </property>
@@ -357,30 +362,37 @@
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_3">
                     <item>
-                     <widget class="QgsMapLayerComboBox" name="inVariableSourceLayer"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="inVariableSourceLayerExpression">
-                      <property name="toolTip">
-                       <string>Enter a QGIS valid expression</string>
-                      </property>
-                      <property name="placeholderText">
-                       <string>Enter a valid expression</string>
+                     <widget class="QgsMapLayerComboBox" name="inVariableSourceLayer">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_3">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
+                     <widget class="QLineEdit" name="inVariableSourceLayerExpression">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
+                      <property name="toolTip">
+                       <string>Enter a QGIS valid expression</string>
                       </property>
-                     </spacer>
+                      <property name="placeholderText">
+                       <string notr="true"/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="bt_open_expression">
+                      <property name="text">
+                       <string>E</string>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </item>
@@ -427,14 +439,7 @@
                    </widget>
                   </item>
                   <item>
-                   <layout class="QGridLayout" name="gridLayout">
-                    <item row="0" column="2">
-                     <widget class="QLabel" name="label_3">
-                      <property name="text">
-                       <string>Value</string>
-                      </property>
-                     </widget>
-                    </item>
+                   <layout class="QFormLayout" name="formLayout_2">
                     <item row="0" column="0">
                      <widget class="QLabel" name="label_2">
                       <property name="text">
@@ -442,14 +447,21 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="0">
+                    <item row="0" column="1">
                      <widget class="QLineEdit" name="inVariableName">
                       <property name="placeholderText">
-                       <string>Variable name</string>
+                       <string notr="true"/>
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="2">
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>Value</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
                      <widget class="QLineEdit" name="inVariableValue"/>
                     </item>
                    </layout>
@@ -459,14 +471,14 @@
                     <item>
                      <widget class="QPushButton" name="btAddVariable">
                       <property name="text">
-                       <string>Add variable</string>
+                       <string notr="true">+</string>
                       </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QPushButton" name="btRemoveVariable">
                       <property name="text">
-                       <string>Remove variable</string>
+                       <string notr="true">-</string>
                       </property>
                      </widget>
                     </item>

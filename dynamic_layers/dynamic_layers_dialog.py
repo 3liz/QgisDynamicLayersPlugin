@@ -27,6 +27,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox
 from qgis.core import QgsApplication
+from qgis.gui import QgsExpressionBuilderDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'dynamic_layers_dialog_base.ui'))
@@ -56,3 +57,20 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.btRemoveVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyRemove.svg')))
 
         self.btClearLog.setIcon(QIcon(QgsApplication.iconPath('iconClearConsole.svg')))
+
+        self.bt_open_expression.setText("")
+        self.bt_open_expression.setToolTip("")
+        self.bt_open_expression.setIcon(QIcon(QgsApplication.iconPath('mIconExpression.svg')))
+        self.bt_open_expression.clicked.connect(self.open_expression_builder)
+
+    def open_expression_builder(self):
+        """ Open the expression builder helper. """
+        layer = self.inVariableSourceLayer.currentLayer()
+        if not layer:
+            return
+        dialog = QgsExpressionBuilderDialog(layer)
+        result = dialog.exec()
+        if result != QDialog.Accepted:
+            return
+
+        self.inVariableSourceLayerExpression.setText(dialog.expressionText())
