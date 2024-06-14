@@ -29,6 +29,7 @@ from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
 from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
 from qgis.core import Qgis, QgsProject
+from qgis.utils import OverrideCursor
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
@@ -827,51 +828,51 @@ class DynamicLayers:
         if not self.initDone:
             return
 
-        # ok = True
+        with OverrideCursor(Qt.WaitCursor):
 
-        # Use the engine class to do the job
-        dle = DynamicLayersEngine()
+            # Use the engine class to do the job
+            dle = DynamicLayersEngine()
 
-        # Set the dynamic layers list
-        dle.set_dynamic_layers_list()
+            # Set the dynamic layers list
+            dle.set_dynamic_layers_list()
 
-        # Set search and replace dictionary
-        # Collect variables names and values
-        if source == 'table':
-            search_and_replace_dictionary = {}
-            tw = self.dlg.twVariableList
-            for row in range(tw.rowCount()):
-                v_name = tw.item(row, 0).data(Qt.EditRole)
-                v_value = tw.item(row, 1).data(Qt.EditRole)
-                search_and_replace_dictionary[v_name] = v_value
-            dle.set_search_and_replace_dictionary(search_and_replace_dictionary)
-        else:
-            layer = self.dlg.inVariableSourceLayer.currentLayer()
-            exp = self.dlg.inVariableSourceLayerExpression.text()
-            dle.set_search_and_replace_dictionary_from_layer(layer, exp)
+            # Set search and replace dictionary
+            # Collect variables names and values
+            if source == 'table':
+                search_and_replace_dictionary = {}
+                tw = self.dlg.twVariableList
+                for row in range(tw.rowCount()):
+                    v_name = tw.item(row, 0).data(Qt.EditRole)
+                    v_value = tw.item(row, 1).data(Qt.EditRole)
+                    search_and_replace_dictionary[v_name] = v_value
+                dle.set_search_and_replace_dictionary(search_and_replace_dictionary)
+            else:
+                layer = self.dlg.inVariableSourceLayer.currentLayer()
+                exp = self.dlg.inVariableSourceLayerExpression.text()
+                dle.set_search_and_replace_dictionary_from_layer(layer, exp)
 
-        # Change layers datasource
-        dle.set_dynamic_layers_datasource_from_dic()
+            # Change layers datasource
+            dle.set_dynamic_layers_datasource_from_dic()
 
-        # Set project properties
-        dle.set_dynamic_project_properties()
+            # Set project properties
+            dle.set_dynamic_project_properties()
 
-        # Set extent layer
-        extent_layer = self.dlg.inExtentLayer.currentLayer()
-        if extent_layer:
-            dle.set_extent_layer(extent_layer)
+            # Set extent layer
+            extent_layer = self.dlg.inExtentLayer.currentLayer()
+            if extent_layer:
+                dle.set_extent_layer(extent_layer)
 
-        # Set extent margin
-        extent_margin = self.dlg.inExtentMargin.value()
-        if extent_margin:
-            dle.set_extent_margin(extent_margin)
+            # Set extent margin
+            extent_margin = self.dlg.inExtentMargin.value()
+            if extent_margin:
+                dle.set_extent_margin(extent_margin)
 
-        # Set new extent
-        dle.set_project_extent()
+            # Set new extent
+            dle.set_project_extent()
 
-        # Set project as dirty
-        p = QgsProject.instance()
-        p.setDirty(True)
+            # Set project as dirty
+            p = QgsProject.instance()
+            p.setDirty(True)
 
     def run(self):
         """Run method that performs all the real work"""
