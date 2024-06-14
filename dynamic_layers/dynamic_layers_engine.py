@@ -130,7 +130,7 @@ class LayerDataSourceModifier:
         layer.updateExtents()
 
         # Update graduated symbol renderer
-        if layer.renderer().type() == 'graduatedSymbol':
+        if layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
             if len(layer.renderer().ranges()) == 1:
                 layer.renderer().updateClasses(layer, layer.renderer().mode(), len(layer.renderer().ranges()))
 
@@ -316,7 +316,7 @@ class DynamicLayersEngine:
             a = LayerDataSourceModifier(layer)
             a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
 
-            if self.iface and layer.renderer().type() == 'graduatedSymbol':
+            if self.iface and layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
 
         if self.iface:
