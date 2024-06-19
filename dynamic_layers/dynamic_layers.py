@@ -28,7 +28,7 @@ from functools import partial
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
 from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
@@ -375,6 +375,8 @@ class DynamicLayers:
                 # Item value
                 value = self.get_layer_property(layer, attr['key'])
                 new_item.setData(Qt.EditRole, value)
+                if attr['key'] == 'name':
+                    new_item.setIcon(QgsIconUtils.iconForLayer(layer))
 
                 # Add cell data to lineData
                 # encode it in the file system encoding, only if needed
