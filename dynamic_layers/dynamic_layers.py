@@ -71,14 +71,23 @@ class DynamicLayers:
         self.dlg = DynamicLayersDialog()
 
         # Layers attribute that can be shown and optionally changed in the plugin
-        self.layersTable = {
-            'tableWidget': self.dlg.twLayers,
-            'attributes': [
-                {'key': 'id', 'editable': False},
-                {'key': 'name', 'editable': False, 'type': 'string'},
-                {'key': 'dynamicDatasourceActive', 'editable': False, 'type': 'string'},
-            ],
-        }
+        self.layersTable = [
+            {
+                'key': 'id',
+                'display': self.tr('ID'),
+                'editable': False,
+            }, {
+                'key': 'name',
+                'display': self.tr('Name'),
+                'editable': False,
+                'type': 'string'
+            }, {
+                'key': 'dynamicDatasourceActive',
+                'display': self.tr('Dynamic Datasource Active'),
+                'editable': False,
+                'type': 'string'
+            },
+        ]
 
         # Keep record of style widget
         self.selectedLayerWidget = None
@@ -197,10 +206,8 @@ class DynamicLayers:
         self.initDone = False
 
         # Actions when row selection changes
-        slot = self.on_row_selection_changed
-        table = self.layersTable['tableWidget']
-        sm = table.selectionModel()
-        sm.selectionChanged.connect(slot)
+        sm = self.dlg.twLayers.selectionModel()
+        sm.selectionChanged.connect(self.on_row_selection_changed)
 
         # Actions when the layer properties are changed panel
         self.dlg.cbDatasourceActive.stateChanged.connect(self.on_cb_datasource_active_change)
@@ -322,24 +329,16 @@ class DynamicLayers:
         """
         Fill the table for a given layer type
         """
-        # Get parameters for the widget
-        lt = self.layersTable
-        table = lt['tableWidget']
-
-        attributes = lt['attributes']
-
-        # headerData = [a['key'] for a in attributes]
-
         # empty previous content
-        for row in range(table.rowCount()):
-            table.removeRow(row)
-        table.setRowCount(0)
+        for row in range(self.dlg.twLayers.rowCount()):
+            self.dlg.twLayers.removeRow(row)
+        self.dlg.twLayers.setRowCount(0)
 
         # create columns and header row
-        columns = [a['key'] for a in attributes]
+        columns = [a['display'] for a in self.layersTable]
         col_count = len(columns)
-        table.setColumnCount(col_count)
-        table.setHorizontalHeaderLabels(tuple(columns))
+        self.dlg.twLayers.setColumnCount(col_count)
+        self.dlg.twLayers.setHorizontalHeaderLabels(tuple(columns))
 
         # load content from project layers
         lr = QgsProject.instance()
@@ -349,10 +348,10 @@ class DynamicLayers:
             line_data = []
 
             # Set row and column count
-            tw_row_count = table.rowCount()
+            tw_row_count = self.dlg.twLayers.rowCount()
             # add a new line
-            table.setRowCount(tw_row_count + 1)
-            table.setColumnCount(col_count)
+            self.dlg.twLayers.setRowCount(tw_row_count + 1)
+            self.dlg.twLayers.setColumnCount(col_count)
             i = 0
 
             if layer.customProperty('dynamicDatasourceActive') == 'True':
@@ -361,7 +360,7 @@ class DynamicLayers:
                 bg = Qt.transparent
 
             # get information
-            for attr in attributes:
+            for attr in self.layersTable:
                 new_item = QTableWidgetItem()
 
                 # Is editable or not
@@ -384,7 +383,7 @@ class DynamicLayers:
                 line_data.append(value)
 
                 # Add item
-                table.setItem(tw_row_count, i, new_item)
+                self.dlg.twLayers.setItem(tw_row_count, i, new_item)
                 i += 1
 
     @staticmethod
@@ -403,12 +402,10 @@ class DynamicLayers:
             return layer.dataProvider().dataSourceUri().split('|')[0]
 
         elif prop == 'dynamicDatasourceActive':
-            a = layer.customProperty('dynamicDatasourceActive')
-            return a
+            return layer.customProperty('dynamicDatasourceActive')
 
         elif prop == 'dynamicDatasourceContent':
-            a = layer.customProperty('dynamicDatasourceContent')
-            return a
+            return layer.customProperty('dynamicDatasourceContent')
 
         else:
             return None
@@ -423,13 +420,8 @@ class DynamicLayers:
 
         show_layer_properties = True
 
-        # Get layers table
-        lt = self.layersTable
-        table = lt['tableWidget']
-
         # Get selected lines
-        sm = table.selectionModel()
-        lines = sm.selectedRows()
+        lines = self.dlg.twLayers.selectionModel().selectedRows()
         if not lines:
             return
 
@@ -441,7 +433,7 @@ class DynamicLayers:
             row = lines[0].row()
 
             # Get layer
-            layer_id = table.item(row, 0).data(Qt.EditRole)
+            layer_id = self.dlg.twLayers.item(row, 0).data(Qt.EditRole)
             lr = QgsProject.instance()
             layer = lr.mapLayer(layer_id)
             if not layer:
@@ -491,16 +483,9 @@ class DynamicLayers:
         if not self.selectedLayer:
             return
 
-        # Get layers table
-        lt = self.layersTable
-        table = lt['tableWidget']
-
         # Get selected lines
-        sm = table.selectionModel()
-        lines = sm.selectedRows()
-        if not lines:
-            return
-        if len(lines) != 1:
+        lines = self.dlg.twLayers.selectionModel().selectedRows()
+        if lines != 1:
             return
         for index in lines:
             row = index.row()
@@ -514,10 +499,10 @@ class DynamicLayers:
         else:
             bg = Qt.transparent
         for i in range(0, 3):
-            table.item(row, i).setBackground(bg)
+            self.dlg.twLayers.item(row, i).setBackground(bg)
 
         # Change data for the corresponding column in the layers table
-        table.item(row, 2).setData(Qt.EditRole, input_value)
+        self.dlg.twLayers.item(row, 2).setData(Qt.EditRole, input_value)
 
         # Record the new value in the project
         self.selectedLayer.setCustomProperty('dynamicDatasourceActive', input_value)

@@ -6,530 +6,413 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
-    <height>877</height>
+    <width>826</width>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dynamic Layers</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
-    <widget class="QScrollArea" name="scrollArea">
-     <property name="widgetResizable">
-      <bool>true</bool>
+    <widget class="QTabWidget" name="tabWidget_2">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>921</width>
-        <height>801</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Configure layers</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QTabWidget" name="tabWidget_2">
-         <property name="currentIndex">
-          <number>0</number>
+        <widget class="QScrollArea" name="scrollArea_2">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
-         <widget class="QWidget" name="tab_2">
-          <attribute name="title">
-           <string>Configure layers</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
+         <widget class="QWidget" name="scrollAreaWidgetContents_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>770</width>
+            <height>677</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <widget class="QScrollArea" name="scrollArea_2">
-             <property name="widgetResizable">
-              <bool>true</bool>
+            <widget class="QGroupBox" name="groupBox_2">
+             <property name="title">
+              <string>Layers</string>
              </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_2">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>879</width>
-                <height>730</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_7">
-               <item>
-                <widget class="QGroupBox" name="groupBox_2">
-                 <property name="title">
-                  <string>Layers</string>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_6">
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>You can select a layer and modify dynamic properties with the tools below. Layers activated as dynamic layers have a green background</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTableWidget" name="twLayers">
+                <property name="editTriggers">
+                 <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+                </property>
+                <property name="alternatingRowColors">
+                 <bool>true</bool>
+                </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
+                <property name="selectionBehavior">
+                 <enum>QAbstractItemView::SelectRows</enum>
+                </property>
+                <property name="sortingEnabled">
+                 <bool>true</bool>
+                </property>
+                <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                 <bool>true</bool>
+                </attribute>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="gbLayerDynamicProperties">
+             <property name="title">
+              <string>Dynamic properties</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QCheckBox" name="cbDatasourceActive">
+                <property name="text">
+                 <string>Activate dynamic datasource and properties</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
                   <item>
-                   <widget class="QLabel" name="label_7">
+                   <widget class="QLabel" name="label">
                     <property name="text">
-                     <string>You can select a layer and modify dynamic properties with the tools below. Layers activated as dynamic layers have a green background</string>
-                    </property>
-                    <property name="wordWrap">
-                     <bool>true</bool>
+                     <string>Datasource template</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTableWidget" name="twLayers">
-                    <property name="editTriggers">
-                     <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
-                    </property>
-                    <property name="alternatingRowColors">
-                     <bool>true</bool>
-                    </property>
-                    <property name="selectionMode">
-                     <enum>QAbstractItemView::ExtendedSelection</enum>
-                    </property>
-                    <property name="selectionBehavior">
-                     <enum>QAbstractItemView::SelectRows</enum>
-                    </property>
-                    <property name="sortingEnabled">
-                     <bool>true</bool>
-                    </property>
-                    <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-                     <bool>true</bool>
-                    </attribute>
-                   </widget>
+                   <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
                   </item>
                  </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <widget class="QLabel" name="label_8">
+                    <property name="text">
+                     <string>Title template</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="titleTemplate"/>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_9">
+                    <property name="text">
+                     <string>Abstract template</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPlainTextEdit" name="abstractTemplate"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btCopyFromLayer">
+                <property name="text">
+                 <string>Set templates content from layer properties</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Configure project</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Set some properties from the project</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="projectTitleLabel">
+           <property name="text">
+            <string>Project title</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="inProjectTitle"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="projectDescriptionLabel">
+           <property name="text">
+            <string>Project description</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QTextEdit" name="inProjectAbstract"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Extent layer</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QgsMapLayerComboBox" name="inExtentLayer"/>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Extent margin</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="inExtentMargin">
+           <property name="suffix">
+            <string>%</string>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>20</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Project shortname</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="inProjectShortName"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btCopyFromProject">
+         <property name="text">
+          <string>Copy properties from project</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Set variables</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Set variables from a vector layer</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_14">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QgsMapLayerComboBox" name="inVariableSourceLayer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="inVariableSourceLayerExpression">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Enter a QGIS valid expression</string>
+              </property>
+              <property name="placeholderText">
+               <string notr="true"/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="bt_open_expression">
+              <property name="text">
+               <string>E</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="title">
+             <string>Set variables manually</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <widget class="QTableWidget" name="twVariableList">
+               <property name="editTriggers">
+                <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::SingleSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+               <column>
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Value</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="formLayout_2">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>Name</string>
+                 </property>
                 </widget>
                </item>
-               <item>
-                <widget class="QGroupBox" name="gbLayerDynamicProperties">
-                 <property name="title">
-                  <string>Dynamic properties</string>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="inVariableName">
+                 <property name="placeholderText">
+                  <string notr="true"/>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_3">
-                  <item>
-                   <widget class="QCheckBox" name="cbDatasourceActive">
-                    <property name="text">
-                     <string>Activate dynamic datasource and properties</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_2">
-                    <item>
-                     <widget class="QScrollArea" name="scrollArea_5">
-                      <property name="widgetResizable">
-                       <bool>true</bool>
-                      </property>
-                      <widget class="QWidget" name="scrollAreaWidgetContents_5">
-                       <property name="geometry">
-                        <rect>
-                         <x>0</x>
-                         <y>0</y>
-                         <width>412</width>
-                         <height>335</height>
-                        </rect>
-                       </property>
-                       <layout class="QVBoxLayout" name="verticalLayout_15">
-                        <item>
-                         <widget class="QLabel" name="label">
-                          <property name="text">
-                           <string>Datasource template</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
-                        </item>
-                        <item>
-                         <spacer name="verticalSpacer_2">
-                          <property name="orientation">
-                           <enum>Qt::Vertical</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>20</width>
-                            <height>40</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                       </layout>
-                      </widget>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QScrollArea" name="scrollArea_6">
-                      <property name="widgetResizable">
-                       <bool>true</bool>
-                      </property>
-                      <widget class="QWidget" name="scrollAreaWidgetContents_6">
-                       <property name="geometry">
-                        <rect>
-                         <x>0</x>
-                         <y>0</y>
-                         <width>411</width>
-                         <height>335</height>
-                        </rect>
-                       </property>
-                       <layout class="QVBoxLayout" name="verticalLayout_16">
-                        <item>
-                         <widget class="QLabel" name="label_8">
-                          <property name="text">
-                           <string>Title template</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLineEdit" name="titleTemplate"/>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="label_9">
-                          <property name="text">
-                           <string>Abstract template</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QPlainTextEdit" name="abstractTemplate"/>
-                        </item>
-                        <item>
-                         <spacer name="verticalSpacer">
-                          <property name="orientation">
-                           <enum>Qt::Vertical</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>20</width>
-                            <height>40</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                       </layout>
-                      </widget>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btCopyFromLayer">
-                    <property name="text">
-                     <string>Set templates content from layer properties</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
                 </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Value</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="inVariableValue"/>
                </item>
               </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_3">
-          <attribute name="title">
-           <string>Configure project</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_11">
-           <item>
-            <widget class="QScrollArea" name="scrollArea_4">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_4">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>879</width>
-                <height>730</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_13">
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QGroupBox" name="groupBox">
-                 <property name="title">
-                  <string>Configure dynamic project properties</string>
+                <widget class="QPushButton" name="btAddVariable">
+                 <property name="text">
+                  <string notr="true">+</string>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_12">
-                  <item>
-                   <layout class="QFormLayout" name="formLayout">
-                    <property name="fieldGrowthPolicy">
-                     <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-                    </property>
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="projectTitleLabel">
-                      <property name="text">
-                       <string>Project title</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QLineEdit" name="inProjectTitle"/>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="projectDescriptionLabel">
-                      <property name="text">
-                       <string>Project description</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QTextEdit" name="inProjectAbstract"/>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="label_4">
-                      <property name="text">
-                       <string>Extent layer</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QgsMapLayerComboBox" name="inExtentLayer"/>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="label_6">
-                      <property name="text">
-                       <string>Extent margin</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="1">
-                     <widget class="QSpinBox" name="inExtentMargin">
-                      <property name="suffix">
-                       <string>%</string>
-                      </property>
-                      <property name="singleStep">
-                       <number>5</number>
-                      </property>
-                      <property name="value">
-                       <number>20</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btCopyFromProject">
-                    <property name="text">
-                     <string>Copy properties from project</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
                 </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btRemoveVariable">
+                 <property name="text">
+                  <string notr="true">-</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab">
-          <attribute name="title">
-           <string>Set variables</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
-           <item>
-            <widget class="QScrollArea" name="scrollArea_3">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_3">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>879</width>
-                <height>730</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_10">
-               <item>
-                <widget class="QGroupBox" name="groupBox_4">
-                 <property name="title">
-                  <string>Set variables from a vector layer</string>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_14">
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_3">
-                    <item>
-                     <widget class="QgsMapLayerComboBox" name="inVariableSourceLayer">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="inVariableSourceLayerExpression">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="toolTip">
-                       <string>Enter a QGIS valid expression</string>
-                      </property>
-                      <property name="placeholderText">
-                       <string notr="true"/>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="bt_open_expression">
-                      <property name="text">
-                       <string>E</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btApplyFromLayer">
-                    <property name="text">
-                     <string>Apply on project</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="groupBox_3">
-                 <property name="title">
-                  <string>Set variables manually</string>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_9">
-                  <item>
-                   <widget class="QTableWidget" name="twVariableList">
-                    <property name="editTriggers">
-                     <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
-                    </property>
-                    <property name="alternatingRowColors">
-                     <bool>true</bool>
-                    </property>
-                    <property name="selectionMode">
-                     <enum>QAbstractItemView::SingleSelection</enum>
-                    </property>
-                    <property name="selectionBehavior">
-                     <enum>QAbstractItemView::SelectRows</enum>
-                    </property>
-                    <column>
-                     <property name="text">
-                      <string>Name</string>
-                     </property>
-                    </column>
-                    <column>
-                     <property name="text">
-                      <string>Value</string>
-                     </property>
-                    </column>
-                   </widget>
-                  </item>
-                  <item>
-                   <layout class="QFormLayout" name="formLayout_2">
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="label_2">
-                      <property name="text">
-                       <string>Name</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QLineEdit" name="inVariableName">
-                      <property name="placeholderText">
-                       <string notr="true"/>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_3">
-                      <property name="text">
-                       <string>Value</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QLineEdit" name="inVariableValue"/>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout">
-                    <item>
-                     <widget class="QPushButton" name="btAddVariable">
-                      <property name="text">
-                       <string notr="true">+</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="btRemoveVariable">
-                      <property name="text">
-                       <string notr="true">-</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btApplyVariables">
-                    <property name="text">
-                     <string>Apply variables on project</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_4">
-          <attribute name="title">
-           <string>Log</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <widget class="QTextEdit" name="txtLog"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btClearLog">
-             <property name="text">
-              <string>Clear log</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btApplyVariables">
+               <property name="text">
+                <string>Apply variables on project</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btApplyFromLayer">
+            <property name="text">
+             <string>Apply on project</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Log</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QTextEdit" name="txtLog"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btClearLog">
+         <property name="text">
+          <string>Clear log</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -552,7 +435,7 @@
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgis.gui</header>
+   <header>qgsmaplayercombobox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
