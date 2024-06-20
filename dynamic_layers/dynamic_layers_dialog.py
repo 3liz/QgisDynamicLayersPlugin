@@ -64,6 +64,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.bt_open_expression.clicked.connect(self.open_expression_builder)
 
         self.inProjectShortName.setVisible(False)
+        self.label_5.setVisible(False)
 
     def open_expression_builder(self):
         """ Open the expression builder helper. """

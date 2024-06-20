@@ -1,13 +1,9 @@
-*.orig
-*.rej
+# Temp files
 *~
-*.o
-*.swp
 *.pyc
-*.DS_Store
-*.zip
-help/
-i18n/
-scripts/
-test/
+
+# Tests data
+symbology-style.db
+
+# IDE
 .idea/

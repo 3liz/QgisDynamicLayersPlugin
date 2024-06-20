@@ -35,6 +35,8 @@ from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.tools import resources_path
 
+GREEN = QColor(175, 208, 126)
+
 
 class DynamicLayers:
     """QGIS Plugin Implementation."""
@@ -352,7 +354,7 @@ class DynamicLayers:
             i = 0
 
             if layer.customProperty('dynamicDatasourceActive') == str(True):
-                bg = QColor(175, 208, 126)
+                bg = GREEN
             else:
                 bg = Qt.transparent
 
@@ -421,12 +423,12 @@ class DynamicLayers:
 
         # Get selected lines
         lines = self.dlg.twLayers.selectionModel().selectedRows()
-        if not lines:
+        if len(lines) < 1:
             return
 
         layer = None
         self.selectedLayer = None
-        is_active = False
+        # is_active = False
 
         if show_layer_properties:
             row = lines[0].row()
@@ -484,8 +486,9 @@ class DynamicLayers:
 
         # Get selected lines
         lines = self.dlg.twLayers.selectionModel().selectedRows()
-        if lines != 1:
+        if len(lines) != 1:
             return
+
         for index in lines:
             row = index.row()
 
@@ -494,7 +497,7 @@ class DynamicLayers:
 
         # Change layer line background color in the table
         if self.dlg.cbDatasourceActive.isChecked():
-            bg = QColor(175, 208, 126)
+            bg = GREEN
         else:
             bg = Qt.transparent
         for i in range(0, 3):
@@ -683,7 +686,7 @@ class DynamicLayers:
 
         # Get selected lines
         lines = self.dlg.twVariableList.selectionModel().selectedRows()
-        if not lines or len(lines) != 1:
+        if len(lines) != 1:
             return
 
         row = lines[0].row()
@@ -758,7 +761,7 @@ class DynamicLayers:
         if previous_title != '' and previous_title != p_title:
             ask = True
 
-        previous_abstract = self.dlg.inProjectAbstract.text()
+        previous_abstract = self.dlg.inProjectAbstract.toPlainText()
         if previous_abstract != '' and previous_abstract != p_abstract:
             ask = True
 
