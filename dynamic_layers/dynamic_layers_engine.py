@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 import typing
+from string import Template
 
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import (
@@ -47,28 +48,9 @@ import re
 class DynamicLayersTools:
 
     @staticmethod
-    def search_and_replace_string_by_dictionary(string: str = '', dictionary: dict = None) -> str:
-        """
-        Get the string,
-        Replace variable such as {$VAR} with passed data,
-        And returns the updated string
-        """
-        if dictionary is None:
-            dictionary = {}
-        # Check everything is ok
-        if not string:
-            return ''
-        if not dictionary or not isinstance(dictionary, dict):
-            return string
-
-        # Create new string from original string by replacing via dic
-        for k, v in dictionary.items():
-            # Replace search string by value
-            if v:
-                r = re.compile(r'\{\$%s\}' % k, re.MULTILINE)
-                string = r.sub(v, string)
-
-        return string
+    def search_and_replace_string_by_dictionary(string: str, dictionary: dict) -> str:
+        """ String substitution. """
+        return Template(string).substitute(dictionary)
 
 
 class LayerDataSourceModifier:

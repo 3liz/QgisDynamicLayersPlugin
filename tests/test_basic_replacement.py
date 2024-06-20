@@ -20,7 +20,11 @@ class TestBasicReplacement(BaseTests):
         """ Test datasource can be replaced. """
         project = QgsProject()
 
-        vector = QgsVectorLayer(str(Path("fixtures/folder_1/lines.geojson")), "Layer 1")
+        folder_1 = 'folder_1'
+        folder_2 = 'folder_2'
+        folder_token = '$folder'
+
+        vector = QgsVectorLayer(str(Path(f"fixtures/{folder_1}/lines.geojson")), "Layer 1")
         project.addMapLayer(vector)
         self.assertEqual(1, len(project.mapLayers()))
 
@@ -31,11 +35,11 @@ class TestBasicReplacement(BaseTests):
         vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, str(True))
         dynamic_source = vector.source()
 
-        self.assertIn("folder_1", dynamic_source)
-        self.assertNotIn("folder_2", dynamic_source)
-        self.assertNotIn("{$folder}", dynamic_source)
+        self.assertIn(folder_1, dynamic_source)
+        self.assertNotIn(folder_2, dynamic_source)
+        self.assertNotIn(folder_token, dynamic_source)
 
-        dynamic_source = dynamic_source.replace("folder_1", "{$folder}")
+        dynamic_source = dynamic_source.replace(folder_1, folder_token)
         vector.setCustomProperty(CustomProperty.DynamicDatasourceContent, dynamic_source)
 
         engine.set_dynamic_layers_list(project)
@@ -48,16 +52,16 @@ class TestBasicReplacement(BaseTests):
 
         # Replace
         variables = {
-            'folder': 'folder_2',
+            'folder': folder_2,
         }
         engine.set_search_and_replace_dictionary(variables)
 
         engine.set_dynamic_layers_datasource_from_dic()
         engine.set_dynamic_project_properties(project, "Test title", "Test abstract")
 
-        self.assertIn("folder_2", vector.source())
-        self.assertNotIn("folder_1", vector.source())
-        self.assertNotIn("{$folder}", vector.source())
+        self.assertIn(folder_2, vector.source())
+        self.assertNotIn(folder_1, vector.source())
+        self.assertNotIn(folder_token, vector.source())
 
 
 if __name__ == '__main__':
