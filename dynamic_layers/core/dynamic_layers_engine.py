@@ -2,9 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-import typing
-
 from qgis.core import (
+    QgsFeature,
     QgsMapLayer,
     QgsProject,
     QgsExpression,
@@ -22,75 +21,44 @@ from qgis.utils import iface
 
 
 class DynamicLayersEngine:
-    """
-    Changes the layers datasource by using dynamicDatasourceContent
-    as a template and replace variable with data given by the user
-    """
 
-    # Layer with the location to zoom in
-    extent_layer = None
-
-    # margin around the extent layer
-    extent_margin = None
-
-    # List of dynamic layers
-    dynamic_layers: typing.ClassVar = {}
-
-    # Search and replace dictionary
-    search_and_replace_dictionary: typing.ClassVar = {}
-
-    def __init__(
-            self,
-            dynamic_layers: dict = None,
-            search_and_replace_dictionary: dict = None,
-            extent_layer: list = None,
-            extent_margin: int = None,
-    ):
-        """
-        Dynamic Layers Engine constructor
-        """
-        if dynamic_layers is None:
-            dynamic_layers = {}
-        if search_and_replace_dictionary is None:
-            search_and_replace_dictionary = {}
-        self.extent_layer = extent_layer
-        self.extent_margin = extent_margin
-        self.dynamic_layers = dynamic_layers
-        self.search_and_replace_dictionary = search_and_replace_dictionary
+    def __init__(self):
+        """ Dynamic Layers Engine constructor. """
+        self._extent_layer = None
+        self._extent_margin = None
+        self._dynamic_layers: dict = {}
+        self._search_and_replace_dictionary: dict = {}
         self.iface = iface
 
-    def set_extent_layer(self, layer: QgsMapLayer):
-        """
-        Set the extent layer.
-        If a layer is set, the project extent will be changed to this extent
-        """
-        self.extent_layer = layer
+    @property
+    def extent_layer(self) -> QgsMapLayer:
+        return self._extent_layer
 
-    def set_extent_margin(self, margin: int):
-        """
-        Set the extent margin
-        """
-        margin = int(margin)
-        if not margin:
-            return
-        self.extent_margin = margin
+    @extent_layer.setter
+    def extent_layer(self, layer: QgsMapLayer):
+        self._extent_layer = layer
 
-    def set_search_and_replace_dictionary(self, search_and_replace_dictionary: dict):
-        """
-        Set the search and replace dictionary
-        """
-        self.search_and_replace_dictionary = search_and_replace_dictionary
+    @property
+    def extent_margin(self) -> int:
+        return self._extent_margin
+
+    @extent_margin.setter
+    def extent_margin(self, extent: int):
+        self._extent_margin = extent
+
+    @property
+    def search_and_replace_dictionary(self) -> dict:
+        return self._search_and_replace_dictionary
+
+    @search_and_replace_dictionary.setter
+    def search_and_replace_dictionary(self, values: dict):
+        self._search_and_replace_dictionary = values
 
     def set_search_and_replace_dictionary_from_layer(self, layer: QgsVectorLayer, expression: str):
-        """
-        Set the search and replace dictionary
-        from a given layer
-        and an expression.
+        """ Set the search and replace dictionary from a given layer and an expression.
+
         The first found features is the data source
         """
-        search_and_replace_dictionary = {}
-
-        # Get and validate expression
         q_exp = QgsExpression(expression)
         if not q_exp.hasParserError():
             q_req = QgsFeatureRequest(q_exp)
@@ -101,19 +69,13 @@ class DynamicLayersEngine:
             features = layer.getFeatures()
 
         # Take only first feature
-        for feat in features:
-            # Build dictionary
-            search_and_replace_dictionary = dict(zip(layer.fields().names(), feat.attributes()))
-            break
+        feature = QgsFeature()
+        features.nextFeature(feature)
+        self.search_and_replace_dictionary = dict(zip(layer.fields().names(), feature.attributes()))
 
-        self.search_and_replace_dictionary = search_and_replace_dictionary
-
-    def set_dynamic_layers_list(self, project: QgsProject):
-        """
-        Add the passed layers to the dynamic layers dictionary
-        """
-        # Get the layers with dynamicDatasourceActive enable
-        self.dynamic_layers = {
+    def set_dynamic_layers_from_project(self, project: QgsProject):
+        """ Check all maplayers in the given project which are dynamic. """
+        self._dynamic_layers = {
             lid: layer for lid, layer in project.mapLayers().items() if
             layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True) and layer.customProperty(
                 CustomProperty.DynamicDatasourceContent)
@@ -125,11 +87,10 @@ class DynamicLayersEngine:
         Change the datasource by using the dynamicDatasourceContent
         And the given search&replace dictionary
         """
-
-        if not self.search_and_replace_dictionary or not isinstance(self.search_and_replace_dictionary, dict):
+        if len(self.search_and_replace_dictionary) < 1:
             return
 
-        for lid, layer in self.dynamic_layers.items():
+        for lid, layer in self._dynamic_layers.items():
             # Change datasource
             a = LayerDataSourceModifier(layer)
             a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
@@ -195,9 +156,9 @@ class DynamicLayersEngine:
         """
         # Get extent from extent layer (if given)
         p_extent = None
-        if self.extent_layer:
-            self.extent_layer.updateExtents()
-            p_extent = self.extent_layer.extent()
+        if self._extent_layer:
+            self._extent_layer.updateExtents()
+            p_extent = self._extent_layer.extent()
         else:
             if self.iface:
                 p_extent = self.iface.mapCanvas().extent()
@@ -206,9 +167,9 @@ class DynamicLayersEngine:
 
         # Add a margin
         if p_extent:
-            if self.extent_margin:
-                margin_x = p_extent.width() * self.extent_margin / 100
-                margin_y = p_extent.height() * self.extent_margin / 100
+            if self._extent_margin:
+                margin_x = p_extent.width() * self._extent_margin / 100
+                margin_y = p_extent.height() * self._extent_margin / 100
                 margin = max(margin_x, margin_y)
                 p_extent = p_extent.buffered(margin)
 

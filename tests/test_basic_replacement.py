@@ -29,8 +29,8 @@ class TestBasicReplacement(BaseTests):
         self.assertEqual(1, len(project.mapLayers()))
 
         engine = DynamicLayersEngine()
-        engine.set_dynamic_layers_list(project)
-        self.assertDictEqual({}, engine.dynamic_layers)
+        engine.set_dynamic_layers_from_project(project)
+        self.assertDictEqual({}, engine._dynamic_layers)
 
         vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, str(True))
         dynamic_source = vector.source()
@@ -42,19 +42,19 @@ class TestBasicReplacement(BaseTests):
         dynamic_source = dynamic_source.replace(folder_1, folder_token)
         vector.setCustomProperty(CustomProperty.DynamicDatasourceContent, dynamic_source)
 
-        engine.set_dynamic_layers_list(project)
+        engine.set_dynamic_layers_from_project(project)
         self.assertDictEqual(
             {
                 vector.id(): vector
             },
-            engine.dynamic_layers
+            engine._dynamic_layers
         )
 
         # Replace
         variables = {
             'folder': folder_2,
         }
-        engine.set_search_and_replace_dictionary(variables)
+        engine.search_and_replace_dictionary = variables
 
         engine.set_dynamic_layers_datasource_from_dic()
         engine.set_dynamic_project_properties(project, "Test title", "Test abstract")

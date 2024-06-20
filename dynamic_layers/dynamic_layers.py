@@ -810,10 +810,10 @@ class DynamicLayers:
         with OverrideCursor(Qt.WaitCursor):
 
             # Use the engine class to do the job
-            dle = DynamicLayersEngine()
+            engine = DynamicLayersEngine()
 
             # Set the dynamic layers list
-            dle.set_dynamic_layers_list(self.project)
+            engine.set_dynamic_layers_from_project(self.project)
 
             # Set search and replace dictionary
             # Collect variables names and values
@@ -823,30 +823,26 @@ class DynamicLayers:
                     v_name = self.dlg.twVariableList.item(row, 0).data(Qt.EditRole)
                     v_value = self.dlg.twVariableList.item(row, 1).data(Qt.EditRole)
                     search_and_replace_dictionary[v_name] = v_value
-                dle.set_search_and_replace_dictionary(search_and_replace_dictionary)
+                engine.search_and_replace_dictionary = search_and_replace_dictionary
             else:
                 layer = self.dlg.inVariableSourceLayer.currentLayer()
                 exp = self.dlg.inVariableSourceLayerExpression.text()
-                dle.set_search_and_replace_dictionary_from_layer(layer, exp)
+                engine.set_search_and_replace_dictionary_from_layer(layer, exp)
 
             # Change layers datasource
-            dle.set_dynamic_layers_datasource_from_dic()
+            engine.set_dynamic_layers_datasource_from_dic()
 
             # Set project properties
-            dle.set_dynamic_project_properties(self.project)
+            engine.set_dynamic_project_properties(self.project)
 
             # Set extent layer
-            extent_layer = self.dlg.inExtentLayer.currentLayer()
-            if extent_layer:
-                dle.set_extent_layer(extent_layer)
+            engine.extent_layer = self.dlg.inExtentLayer.currentLayer()
 
             # Set extent margin
-            extent_margin = self.dlg.inExtentMargin.value()
-            if extent_margin:
-                dle.set_extent_margin(extent_margin)
+            engine.extent_margin = self.dlg.inExtentMargin.value()
 
             # Set new extent
-            dle.set_project_extent(self.project)
+            engine.set_project_extent(self.project)
 
             # Set project as dirty
             self.project.setDirty(True)
