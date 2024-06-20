@@ -26,7 +26,7 @@ import re
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
+from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
 from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
@@ -34,8 +34,7 @@ from qgis.utils import OverrideCursor
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.tools import resources_path
-
-GREEN = QColor(175, 208, 126)
+from dynamic_layers.definitions import GREEN, CustomProperty
 
 
 class DynamicLayers:
@@ -68,6 +67,8 @@ class DynamicLayers:
             self.translator.load(locale_path)
 
             QCoreApplication.installTranslator(self.translator)
+
+        self.project = QgsProject.instance()
 
         # Create the dialog (after translation) and keep reference
         self.dlg = DynamicLayersDialog()
@@ -342,7 +343,7 @@ class DynamicLayers:
         self.dlg.twLayers.setHorizontalHeaderLabels(tuple(columns))
 
         # load content from project layers
-        for layer in QgsProject.instance().mapLayers().values():
+        for layer in self.project.mapLayers().values():
 
             line_data = []
 
@@ -353,7 +354,7 @@ class DynamicLayers:
             self.dlg.twLayers.setColumnCount(col_count)
             i = 0
 
-            if layer.customProperty('dynamicDatasourceActive') == str(True):
+            if layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True):
                 bg = GREEN
             else:
                 bg = Qt.transparent
@@ -402,11 +403,11 @@ class DynamicLayers:
         elif prop == 'uri':
             return layer.dataProvider().dataSourceUri().split('|')[0]
 
-        elif prop == 'dynamicDatasourceActive':
-            return layer.customProperty('dynamicDatasourceActive')
+        elif prop == CustomProperty.DynamicDatasourceActive:
+            return layer.customProperty(CustomProperty.DynamicDatasourceActive)
 
-        elif prop == 'dynamicDatasourceContent':
-            return layer.customProperty('dynamicDatasourceContent')
+        elif prop == CustomProperty.DynamicDatasourceContent:
+            return layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
         else:
             return None
@@ -435,8 +436,7 @@ class DynamicLayers:
 
             # Get layer
             layer_id = self.dlg.twLayers.item(row, 0).data(Qt.EditRole)
-            lr = QgsProject.instance()
-            layer = lr.mapLayer(layer_id)
+            layer = self.project.mapLayer(layer_id)
             if not layer:
                 show_layer_properties = False
             else:
@@ -470,7 +470,7 @@ class DynamicLayers:
                         widget.setCurrentIndex(list_dic[val])
 
         # "active" checkbox
-        is_active = layer.customProperty('dynamicDatasourceActive') == str(True)
+        is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True)
         self.dlg.cbDatasourceActive.setChecked(is_active)
 
     def on_cb_datasource_active_change(self):
@@ -507,8 +507,8 @@ class DynamicLayers:
         self.dlg.twLayers.item(row, 2).setData(Qt.EditRole, input_value)
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty('dynamicDatasourceActive', input_value)
-        QgsProject.instance().setDirty(True)
+        self.selectedLayer.setCustomProperty(CustomProperty.DynamicDatasourceActive, input_value)
+        self.project.setDirty(True)
 
     def on_layer_property_change(self, key: str):
         """
@@ -533,7 +533,7 @@ class DynamicLayers:
 
         # Record the new value in the project
         self.selectedLayer.setCustomProperty(item['xml'], input_value)
-        QgsProject.instance().setDirty(True)
+        self.project.setDirty(True)
 
     def on_copy_from_layer(self):
         """
@@ -590,7 +590,7 @@ class DynamicLayers:
         Fill the variable table
         """
         # Get the list of variable from the project
-        variable_list = QgsProject.instance().readListEntry('PluginDynamicLayers', 'VariableList')
+        variable_list = self.project.readListEntry('PluginDynamicLayers', 'VariableList')
         if not variable_list:
             return
 
@@ -672,9 +672,8 @@ class DynamicLayers:
         self.variableList.append(v_name)
 
         # Add variable to the project
-        project = QgsProject.instance()
-        project.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
-        project.setDirty(True)
+        self.project.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        self.project.setDirty(True)
 
     def on_remove_variable_clicked(self):
         """
@@ -698,9 +697,8 @@ class DynamicLayers:
         self.variableList.remove(v_name)
 
         # Update project
-        p = QgsProject.instance()
-        p.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
-        p.setDirty(True)
+        self.project.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        self.project.setDirty(True)
 
         # Remove selected lines
         self.dlg.twVariableList.removeRow(self.dlg.twVariableList.currentRow())
@@ -740,21 +738,20 @@ class DynamicLayers:
             return
 
         # Check if project has got some WMS capabilities
-        project = QgsProject.instance()
 
         # Title
         p_title = ''
-        if project.readEntry('ProjectTitle', '/PluginDynamicLayers'):
-            p_title = project.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
-        if not p_title and project.readEntry('WMSServiceTitle', "/"):
-            p_title = project.readEntry('WMSServiceTitle', "/")[0]
+        if self.project.readEntry('ProjectTitle', '/PluginDynamicLayers'):
+            p_title = self.project.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
+        if not p_title and self.project.readEntry('WMSServiceTitle', "/"):
+            p_title = self.project.readEntry('WMSServiceTitle', "/")[0]
 
         # Abstract
         p_abstract = ''
-        if project.readEntry('ProjectAbstract', '/PluginDynamicLayers'):
-            p_abstract = project.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
-        if not p_abstract and project.readEntry('WMSServiceAbstract', "/"):
-            p_abstract = project.readEntry('WMSServiceAbstract', "/")[0]
+        if self.project.readEntry('ProjectAbstract', '/PluginDynamicLayers'):
+            p_abstract = self.project.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
+        if not p_abstract and self.project.readEntry('WMSServiceAbstract', "/"):
+            p_abstract = self.project.readEntry('WMSServiceAbstract', "/")[0]
 
         ask = False
         previous_title = self.dlg.inProjectTitle.text()
@@ -778,8 +775,8 @@ class DynamicLayers:
             if result == QMessageBox.No:
                 return
 
-        if not project.readEntry('WMSServiceCapabilities', "/")[1]:
-            project.writeEntry('WMSServiceCapabilities', "/", str(True))
+        if not self.project.readEntry('WMSServiceCapabilities', "/")[1]:
+            self.project.writeEntry('WMSServiceCapabilities', "/", str(True))
 
         self.dlg.inProjectTitle.setText(p_title)
         self.dlg.inProjectAbstract.setText(p_abstract)
@@ -810,26 +807,21 @@ class DynamicLayers:
         else:
             return
 
-        p = QgsProject.instance()
-
         # Store value into the project
         xml = self.projectPropertiesInputs[prop]['xml']
-        p.writeEntry('PluginDynamicLayers', xml, val)
-        p.setDirty(True)
+        self.project.writeEntry('PluginDynamicLayers', xml, val)
+        self.project.setDirty(True)
 
     def populate_project_properties(self):
         """
         Fill in the project properties item
         from XML
         """
-
-        p = QgsProject.instance()
-        # lr = QgsProject.instance()
         # Fill the property from the PluginDynamicLayers XML
         for prop, item in self.projectPropertiesInputs.items():
             widget = item['widget']
             xml = self.projectPropertiesInputs[prop]['xml']
-            val = p.readEntry('PluginDynamicLayers', xml)
+            val = self.project.readEntry('PluginDynamicLayers', xml)
             if val:
                 val = val[0]
             if not val:
@@ -862,7 +854,7 @@ class DynamicLayers:
             dle = DynamicLayersEngine()
 
             # Set the dynamic layers list
-            dle.set_dynamic_layers_list()
+            dle.set_dynamic_layers_list(self.project)
 
             # Set search and replace dictionary
             # Collect variables names and values
@@ -882,7 +874,7 @@ class DynamicLayers:
             dle.set_dynamic_layers_datasource_from_dic()
 
             # Set project properties
-            dle.set_dynamic_project_properties()
+            dle.set_dynamic_project_properties(self.project)
 
             # Set extent layer
             extent_layer = self.dlg.inExtentLayer.currentLayer()
@@ -895,11 +887,10 @@ class DynamicLayers:
                 dle.set_extent_margin(extent_margin)
 
             # Set new extent
-            dle.set_project_extent()
+            dle.set_project_extent(self.project)
 
             # Set project as dirty
-            p = QgsProject.instance()
-            p.setDirty(True)
+            self.project.setDirty(True)
 
     def run(self):
         """Run method that performs all the real work"""

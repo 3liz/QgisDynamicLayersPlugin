@@ -34,6 +34,8 @@ from qgis.core import (
     QgsRectangle,
 )
 
+from dynamic_layers.definitions import CustomProperty
+
 try:
     from qgis.utils import iface
 except Exception:
@@ -87,8 +89,8 @@ class LayerDataSourceModifier:
             return
 
         self.layer = layer
-        self.dynamic_datasource_active = layer.customProperty('dynamicDatasourceActive') == str(True)
-        self.dynamic_datasource_content = layer.customProperty('dynamicDatasourceContent')
+        self.dynamic_datasource_active = layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True)
+        self.dynamic_datasource_content = layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
     def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):
         """
@@ -296,16 +298,15 @@ class DynamicLayersEngine:
 
         self.search_and_replace_dictionary = search_and_replace_dictionary
 
-    def set_dynamic_layers_list(self):
+    def set_dynamic_layers_list(self, project: QgsProject):
         """
         Add the passed layers to the dynamic layers dictionary
         """
         # Get the layers with dynamicDatasourceActive enable
-        lr = QgsProject.instance()
         self.dynamic_layers = {
-            lid: layer for lid, layer in lr.mapLayers().items() if
-            layer.customProperty('dynamicDatasourceActive') == str(True) and layer.customProperty(
-                'dynamicDatasourceContent')
+            lid: layer for lid, layer in project.mapLayers().items() if
+            layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True) and layer.customProperty(
+                CustomProperty.DynamicDatasourceContent)
         }
 
     def set_dynamic_layers_datasource_from_dic(self):
@@ -323,69 +324,66 @@ class DynamicLayersEngine:
             a = LayerDataSourceModifier(layer)
             a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
 
-            if self.iface and layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
+            if not self.iface:
+                continue
+
+            if layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
 
-        if self.iface:
-            self.iface.actionDraw().trigger()
-            self.iface.mapCanvas().refresh()
+        if not self.iface:
+            return
 
-    def set_dynamic_project_properties(self, title: str = None, abstract: str = None):
+        self.iface.actionDraw().trigger()
+        self.iface.mapCanvas().refresh()
+
+    def set_dynamic_project_properties(self, project: QgsProject, title: str = None, abstract: str = None):
         """
         Set some project properties : title, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
         and by using the search and replace dictionary
         """
-        # Get project instance
-        p = QgsProject.instance()
-
         # Make sure WMS Service is active
-        if not p.readEntry('WMSServiceCapabilities', "/")[1]:
-            p.writeEntry('WMSServiceCapabilities', "/", "True")
+        if not project.readEntry('WMSServiceCapabilities', "/")[1]:
+            project.writeEntry('WMSServiceCapabilities', "/", "True")
 
         # title
         if not title:
             xml = 'ProjectTitle'
-            val = p.readEntry('PluginDynamicLayers', xml)
+            val = project.readEntry('PluginDynamicLayers', xml)
             if val:
                 title = val[0]
-        self.set_project_property('title', title)
+        self.set_project_property(project, 'title', title)
 
         # abstract
         if not abstract:
             xml = 'ProjectAbstract'
-            val = p.readEntry('PluginDynamicLayers', xml)
+            val = project.readEntry('PluginDynamicLayers', xml)
             if val:
                 abstract = val[0]
-        self.set_project_property('abstract', abstract)
+        self.set_project_property(project, 'abstract', abstract)
 
-    def set_project_property(self, prop: str, val: str):
+    def set_project_property(self, project: QgsProject, prop: str, val: str):
         """
         Set a project property
         And replace variable if found in the properties
         """
-        # Get project instance
-        p = QgsProject.instance()
-
         # Replace variable in given val via dictionary
         t = DynamicLayersTools()
         val = t.search_and_replace_string_by_dictionary(val, self.search_and_replace_dictionary)
 
         # Title
         if prop == 'title':
-            p.writeEntry('WMSServiceTitle', '', val)
+            project.writeEntry('WMSServiceTitle', '', val)
 
         # Abstract
         elif prop == 'abstract':
-            p.writeEntry('WMSServiceAbstract', '',val)
+            project.writeEntry('WMSServiceAbstract', '', val)
 
-    def set_project_extent(self) -> QgsRectangle:
+    def set_project_extent(self, project: QgsProject) -> QgsRectangle:
         """
         Sets the project extent
         and corresponding XML property
         """
-        p = QgsProject.instance()
-
         # Get extent from extent layer (if given)
         p_extent = None
         if self.extent_layer:
@@ -413,7 +411,7 @@ class DynamicLayersEngine:
                 p_extent.yMaximum(),
             ]
             p_wms_extent = [str(i) for i in p_wms_extent]
-            p.writeEntry('WMSExtent', '', p_wms_extent)
+            project.writeEntry('WMSExtent', '', p_wms_extent)
 
             # Zoom canvas to extent
             if self.iface:
