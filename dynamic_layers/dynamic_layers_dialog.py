@@ -63,6 +63,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.bt_open_expression.setIcon(QIcon(QgsApplication.iconPath('mIconExpression.svg')))
         self.bt_open_expression.clicked.connect(self.open_expression_builder)
 
+        self.inProjectShortName.setVisible(False)
+
     def open_expression_builder(self):
         """ Open the expression builder helper. """
         layer = self.inVariableSourceLayer.currentLayer()

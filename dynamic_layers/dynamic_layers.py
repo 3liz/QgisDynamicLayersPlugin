@@ -351,7 +351,7 @@ class DynamicLayers:
             self.dlg.twLayers.setColumnCount(col_count)
             i = 0
 
-            if layer.customProperty('dynamicDatasourceActive') == 'True':
+            if layer.customProperty('dynamicDatasourceActive') == str(True):
                 bg = QColor(175, 208, 126)
             else:
                 bg = Qt.transparent
@@ -449,7 +449,6 @@ class DynamicLayers:
         # Set the content of the layer properties inputs
         # dynamic datasource text input content
         if layer:
-            is_active = layer.customProperty('dynamicDatasourceActive') == 'True'
             for key, item in self.layerPropertiesInputs.items():
                 widget = item['widget']
                 val = layer.customProperty(item['xml'])
@@ -469,6 +468,7 @@ class DynamicLayers:
                         widget.setCurrentIndex(list_dic[val])
 
         # "active" checkbox
+        is_active = layer.customProperty('dynamicDatasourceActive') == str(True)
         self.dlg.cbDatasourceActive.setChecked(is_active)
 
     def on_cb_datasource_active_change(self):

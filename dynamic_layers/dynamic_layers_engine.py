@@ -87,7 +87,7 @@ class LayerDataSourceModifier:
             return
 
         self.layer = layer
-        self.dynamic_datasource_active = layer.customProperty('dynamicDatasourceActive') == 'True'
+        self.dynamic_datasource_active = layer.customProperty('dynamicDatasourceActive') == str(True)
         self.dynamic_datasource_content = layer.customProperty('dynamicDatasourceContent')
 
     def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):
@@ -304,7 +304,7 @@ class DynamicLayersEngine:
         lr = QgsProject.instance()
         self.dynamic_layers = {
             lid: layer for lid, layer in lr.mapLayers().items() if
-            layer.customProperty('dynamicDatasourceActive') == 'True' and layer.customProperty(
+            layer.customProperty('dynamicDatasourceActive') == str(True) and layer.customProperty(
                 'dynamicDatasourceContent')
         }
 
