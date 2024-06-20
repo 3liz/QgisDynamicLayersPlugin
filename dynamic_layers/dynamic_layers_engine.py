@@ -64,7 +64,7 @@ class DynamicLayersTools:
             # Replace search string by value
             if v:
                 r = re.compile(r'\{\$%s\}' % k, re.MULTILINE)
-                string = r.sub('%s' % v, string)
+                string = r.sub(v, string)
 
         return string
 
@@ -177,7 +177,7 @@ class LayerDataSourceModifier:
             source_title = self.layer.customProperty('titleTemplate').strip()
         # Search and replace content
         self.layer.setTitle(
-            "%s" % t.search_and_replace_string_by_dictionary(
+            t.search_and_replace_string_by_dictionary(
                 source_title,
                 search_and_replace_dictionary,
             ),
@@ -190,7 +190,7 @@ class LayerDataSourceModifier:
         if self.layer.customProperty('abstractTemplate') and self.layer.customProperty('abstractTemplate').strip() != '':
             source_abstract = self.layer.customProperty('abstractTemplate').strip()
         self.layer.setAbstract(
-            "%s" % t.search_and_replace_string_by_dictionary(
+            t.search_and_replace_string_by_dictionary(
                 source_abstract,
                 search_and_replace_dictionary,
             ),
@@ -285,7 +285,7 @@ class DynamicLayersEngine:
             features = layer.getFeatures(q_req)
         else:
             QgsMessageLog.logMessage(
-                'An error occurred while parsing the given expression: %s' % q_exp.parserErrorString())
+                f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}')
             features = layer.getFeatures()
 
         # Take only first feature
@@ -373,11 +373,11 @@ class DynamicLayersEngine:
 
         # Title
         if prop == 'title':
-            p.writeEntry('WMSServiceTitle', '', '%s' % val)
+            p.writeEntry('WMSServiceTitle', '', val)
 
         # Abstract
         elif prop == 'abstract':
-            p.writeEntry('WMSServiceAbstract', '', '%s' % val)
+            p.writeEntry('WMSServiceAbstract', '',val)
 
     def set_project_extent(self) -> QgsRectangle:
         """
@@ -407,11 +407,12 @@ class DynamicLayersEngine:
 
             # Modify OWS WMS extent
             p_wms_extent = [
-                '%s' % p_extent.xMinimum(),
-                '%s' % p_extent.yMinimum(),
-                '%s' % p_extent.xMaximum(),
-                '%s' % p_extent.yMaximum(),
+                p_extent.xMinimum(),
+                p_extent.yMinimum(),
+                p_extent.xMaximum(),
+                p_extent.yMaximum(),
             ]
+            p_wms_extent = [str(i) for i in p_wms_extent]
             p.writeEntry('WMSExtent', '', p_wms_extent)
 
             # Zoom canvas to extent
