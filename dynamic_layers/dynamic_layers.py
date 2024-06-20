@@ -27,7 +27,7 @@ from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
-from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
+from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
 from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
@@ -543,13 +543,41 @@ class DynamicLayers:
 
         # Get the layer datasource
         uri = self.selectedLayer.dataProvider().dataSourceUri().split('|')[0]
+        abstract = self.selectedLayer.abstract()
+        title = self.selectedLayer.title()
+
+        # Previous values
+        previous_uri = self.dlg.dynamicDatasourceContent.toPlainText()
+        previous_abstract = self.dlg.abstractTemplate.toPlainText()
+        previous_title = self.dlg.titleTemplate.text()
+
+        ask = False
+        if previous_uri != '' and previous_uri != uri:
+            ask = True
+        if previous_abstract != '' and previous_abstract != abstract:
+            ask = True
+        if previous_title != '' and previous_title != title:
+            ask = True
+
+        if ask:
+            box = QMessageBox(self.dlg)
+            box.setIcon(QMessageBox.Question)
+            box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
+            box.setWindowTitle(self.tr('Replace settings by layer properties'))
+            box.setText(self.tr(
+                'You have already set some values for this layer, are you sure you want to reset these ?'))
+            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            box.setDefaultButton(QMessageBox.No)
+            result = box.exec_()
+            if result == QMessageBox.No:
+                return
 
         # Set the dynamic datasource content input
         self.dlg.dynamicDatasourceContent.setPlainText(uri)
 
         # Set templates for title and abstract
-        self.dlg.abstractTemplate.setPlainText(self.selectedLayer.abstract())
-        self.dlg.titleTemplate.setText(self.selectedLayer.title())
+        self.dlg.abstractTemplate.setPlainText(abstract)
+        self.dlg.titleTemplate.setText(title)
 
     ##
     # Variables tab
@@ -710,8 +738,6 @@ class DynamicLayers:
 
         # Check if project has got some WMS capabilities
         project = QgsProject.instance()
-        if not project.readEntry('WMSServiceCapabilities', "/")[1]:
-            project.writeEntry('WMSServiceCapabilities', "/", "True")
 
         # Title
         p_title = ''
@@ -719,7 +745,6 @@ class DynamicLayers:
             p_title = project.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
         if not p_title and project.readEntry('WMSServiceTitle', "/"):
             p_title = project.readEntry('WMSServiceTitle', "/")[0]
-        self.dlg.inProjectTitle.setText(str(p_title))
 
         # Abstract
         p_abstract = ''
@@ -727,7 +752,35 @@ class DynamicLayers:
             p_abstract = project.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
         if not p_abstract and project.readEntry('WMSServiceAbstract', "/"):
             p_abstract = project.readEntry('WMSServiceAbstract', "/")[0]
-        self.dlg.inProjectAbstract.setText(str(p_abstract))
+
+        ask = False
+        previous_title = self.dlg.inProjectTitle.text()
+        if previous_title != '' and previous_title != p_title:
+            ask = True
+
+        previous_abstract = self.dlg.inProjectAbstract.text()
+        if previous_abstract != '' and previous_abstract != p_abstract:
+            ask = True
+
+        if ask:
+            box = QMessageBox(self.dlg)
+            box.setIcon(QMessageBox.Question)
+            box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
+            box.setWindowTitle(self.tr('Replace settings by project properties'))
+            box.setText(self.tr(
+                'You have already set some values for this project, are you sure you want to reset these ?'))
+            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            box.setDefaultButton(QMessageBox.No)
+            result = box.exec_()
+            if result == QMessageBox.No:
+                return
+
+        if not project.readEntry('WMSServiceCapabilities', "/")[1]:
+            project.writeEntry('WMSServiceCapabilities', "/", str(True))
+
+        self.dlg.inProjectTitle.setText(p_title)
+        self.dlg.inProjectAbstract.setText(p_abstract)
+
 
     def on_project_property_changed(self, prop: str) -> str | None:
         """
@@ -812,10 +865,9 @@ class DynamicLayers:
             # Collect variables names and values
             if source == 'table':
                 search_and_replace_dictionary = {}
-                tw = self.dlg.twVariableList
-                for row in range(tw.rowCount()):
-                    v_name = tw.item(row, 0).data(Qt.EditRole)
-                    v_value = tw.item(row, 1).data(Qt.EditRole)
+                for row in range(self.dlg.twVariableList.rowCount()):
+                    v_name = self.dlg.twVariableList.item(row, 0).data(Qt.EditRole)
+                    v_value = self.dlg.twVariableList.item(row, 1).data(Qt.EditRole)
                     search_and_replace_dictionary[v_name] = v_value
                 dle.set_search_and_replace_dictionary(search_and_replace_dictionary)
             else:
