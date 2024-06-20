@@ -12,7 +12,7 @@ from qgis.gui import QgsExpressionBuilderDialog
 
 
 folder = Path(__file__).resolve().parent
-ui_file = folder / 'dynamic_layers_dialog_base.ui'
+ui_file = folder / 'resources' / 'ui' / 'dynamic_layers_dialog_base.ui'
 FORM_CLASS, _ = uic.loadUiType(ui_file)
 
 
