@@ -7,7 +7,7 @@ import re
 from functools import partial
 from pathlib import Path
 
-from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
 from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
@@ -16,7 +16,7 @@ from qgis.utils import OverrideCursor
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.tools import resources_path
-from dynamic_layers.definitions import GREEN, CustomProperty
+from dynamic_layers.definitions import CustomProperty, QtVar
 
 
 class DynamicLayers:
@@ -128,12 +128,13 @@ class DynamicLayers:
             mouse pointer hovers over the action.
 
         :returns: The action that was created. Note that the action is also
-            added to self.actions list.
+            added to self. actions list.
         :rtype: QAction
         """
 
         icon = QIcon(str(icon_path))
         action = QAction(icon, text, parent)
+        # noinspection PyUnresolvedReferences
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
 
@@ -316,9 +317,9 @@ class DynamicLayers:
             i = 0
 
             if layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True):
-                bg = GREEN
+                bg = QtVar.Green
             else:
-                bg = Qt.transparent
+                bg = QtVar.Transparent
 
             # get information
             for attr in self.layersTable:
@@ -326,16 +327,16 @@ class DynamicLayers:
 
                 # Is editable or not
                 if attr['editable']:
-                    new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
+                    new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEditable | QtVar.ItemIsEnabled)
                 else:
-                    new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                    new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEnabled)
 
                 # background
                 new_item.setBackground(bg)
 
                 # Item value
                 value = self.get_layer_property(layer, attr['key'])
-                new_item.setData(Qt.EditRole, value)
+                new_item.setData(QtVar.EditRole, value)
                 if attr['key'] == 'name':
                     new_item.setIcon(QgsIconUtils.iconForLayer(layer))
 
@@ -395,7 +396,7 @@ class DynamicLayers:
             row = lines[0].row()
 
             # Get layer
-            layer_id = self.dlg.twLayers.item(row, 0).data(Qt.EditRole)
+            layer_id = self.dlg.twLayers.item(row, 0).data(QtVar.EditRole)
             layer = self.project.mapLayer(layer_id)
             if not layer:
                 show_layer_properties = False
@@ -449,22 +450,21 @@ class DynamicLayers:
         if len(lines) != 1:
             return
 
-        for index in lines:
-            row = index.row()
+        row = lines[0].row()
 
         # Get the status of active checkbox
         input_value = str(self.dlg.cbDatasourceActive.isChecked())
 
         # Change layer line background color in the table
         if self.dlg.cbDatasourceActive.isChecked():
-            bg = GREEN
+            bg = QtVar.Green
         else:
-            bg = Qt.transparent
+            bg = QtVar.Transparent
         for i in range(0, 3):
             self.dlg.twLayers.item(row, i).setBackground(bg)
 
         # Change data for the corresponding column in the layers table
-        self.dlg.twLayers.item(row, 2).setData(Qt.EditRole, input_value)
+        self.dlg.twLayers.item(row, 2).setData(QtVar.EditRole, input_value)
 
         # Record the new value in the project
         self.selectedLayer.setCustomProperty(CustomProperty.DynamicDatasourceActive, input_value)
@@ -567,12 +567,12 @@ class DynamicLayers:
 
             # Set name item
             new_item = QTableWidgetItem(variable)
-            new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEnabled)
             self.dlg.twVariableList.setItem(i, 0, new_item)
 
             # Set empty value item
             new_item = QTableWidgetItem()
-            new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
+            new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEditable | QtVar.ItemIsEnabled)
             self.dlg.twVariableList.setItem(i, 1, new_item)
 
             # Set the new row count
@@ -618,14 +618,14 @@ class DynamicLayers:
         # Add the new "variable" item to the table
         # name
         new_item = QTableWidgetItem()
-        new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-        new_item.setData(Qt.EditRole, v_name)
+        new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEnabled)
+        new_item.setData(QtVar.EditRole, v_name)
         self.dlg.twVariableList.setItem(tw_row_count, 0, new_item)
 
         # value
         new_item = QTableWidgetItem()
-        new_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled)
-        new_item.setData(Qt.EditRole, v_value)
+        new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEditable | QtVar.ItemIsEnabled)
+        new_item.setData(QtVar.EditRole, v_value)
         self.dlg.twVariableList.setItem(tw_row_count, 1, new_item)
 
         # Add variable to the list
@@ -651,7 +651,7 @@ class DynamicLayers:
         row = lines[0].row()
 
         # Get variable name
-        v_name = self.dlg.twVariableList.item(row, 0).data(Qt.EditRole)
+        v_name = self.dlg.twVariableList.item(row, 0).data(QtVar.EditRole)
 
         # Remove variable name from list
         self.variableList.remove(v_name)
@@ -807,7 +807,7 @@ class DynamicLayers:
         if not self.initDone:
             return
 
-        with OverrideCursor(Qt.WaitCursor):
+        with OverrideCursor(QtVar.WaitCursor):
 
             # Use the engine class to do the job
             engine = DynamicLayersEngine()
@@ -820,8 +820,8 @@ class DynamicLayers:
             if source == 'table':
                 search_and_replace_dictionary = {}
                 for row in range(self.dlg.twVariableList.rowCount()):
-                    v_name = self.dlg.twVariableList.item(row, 0).data(Qt.EditRole)
-                    v_value = self.dlg.twVariableList.item(row, 1).data(Qt.EditRole)
+                    v_name = self.dlg.twVariableList.item(row, 0).data(QtVar.EditRole)
+                    v_value = self.dlg.twVariableList.item(row, 1).data(QtVar.EditRole)
                     search_and_replace_dictionary[v_name] = v_value
                 engine.search_and_replace_dictionary = search_and_replace_dictionary
             else:

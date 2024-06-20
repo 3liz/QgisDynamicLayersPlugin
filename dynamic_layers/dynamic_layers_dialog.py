@@ -19,6 +19,7 @@ FORM_CLASS, _ = uic.loadUiType(ui_file)
 class DynamicLayersDialog(QDialog, FORM_CLASS):
     def __init__(self, parent: QDialog = None):
         """Constructor."""
+        # noinspection PyArgumentList
         super().__init__(parent)
         self.setupUi(self)
 

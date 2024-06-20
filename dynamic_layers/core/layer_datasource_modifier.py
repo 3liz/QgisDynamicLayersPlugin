@@ -122,8 +122,11 @@ class LayerDataSourceModifier:
         source_abstract = ''
         if self.layer.abstract().strip() != '':
             source_abstract = self.layer.abstract().strip()
-        if self.layer.customProperty('abstractTemplate') and self.layer.customProperty('abstractTemplate').strip() != '':
+
+        abstract_template = self.layer.customProperty('abstractTemplate')
+        if abstract_template and abstract_template.strip() != '':
             source_abstract = self.layer.customProperty('abstractTemplate').strip()
+
         self.layer.setAbstract(
             string_substitution(
                 source_abstract,
@@ -142,4 +145,3 @@ class LayerDataSourceModifier:
                     search_and_replace_dictionary,
                 )
                 self.layer.setFieldAlias(fid, new_alias)
-
