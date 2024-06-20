@@ -14,7 +14,7 @@ from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
-from dynamic_layers.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.tools import resources_path
 from dynamic_layers.definitions import GREEN, CustomProperty
 
@@ -23,13 +23,7 @@ class DynamicLayers:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
-        """Constructor.
-
-        :param iface: An interface instance that will be passed to this class
-            which provides the hook by which you can manipulate the QGIS
-            application at run time.
-        :type iface: QgsInterface
-        """
+        """Constructor."""
         self.projectPropertiesInputs = None
         self.layerPropertiesInputs = None
         self.initDone = None
@@ -86,22 +80,11 @@ class DynamicLayers:
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message: str) -> str:
-        """Get the translation for a string using Qt translation API.
-
-        We implement this ourselves since we do not inherit QObject.
-
-        :param message: String for translation.
-        :type message: str, QString
-
-        :returns: Translated version of message.
-        :rtype: QString
-        """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('DynamicLayers', message)
 
     def add_action(
             self,
-            icon_path: str,
+            icon_path: Path,
             text: str,
             callback,
             enabled_flag=True,
@@ -407,7 +390,6 @@ class DynamicLayers:
 
         layer = None
         self.selectedLayer = None
-        # is_active = False
 
         if show_layer_properties:
             row = lines[0].row()
@@ -758,7 +740,6 @@ class DynamicLayers:
 
         self.dlg.inProjectTitle.setText(p_title)
         self.dlg.inProjectAbstract.setText(p_abstract)
-
 
     def on_project_property_changed(self, prop: str) -> str | None:
         """

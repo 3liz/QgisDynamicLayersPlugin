@@ -1,6 +1,16 @@
+__copyright__ = 'Copyright 2024, 3Liz'
+__license__ = 'GPL version 3'
+__email__ = 'info@3liz.org'
+
 """Tools to work with resources files."""
 
 from pathlib import Path
+from string import Template
+
+
+def string_substitution(string: str, dictionary: dict) -> str:
+    """ String substitution. """
+    return Template(string).substitute(dictionary)
 
 
 def plugin_path(*args) -> Path:

@@ -20,11 +20,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
     def __init__(self, parent: QDialog = None):
         """Constructor."""
         super().__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
         self.button_box.button(QDialogButtonBox.Close).clicked.connect(self.close)
@@ -54,6 +49,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         layer = self.inVariableSourceLayer.currentLayer()
         if not layer:
             return
+
         dialog = QgsExpressionBuilderDialog(layer)
         result = dialog.exec()
         if result != QDialog.Accepted:
