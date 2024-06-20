@@ -23,7 +23,16 @@
 import typing
 
 from qgis.PyQt.QtXml import QDomDocument
-from qgis.core import QgsMapLayer, QgsProject, QgsExpression, QgsFeatureRequest, QgsMessageLog, QgsReadWriteContext
+from qgis.core import (
+    QgsMapLayer,
+    QgsProject,
+    QgsExpression,
+    QgsFeatureRequest,
+    QgsMessageLog,
+    QgsReadWriteContext,
+    QgsVectorLayer,
+    QgsRectangle,
+)
 
 try:
     from qgis.utils import iface
@@ -36,7 +45,7 @@ import re
 class DynamicLayersTools:
 
     @staticmethod
-    def search_and_replace_string_by_dictionary(string='', dictionary=None):
+    def search_and_replace_string_by_dictionary(string: str = '', dictionary: dict = None) -> str:
         """
         Get the string,
         Replace variable such as {$VAR} with passed data,
@@ -69,7 +78,7 @@ class LayerDataSourceModifier:
 
     def __init__(
             self,
-            layer,
+            layer: QgsMapLayer,
     ):
         """
         Initialize class instance
@@ -81,7 +90,7 @@ class LayerDataSourceModifier:
         self.dynamic_datasource_active = layer.customProperty('dynamicDatasourceActive') == 'True'
         self.dynamic_datasource_content = layer.customProperty('dynamicDatasourceContent')
 
-    def set_new_source_uri_from_dict(self, search_and_replace_dictionary=None):
+    def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):
         """
         Get the dynamic datasource template,
         Replace variable with passed data,
@@ -89,12 +98,11 @@ class LayerDataSourceModifier:
         """
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
-        # Get template uri
-        uri_template = self.dynamic_datasource_content
 
         # Set the new uri
         t = DynamicLayersTools()
-        new_uri = t.search_and_replace_string_by_dictionary(uri_template, search_and_replace_dictionary)
+        new_uri = t.search_and_replace_string_by_dictionary(
+            self.dynamic_datasource_content, search_and_replace_dictionary)
 
         # Set the layer datasource
         self.set_data_source(new_uri)
@@ -102,14 +110,13 @@ class LayerDataSourceModifier:
         # Set other properties
         self.set_dynamic_layer_properties(search_and_replace_dictionary)
 
-    def set_data_source(self, new_source_uri):
+    def set_data_source(self, new_source_uri: str):
         """
         Method to apply a new datasource to a vector Layer
         """
         context = QgsReadWriteContext()
-        layer = self.layer
         new_ds, new_uri = self.split_source(new_source_uri)
-        new_datasource_type = new_ds or layer.dataProvider().name()
+        new_datasource_type = new_ds or self.layer.dataProvider().name()
 
         # read layer definition
         xml_document = QDomDocument("style")
@@ -117,28 +124,29 @@ class LayerDataSourceModifier:
         xml_map_layers = xml_document.createElement("maplayers")
         # XMLMapLayer = QDomElement()
         xml_map_layer = xml_document.createElement("maplayer")
-        layer.writeLayerXml(xml_map_layer, xml_document, context)
+        self.layer.writeLayerXml(xml_map_layer, xml_document, context)
 
         # apply layer definition
         xml_map_layer.firstChildElement("datasource").firstChild().setNodeValue(new_uri)
         xml_map_layer.firstChildElement("provider").firstChild().setNodeValue(new_datasource_type)
         xml_map_layers.appendChild(xml_map_layer)
         xml_document.appendChild(xml_map_layers)
-        layer.readLayerXml(xml_map_layer, context)
+        self.layer.readLayerXml(xml_map_layer, context)
 
         # Update layer extent
-        layer.updateExtents()
+        self.layer.updateExtents()
 
         # Update graduated symbol renderer
-        if layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
-            if len(layer.renderer().ranges()) == 1:
-                layer.renderer().updateClasses(layer, layer.renderer().mode(), len(layer.renderer().ranges()))
+        if self.layer.renderer() and self.layer.renderer().type() == 'graduatedSymbol':
+            ranges = self.layer.renderer().ranges()
+            if len(ranges) == 1:
+                self.layer.renderer().updateClasses(self.layer, self.layer.renderer().mode(), len(ranges))
 
         # Reload layer
-        layer.reload()
+        self.layer.reload()
 
     @staticmethod
-    def split_source(source):
+    def split_source(source: str) -> typing.Tuple[str, str]:
         """
         Split QGIS datasource into meaningful components
         """
@@ -151,25 +159,24 @@ class LayerDataSourceModifier:
             uri = source.replace('\\', '/')
         return datasource_type, uri
 
-    def set_dynamic_layer_properties(self, search_and_replace_dictionary=None):
+    def set_dynamic_layer_properties(self, search_and_replace_dictionary: dict = None):
         """
         Set layer title, abstract,
         and field aliases (for vector layers only)
         """
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
-        layer = self.layer
         t = DynamicLayersTools()
 
         # Layer title
         # First check that we have a title
-        source_title = layer.name().strip()
-        if layer.title().strip() != '':
-            source_title = layer.title().strip()
-        if layer.customProperty('titleTemplate') and layer.customProperty('titleTemplate').strip() != '':
-            source_title = layer.customProperty('titleTemplate').strip()
+        source_title = self.layer.name().strip()
+        if self.layer.title().strip() != '':
+            source_title = self.layer.title().strip()
+        if self.layer.customProperty('titleTemplate') and self.layer.customProperty('titleTemplate').strip() != '':
+            source_title = self.layer.customProperty('titleTemplate').strip()
         # Search and replace content
-        layer.setTitle(
+        self.layer.setTitle(
             "%s" % t.search_and_replace_string_by_dictionary(
                 source_title,
                 search_and_replace_dictionary,
@@ -178,11 +185,11 @@ class LayerDataSourceModifier:
 
         # Abstract
         source_abstract = ''
-        if layer.abstract().strip() != '':
-            source_abstract = layer.abstract().strip()
-        if layer.customProperty('abstractTemplate') and layer.customProperty('abstractTemplate').strip() != '':
-            source_abstract = layer.customProperty('abstractTemplate').strip()
-        layer.setAbstract(
+        if self.layer.abstract().strip() != '':
+            source_abstract = self.layer.abstract().strip()
+        if self.layer.customProperty('abstractTemplate') and self.layer.customProperty('abstractTemplate').strip() != '':
+            source_abstract = self.layer.customProperty('abstractTemplate').strip()
+        self.layer.setAbstract(
             "%s" % t.search_and_replace_string_by_dictionary(
                 source_abstract,
                 search_and_replace_dictionary,
@@ -190,16 +197,16 @@ class LayerDataSourceModifier:
         )
 
         # Set fields aliases
-        if layer.type() == QgsMapLayer.VectorLayer:
-            for fid, field in enumerate(layer.fields()):
-                alias = layer.attributeAlias(fid)
+        if self.layer.type() == QgsMapLayer.VectorLayer:
+            for fid, field in enumerate(self.layer.fields()):
+                alias = self.layer.attributeAlias(fid)
                 if not alias:
                     continue
                 new_alias = t.search_and_replace_string_by_dictionary(
                     alias,
                     search_and_replace_dictionary,
                 )
-                layer.setFieldAlias(fid, new_alias)
+                self.layer.setFieldAlias(fid, new_alias)
 
 
 class DynamicLayersEngine:
@@ -222,10 +229,10 @@ class DynamicLayersEngine:
 
     def __init__(
             self,
-            dynamic_layers=None,
-            search_and_replace_dictionary=None,
-            extent_layer=None,
-            extent_margin=None,
+            dynamic_layers: dict = None,
+            search_and_replace_dictionary: dict = None,
+            extent_layer: list = None,
+            extent_margin: int = None,
     ):
         """
         Dynamic Layers Engine constructor
@@ -240,14 +247,14 @@ class DynamicLayersEngine:
         self.search_and_replace_dictionary = search_and_replace_dictionary
         self.iface = iface
 
-    def set_extent_layer(self, layer):
+    def set_extent_layer(self, layer: QgsMapLayer):
         """
         Set the extent layer.
         If a layer is set, the project extent will be changed to this extent
         """
         self.extent_layer = layer
 
-    def set_extent_margin(self, margin):
+    def set_extent_margin(self, margin: int):
         """
         Set the extent margin
         """
@@ -256,13 +263,13 @@ class DynamicLayersEngine:
             return
         self.extent_margin = margin
 
-    def set_search_and_replace_dictionary(self, search_and_replace_dictionary):
+    def set_search_and_replace_dictionary(self, search_and_replace_dictionary: dict):
         """
         Set the search and replace dictionary
         """
         self.search_and_replace_dictionary = search_and_replace_dictionary
 
-    def set_search_and_replace_dictionary_from_layer(self, layer, expression):
+    def set_search_and_replace_dictionary_from_layer(self, layer: QgsVectorLayer, expression: str):
         """
         Set the search and replace dictionary
         from a given layer
@@ -323,7 +330,7 @@ class DynamicLayersEngine:
             self.iface.actionDraw().trigger()
             self.iface.mapCanvas().refresh()
 
-    def set_dynamic_project_properties(self, title=None, abstract=None):
+    def set_dynamic_project_properties(self, title: str = None, abstract: str = None):
         """
         Set some project properties : title, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
@@ -352,7 +359,7 @@ class DynamicLayersEngine:
                 abstract = val[0]
         self.set_project_property('abstract', abstract)
 
-    def set_project_property(self, prop, val):
+    def set_project_property(self, prop: str, val: str):
         """
         Set a project property
         And replace variable if found in the properties
@@ -372,7 +379,7 @@ class DynamicLayersEngine:
         elif prop == 'abstract':
             p.writeEntry('WMSServiceAbstract', '', '%s' % val)
 
-    def set_project_extent(self):
+    def set_project_extent(self) -> QgsRectangle:
         """
         Sets the project extent
         and corresponding XML property

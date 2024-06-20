@@ -24,13 +24,11 @@ import os.path
 import sys
 import re
 from functools import partial
-from typing import Optional
 
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor, QColor
 from qgis.PyQt.QtWidgets import qApp, QTableWidgetItem
-from qgis._core import QgsMapLayer
-from qgis.core import Qgis, QgsIconUtils, QgsProject
+from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
@@ -106,7 +104,7 @@ class DynamicLayers:
         self.toolbar.setObjectName('DynamicLayers')
 
     # noinspection PyMethodMayBeStatic
-    def tr(self, message):
+    def tr(self, message: str) -> str:
         """Get the translation for a string using Qt translation API.
 
         We implement this ourselves since we do not inherit QObject.
@@ -122,8 +120,8 @@ class DynamicLayers:
 
     def add_action(
             self,
-            icon_path,
-            text,
+            icon_path: str,
+            text: str,
             callback,
             enabled_flag=True,
             add_to_menu=True,
@@ -313,7 +311,7 @@ class DynamicLayers:
         """
         self.dlg.txtLog.clear()
 
-    def update_log(self, msg):
+    def update_log(self, msg: str):
         """
         Update the log
         """
@@ -388,7 +386,7 @@ class DynamicLayers:
                 i += 1
 
     @staticmethod
-    def get_layer_property(layer: QgsMapLayer, prop: str) -> Optional[str]:
+    def get_layer_property(layer: QgsMapLayer, prop: str) -> str | None:
         """
         Get a layer property
         """
@@ -509,7 +507,7 @@ class DynamicLayers:
         self.selectedLayer.setCustomProperty('dynamicDatasourceActive', input_value)
         QgsProject.instance().setDirty(True)
 
-    def on_layer_property_change(self, key):
+    def on_layer_property_change(self, key: str):
         """
         Set the layer template property
         when the user change the content
@@ -731,7 +729,7 @@ class DynamicLayers:
             p_abstract = project.readEntry('WMSServiceAbstract', "/")[0]
         self.dlg.inProjectAbstract.setText(str(p_abstract))
 
-    def on_project_property_changed(self, prop: str) -> Optional[str]:
+    def on_project_property_changed(self, prop: str) -> str | None:
         """
         Save project dynamic property in the project
         when the user changes the content
@@ -794,7 +792,7 @@ class DynamicLayers:
     ##
     # Global actions
     ##
-    def on_apply_variables_clicked(self, source='table'):
+    def on_apply_variables_clicked(self, source: str = 'table'):
         """
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
