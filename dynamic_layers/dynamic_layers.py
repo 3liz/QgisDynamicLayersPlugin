@@ -2,7 +2,6 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-import sys
 import re
 from functools import partial
 from pathlib import Path
@@ -10,6 +9,7 @@ from pathlib import Path
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
+from qgis.gui import QgisInterface
 from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
@@ -22,7 +22,7 @@ from dynamic_layers.definitions import CustomProperty, QtVar
 class DynamicLayers:
     """QGIS Plugin Implementation."""
 
-    def __init__(self, iface):
+    def __init__(self, iface: QgisInterface):
         """Constructor."""
         self.projectPropertiesInputs = None
         self.layerPropertiesInputs = None
@@ -306,7 +306,6 @@ class DynamicLayers:
             # add a new line
             self.dlg.twLayers.setRowCount(tw_row_count + 1)
             self.dlg.twLayers.setColumnCount(col_count)
-            i = 0
 
             if layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True):
                 bg = QtVar.Green
@@ -314,7 +313,7 @@ class DynamicLayers:
                 bg = QtVar.Transparent
 
             # get information
-            for attr in self.layersTable:
+            for i, attr in enumerate(self.layersTable):
                 new_item = QTableWidgetItem()
 
                 # Is editable or not
@@ -334,20 +333,16 @@ class DynamicLayers:
 
                 # Add cell data to lineData
                 # encode it in the file system encoding, only if needed
-                if hasattr(value, 'encode'):
-                    value = value.encode(sys.getfilesystemencoding())
                 line_data.append(value)
 
                 # Add item
                 self.dlg.twLayers.setItem(tw_row_count, i, new_item)
-                i += 1
 
     @staticmethod
     def get_layer_property(layer: QgsMapLayer, prop: str) -> str | None:
         """
         Get a layer property
         """
-
         if prop == 'id':
             return layer.id()
 
@@ -363,8 +358,7 @@ class DynamicLayers:
         elif prop == CustomProperty.DynamicDatasourceContent:
             return layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
-        else:
-            return None
+        return None
 
     def on_row_selection_changed(self):
         """
@@ -401,26 +395,28 @@ class DynamicLayers:
         # Toggle the layer properties group
         self.dlg.gbLayerDynamicProperties.setEnabled(show_layer_properties)
 
+        if not layer:
+            return
+
         # Set the content of the layer properties inputs
         # dynamic datasource text input content
-        if layer:
-            for key, item in self.layerPropertiesInputs.items():
-                widget = item['widget']
-                val = layer.customProperty(item['xml'])
-                if not val:
-                    val = ''
-                if item['wType'] in ('text', ):
-                    widget.setText(val)
-                elif item['wType'] == 'textarea':
-                    widget.setPlainText(val)
-                elif item['wType'] == 'spinbox':
-                    widget.setValue(int(val))
-                elif item['wType'] == 'checkbox':
-                    widget.setChecked(val)
-                elif item['wType'] == 'list':
-                    list_dic = {widget.itemData(i): i for i in range(widget.count())}
-                    if val in list_dic:
-                        widget.setCurrentIndex(list_dic[val])
+        for key, item in self.layerPropertiesInputs.items():
+            widget = item['widget']
+            val = layer.customProperty(item['xml'])
+            if not val:
+                val = ''
+            if item['wType'] in ('text', ):
+                widget.setText(val)
+            elif item['wType'] == 'textarea':
+                widget.setPlainText(val)
+            elif item['wType'] == 'spinbox':
+                widget.setValue(int(val))
+            elif item['wType'] == 'checkbox':
+                widget.setChecked(val)
+            elif item['wType'] == 'list':
+                list_dic = {widget.itemData(i): i for i in range(widget.count())}
+                if val in list_dic:
+                    widget.setCurrentIndex(list_dic[val])
 
         # "active" checkbox
         is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True)
@@ -553,8 +549,7 @@ class DynamicLayers:
         self.dlg.twVariableList.setColumnCount(2)
 
         # Fill the table
-        i = 0
-        for variable in variable_list[0]:
+        for i, variable in enumerate(variable_list[0]):
             self.dlg.twVariableList.setRowCount(i + 1)
 
             # Set name item
@@ -566,9 +561,6 @@ class DynamicLayers:
             new_item = QTableWidgetItem()
             new_item.setFlags(QtVar.ItemIsSelectable | QtVar.ItemIsEditable | QtVar.ItemIsEnabled)
             self.dlg.twVariableList.setItem(i, 1, new_item)
-
-            # Set the new row count
-            i += 1
 
         # Set the variable list
         self.variableList = variable_list[0]
@@ -852,7 +844,7 @@ class DynamicLayers:
 
         # Populate the extent layer list
         self.dlg.inExtentLayer.setFilters(Qgis.LayerFilter.VectorLayer)
-        self.dlg.inExtentLayer.setAllowEmptyLayer(False)
+        self.dlg.inExtentLayer.setAllowEmptyLayer(True)
 
         # Populate the variable source layer combobox
         self.dlg.inVariableSourceLayer.setFilters(Qgis.LayerFilter.VectorLayer)

@@ -2,10 +2,10 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-"""Tools to work with resources files."""
-
-from pathlib import Path
 from string import Template
+from pathlib import Path
+
+""" Tools to work with resources files. """
 
 
 def string_substitution(string: str, dictionary: dict) -> str:

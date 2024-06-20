@@ -11,6 +11,13 @@ class CustomProperty:
     DynamicDatasourceContent = 'dynamicDatasourceContent'
 
 
+class ProjectProperty:
+    Abstract = 'WMSServiceAbstract'
+    Title = 'WMSServiceTitle'
+    ShortName = 'WMSRootName'
+    Extent = 'WMSExtent'
+
+
 # noinspection PyUnresolvedReferences
 class QtVar:
     Green = QColor(175, 208, 126)

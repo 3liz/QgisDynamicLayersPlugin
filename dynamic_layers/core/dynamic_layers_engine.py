@@ -2,6 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+from typing import Annotated
+
 from qgis.core import (
     QgsFeature,
     QgsMapLayer,
@@ -14,7 +16,7 @@ from qgis.core import (
 )
 
 from dynamic_layers.core.layer_datasource_modifier import LayerDataSourceModifier
-from dynamic_layers.definitions import CustomProperty
+from dynamic_layers.definitions import CustomProperty, ProjectProperty
 from dynamic_layers.tools import string_substitution
 
 from qgis.utils import iface
@@ -123,7 +125,7 @@ class DynamicLayersEngine:
             val = project.readEntry('PluginDynamicLayers', xml)
             if val:
                 title = val[0]
-        self.set_project_property(project, 'title', title)
+        self.set_project_property(project, ProjectProperty.Title, title)
 
         # abstract
         if not abstract:
@@ -131,23 +133,16 @@ class DynamicLayersEngine:
             val = project.readEntry('PluginDynamicLayers', xml)
             if val:
                 abstract = val[0]
-        self.set_project_property(project, 'abstract', abstract)
+        self.set_project_property(project, ProjectProperty.Abstract, abstract)
 
-    def set_project_property(self, project: QgsProject, prop: str, val: str):
+    def set_project_property(self, project: QgsProject, project_property: Annotated[str, ProjectProperty], val: str):
         """
         Set a project property
         And replace variable if found in the properties
         """
         # Replace variable in given val via dictionary
         val = string_substitution(val, self.search_and_replace_dictionary)
-
-        # Title
-        if prop == 'title':
-            project.writeEntry('WMSServiceTitle', '', val)
-
-        # Abstract
-        elif prop == 'abstract':
-            project.writeEntry('WMSServiceAbstract', '', val)
+        project.writeEntry(project_property, '', val)
 
     def set_project_extent(self, project: QgsProject) -> QgsRectangle:
         """
@@ -181,7 +176,7 @@ class DynamicLayersEngine:
                 p_extent.yMaximum(),
             ]
             p_wms_extent = [str(i) for i in p_wms_extent]
-            project.writeEntry('WMSExtent', '', p_wms_extent)
+            project.writeEntry(ProjectProperty.Extent, '', p_wms_extent)
 
             # Zoom canvas to extent
             if self.iface:
