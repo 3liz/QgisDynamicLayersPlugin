@@ -1,29 +1,11 @@
-"""
-/***************************************************************************
- DynamicLayers
-                                 A QGIS plugin
- This plugin helps to change the datasource of chosen layers dynamically by searching and replacing user defined
- variables.
-                              -------------------
-        begin                : 2015-07-21
-            git sha              : $Format:%H$
-        copyright            : (C) 2015 by Michaël Douchin - 3liz
-        email                : mdouchin@3liz.com
- ***************************************************************************/
+__copyright__ = 'Copyright 2024, 3Liz'
+__license__ = 'GPL version 3'
+__email__ = 'info@3liz.org'
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-"""
-import os.path
 import sys
 import re
 from functools import partial
+from pathlib import Path
 
 from qgis.PyQt.QtCore import Qt, QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
@@ -54,17 +36,13 @@ class DynamicLayers:
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
-        self.plugin_dir = os.path.dirname(__file__)
+        self.plugin_dir = Path(__file__).resolve().parent
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            f'DynamicLayers_{locale}.qm')
-
-        if os.path.exists(locale_path):
+        locale_path = self.plugin_dir / 'i18n' / f'DynamicLayers_{locale}.qm'
+        if locale_path.exists():
             self.translator = QTranslator()
-            self.translator.load(locale_path)
+            self.translator.load(str(locale_path))
 
             QCoreApplication.installTranslator(self.translator)
 
