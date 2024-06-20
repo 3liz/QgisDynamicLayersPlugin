@@ -91,7 +91,6 @@ class DynamicLayers:
             add_to_menu=True,
             add_to_toolbar=True,
             status_tip=None,
-            whats_this=None,
             parent=None):
         """Add a toolbar icon to the toolbar.
 
@@ -124,9 +123,6 @@ class DynamicLayers:
         :param parent: Parent widget for the new action. Defaults None.
         :type parent: QWidget
 
-        :param whats_this: Optional text to show in the status bar when the
-            mouse pointer hovers over the action.
-
         :returns: The action that was created. Note that the action is also
             added to self. actions list.
         :rtype: QAction
@@ -141,9 +137,6 @@ class DynamicLayers:
         if status_tip is not None:
             action.setStatusTip(status_tip)
 
-        if whats_this is not None:
-            action.setWhatsThis(whats_this)
-
         if add_to_toolbar:
             self.toolbar.addAction(action)
 
@@ -153,7 +146,6 @@ class DynamicLayers:
                 action)
 
         self.actions.append(action)
-
         return action
 
     # noinspection PyPep8Naming
