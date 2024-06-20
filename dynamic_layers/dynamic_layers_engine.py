@@ -84,8 +84,7 @@ class LayerDataSourceModifier:
             search_and_replace_dictionary = {}
 
         # Set the new uri
-        t = DynamicLayersTools()
-        new_uri = t.search_and_replace_string_by_dictionary(
+        new_uri = DynamicLayersTools.search_and_replace_string_by_dictionary(
             self.dynamic_datasource_content, search_and_replace_dictionary)
 
         # Set the layer datasource
@@ -150,7 +149,6 @@ class LayerDataSourceModifier:
         """
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
-        t = DynamicLayersTools()
 
         # Layer title
         # First check that we have a title
@@ -161,7 +159,7 @@ class LayerDataSourceModifier:
             source_title = self.layer.customProperty('titleTemplate').strip()
         # Search and replace content
         self.layer.setTitle(
-            t.search_and_replace_string_by_dictionary(
+            DynamicLayersTools.search_and_replace_string_by_dictionary(
                 source_title,
                 search_and_replace_dictionary,
             ),
@@ -174,7 +172,7 @@ class LayerDataSourceModifier:
         if self.layer.customProperty('abstractTemplate') and self.layer.customProperty('abstractTemplate').strip() != '':
             source_abstract = self.layer.customProperty('abstractTemplate').strip()
         self.layer.setAbstract(
-            t.search_and_replace_string_by_dictionary(
+            DynamicLayersTools.search_and_replace_string_by_dictionary(
                 source_abstract,
                 search_and_replace_dictionary,
             ),
@@ -186,7 +184,7 @@ class LayerDataSourceModifier:
                 alias = self.layer.attributeAlias(fid)
                 if not alias:
                     continue
-                new_alias = t.search_and_replace_string_by_dictionary(
+                new_alias = DynamicLayersTools.search_and_replace_string_by_dictionary(
                     alias,
                     search_and_replace_dictionary,
                 )
@@ -350,8 +348,7 @@ class DynamicLayersEngine:
         And replace variable if found in the properties
         """
         # Replace variable in given val via dictionary
-        t = DynamicLayersTools()
-        val = t.search_and_replace_string_by_dictionary(val, self.search_and_replace_dictionary)
+        val = DynamicLayersTools.search_and_replace_string_by_dictionary(val, self.search_and_replace_dictionary)
 
         # Title
         if prop == 'title':
