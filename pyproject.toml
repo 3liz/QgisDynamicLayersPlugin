@@ -35,3 +35,7 @@ suppress-dummy-args = true
 plugin_path = "dynamic_layers"
 github_organization_slug = "3liz"
 project_slug = "QgisDynamicLayersPlugin"
+transifex_organization = "3liz-1"
+transifex_project = "dynamiclayers"
+transifex_resource = "qgis_plugin"
+transifex_coordinator = "etrimaille"
