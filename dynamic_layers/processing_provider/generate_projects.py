@@ -8,6 +8,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
+    QgsProcessingParameterBoolean,
     QgsProcessingParameterFolderDestination,
 )
 from qgis.PyQt.QtCore import QCoreApplication
@@ -20,6 +21,7 @@ class GenerateProjects(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     FIELD = 'FIELD'
+    COPY_SIDE_CAR_FILES = "COPY_SIDE_CAR_FILES"
     OUTPUT = 'OUTPUT'
 
     def tr(self, string):
@@ -54,6 +56,13 @@ class GenerateProjects(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr('Field having unique values'),
                 parentLayerParameterName=self.INPUT,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.COPY_SIDE_CAR_FILES,
+                self.tr('Copy all project side-car files'),
             )
         )
 

@@ -4,6 +4,7 @@ __email__ = 'info@3liz.org'
 
 from pathlib import Path
 from string import Template
+from typing import List
 
 """ Tools to work with resources files. """
 
@@ -25,3 +26,14 @@ def plugin_path(*args) -> Path:
 def resources_path(*args) -> Path:
     """Return the path to the plugin resources folder."""
     return plugin_path("resources", *args)
+
+
+def side_car_files(file_path: Path) -> List[Path]:
+    """ Return a list of all side-car files, having the extension included. """
+    results = []
+    for iter_file in file_path.parent.iterdir():
+        if iter_file.name.startswith(file_path.name) and iter_file != file_path:
+            results.append(iter_file)
+
+    results.sort()
+    return results
