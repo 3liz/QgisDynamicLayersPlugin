@@ -9,12 +9,14 @@ from pathlib import Path
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
+from qgis._core import QgsApplication
 from qgis.gui import QgisInterface
 from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
 from qgis.utils import OverrideCursor
 
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.processing_provider.provider import Provider
 from dynamic_layers.tools import resources_path
 from dynamic_layers.definitions import CustomProperty, QtVar
 
@@ -29,6 +31,7 @@ class DynamicLayers:
         self.initDone = None
         # Save reference to the QGIS interface
         self.iface = iface
+        self.provider = None
         # initialize plugin directory
         self.plugin_dir = Path(__file__).resolve().parent
         # initialize locale
@@ -81,6 +84,11 @@ class DynamicLayers:
     # noinspection PyMethodMayBeStatic
     def tr(self, message: str) -> str:
         return QCoreApplication.translate('DynamicLayers', message)
+
+    # noinspection PyPep8Naming
+    def initProcessing(self):
+        self.provider = Provider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
 
     def add_action(
             self,
@@ -157,6 +165,8 @@ class DynamicLayers:
             text=self.tr('Dynamic Layers'),
             callback=self.run,
             parent=self.iface.mainWindow())
+
+        self.initProcessing()
 
         # slots/signals
         ###############
@@ -254,6 +264,7 @@ class DynamicLayers:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        QgsApplication.processingRegistry().removeProvider(self.provider)
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr('&Dynamic Layers'),
@@ -783,7 +794,7 @@ class DynamicLayers:
     ##
     # Global actions
     ##
-    def on_apply_variables_clicked(self, source: str = 'table'):
+    def on_apply_variables_clicked(self, source: str):
         """
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
