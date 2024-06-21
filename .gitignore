@@ -4,6 +4,7 @@
 
 # Tests data
 symbology-style.db
+*_attachments.zip
 
 # IDE
 .idea/

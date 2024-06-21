@@ -4,8 +4,8 @@ __email__ = 'info@3liz.org'
 
 import typing
 
-from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import QgsMapLayer, QgsReadWriteContext
+from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
 from dynamic_layers.tools import string_substitution

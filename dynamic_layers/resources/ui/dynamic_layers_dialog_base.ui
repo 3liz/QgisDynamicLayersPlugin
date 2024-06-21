@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
-    <widget class="QTabWidget" name="tabWidget_2">
+    <widget class="QTabWidget" name="tab_widget">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -138,7 +138,7 @@
               <item>
                <widget class="QPushButton" name="btCopyFromLayer">
                 <property name="text">
-                 <string>Set templates content from layer properties</string>
+                 <string>Copy templates content from layer properties</string>
                 </property>
                </widget>
               </item>
@@ -233,7 +233,7 @@
        <item>
         <widget class="QPushButton" name="btCopyFromProject">
          <property name="text">
-          <string>Copy properties from project</string>
+          <string>Copy templates from project properties</string>
          </property>
         </widget>
        </item>
@@ -245,11 +245,15 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <widget class="QGroupBox" name="groupBox">
-         <property name="title">
-          <string>Either set variables from a vector layer</string>
+        <widget class="QRadioButton" name="radio_variables_from_layer">
+         <property name="text">
+          <string>Set variables from a vector layer</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_layer" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
@@ -287,22 +291,19 @@
             </item>
            </layout>
           </item>
-          <item>
-           <widget class="QPushButton" name="btApplyFromLayer">
-            <property name="text">
-             <string>Apply on project</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Or set variables manually</string>
+        <widget class="QRadioButton" name="radio_variables_from_table">
+         <property name="text">
+          <string>Set variables manually</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_14">
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_table" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
            <widget class="QTableWidget" name="twVariableList">
             <property name="editTriggers">
@@ -388,13 +389,6 @@
             </item>
            </layout>
           </item>
-          <item>
-           <widget class="QPushButton" name="btApplyVariables">
-            <property name="text">
-             <string>Apply variables on project</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -425,7 +419,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Close|QDialogButtonBox::Help</set>
      </property>
     </widget>
    </item>

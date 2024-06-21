@@ -1,8 +1,9 @@
-from PyQt5.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 
-from dynamic_layers.processing_provider.generate_projects import GenerateProjects
-
+from dynamic_layers.processing_provider.generate_projects import (
+    GenerateProjects,
+)
 from dynamic_layers.tools import resources_path
 
 

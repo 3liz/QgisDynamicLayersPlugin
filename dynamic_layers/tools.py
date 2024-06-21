@@ -2,8 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-from string import Template
 from pathlib import Path
+from string import Template
 
 """ Tools to work with resources files. """
 

@@ -5,21 +5,22 @@ __email__ = 'info@3liz.org'
 from typing import Annotated
 
 from qgis.core import (
-    QgsFeature,
-    QgsMapLayer,
-    QgsProject,
     QgsExpression,
+    QgsFeature,
     QgsFeatureRequest,
+    QgsMapLayer,
     QgsMessageLog,
-    QgsVectorLayer,
+    QgsProject,
     QgsRectangle,
+    QgsVectorLayer,
 )
+from qgis.utils import iface
 
-from dynamic_layers.core.layer_datasource_modifier import LayerDataSourceModifier
+from dynamic_layers.core.layer_datasource_modifier import (
+    LayerDataSourceModifier,
+)
 from dynamic_layers.definitions import CustomProperty, ProjectProperty
 from dynamic_layers.tools import string_substitution
-
-from qgis.utils import iface
 
 
 class DynamicLayersEngine:

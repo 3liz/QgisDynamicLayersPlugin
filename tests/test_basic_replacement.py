@@ -6,11 +6,10 @@ import unittest
 
 from pathlib import Path
 
-from qgis.core import QgsVectorLayer
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsVectorLayer
 
-from dynamic_layers.definitions import CustomProperty
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.definitions import CustomProperty
 from tests.base_tests import BaseTests
 
 

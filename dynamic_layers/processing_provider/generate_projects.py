@@ -2,16 +2,16 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProcessing,
-    QgsProcessingException,
     QgsProcessingAlgorithm,
+    QgsProcessingException,
     QgsProcessingParameterFeatureSource,
-    QgsProcessingParameterFolderDestination,
     QgsProcessingParameterField,
+    QgsProcessingParameterFolderDestination,
 )
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtGui import QIcon
 
 from dynamic_layers.tools import resources_path
 
@@ -82,4 +82,6 @@ class GenerateProjects(QgsProcessingAlgorithm):
             source.wkbType(),
             source.sourceCrs()
         )
+        _ = sink
+        _ = dest_id
         return {self.OUTPUT: dest_id}

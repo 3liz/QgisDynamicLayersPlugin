@@ -3,22 +3,35 @@ __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
 import re
+
 from functools import partial
 from pathlib import Path
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QAction, QIcon, QTextCursor
-from qgis.PyQt.QtWidgets import qApp, QMessageBox, QTableWidgetItem
-from qgis._core import QgsApplication
+from qgis import processing
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsIconUtils,
+    QgsMapLayer,
+    QgsProject,
+)
 from qgis.gui import QgisInterface
-from qgis.core import Qgis, QgsMapLayer, QgsIconUtils, QgsProject
+from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, QUrl
+from qgis.PyQt.QtGui import QAction, QDesktopServices, QIcon, QTextCursor
+from qgis.PyQt.QtWidgets import (
+    QDialogButtonBox,
+    QMenu,
+    QMessageBox,
+    QTableWidgetItem,
+    qApp,
+)
 from qgis.utils import OverrideCursor
 
-from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.definitions import CustomProperty, QtVar
+from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
 from dynamic_layers.tools import resources_path
-from dynamic_layers.definitions import CustomProperty, QtVar
 
 
 class DynamicLayers:
@@ -32,6 +45,13 @@ class DynamicLayers:
         # Save reference to the QGIS interface
         self.iface = iface
         self.provider = None
+
+        self.main_icon = QIcon(str(resources_path('icons', 'icon.png')))
+        self.help_action_about_menu = None
+        self.menu = None
+        self.main_dialog_action = None
+        self.generate_projects_action = None
+
         # initialize plugin directory
         self.plugin_dir = Path(__file__).resolve().parent
         # initialize locale
@@ -74,13 +94,6 @@ class DynamicLayers:
         # Variables
         self.variableList = []
 
-        # Declare instance attributes
-        self.actions = []
-        self.menu = self.tr('&Dynamic Layers')
-        # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar('DynamicLayers')
-        self.toolbar.setObjectName('DynamicLayers')
-
     # noinspection PyMethodMayBeStatic
     def tr(self, message: str) -> str:
         return QCoreApplication.translate('DynamicLayers', message)
@@ -90,83 +103,35 @@ class DynamicLayers:
         self.provider = Provider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
-    def add_action(
-            self,
-            icon_path: Path,
-            text: str,
-            callback,
-            enabled_flag=True,
-            add_to_menu=True,
-            add_to_toolbar=True,
-            status_tip=None,
-            parent=None):
-        """Add a toolbar icon to the toolbar.
-
-        :param icon_path: Path to the icon for this action. Can be a resource
-            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: Path
-
-        :param text: Text that should be shown in menu items for this action.
-        :type text: str
-
-        :param callback: Function to be called when the action is triggered.
-        :type callback: function
-
-        :param enabled_flag: A flag indicating if the action should be enabled
-            by default. Defaults to True.
-        :type enabled_flag: bool
-
-        :param add_to_menu: Flag indicating whether the action should also
-            be added to the menu. Defaults to True.
-        :type add_to_menu: bool
-
-        :param add_to_toolbar: Flag indicating whether the action should also
-            be added to the toolbar. Defaults to True.
-        :type add_to_toolbar: bool
-
-        :param status_tip: Optional text to show in a popup when mouse pointer
-            hovers over the action.
-        :type status_tip: str
-
-        :param parent: Parent widget for the new action. Defaults None.
-        :type parent: QWidget
-
-        :returns: The action that was created. Note that the action is also
-            added to self. actions list.
-        :rtype: QAction
-        """
-
-        icon = QIcon(str(icon_path))
-        action = QAction(icon, text, parent)
-        # noinspection PyUnresolvedReferences
-        action.triggered.connect(callback)
-        action.setEnabled(enabled_flag)
-
-        if status_tip is not None:
-            action.setStatusTip(status_tip)
-
-        if add_to_toolbar:
-            self.toolbar.addAction(action)
-
-        if add_to_menu:
-            self.iface.addPluginToMenu(
-                self.menu,
-                action)
-
-        self.actions.append(action)
-        return action
-
     # noinspection PyPep8Naming
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        self.menu = QMenu("Dynamic Layers")
+        self.menu.setIcon(self.main_icon)
 
-        self.add_action(
-            resources_path('icons', 'icon.png'),
-            text=self.tr('Dynamic Layers'),
-            callback=self.run,
-            parent=self.iface.mainWindow())
+        self.main_dialog_action = QAction(self.main_icon, self.tr("Setup the project"), self.iface.mainWindow())
+        # noinspection PyUnresolvedReferences
+        self.main_dialog_action.triggered.connect(self.run)
+        self.menu.addAction(self.main_dialog_action)
+
+        self.generate_projects_action = QAction(
+            QIcon(QgsApplication.iconPath("processingAlgorithm.svg")),
+            self.tr("Generate projects"),
+            self.iface.mainWindow()
+        )
+        # noinspection PyUnresolvedReferences
+        self.generate_projects_action.triggered.connect(self.generate_projects_clicked)
+        self.menu.addAction(self.generate_projects_action)
+
+        self.iface.pluginMenu().addMenu(self.menu)
 
         self.initProcessing()
+
+        # Open the online help
+        self.help_action_about_menu = QAction(self.main_icon, self.tr('Project generator'), self.iface.mainWindow())
+        self.iface.pluginHelpMenu().addAction(self.help_action_about_menu)
+        # noinspection PyUnresolvedReferences
+        self.help_action_about_menu.triggered.connect(self.open_help)
 
         # slots/signals
         ###############
@@ -206,11 +171,8 @@ class DynamicLayers:
         self.dlg.btAddVariable.clicked.connect(self.on_add_variable_clicked)
         self.dlg.btRemoveVariable.clicked.connect(self.on_remove_variable_clicked)
 
-        # Apply buttons
-        slot = partial(self.on_apply_variables_clicked, 'table')
-        self.dlg.btApplyVariables.clicked.connect(slot)
-        slot = partial(self.on_apply_variables_clicked, 'layer')
-        self.dlg.btApplyFromLayer.clicked.connect(slot)
+        self.dlg.button_box.button(QDialogButtonBox.Apply).clicked.connect(self.on_apply_variables_clicked)
+        self.dlg.button_box.button(QDialogButtonBox.Help).clicked.connect(self.open_help)
 
         # Project properties tab
         self.dlg.btCopyFromProject.clicked.connect(self.on_copy_from_project_clicked)
@@ -262,16 +224,27 @@ class DynamicLayers:
         # Log
         self.dlg.btClearLog.clicked.connect(self.clear_log)
 
+    @staticmethod
+    def open_help():
+        """Opens the html help file content with default browser"""
+        QDesktopServices.openUrl(QUrl("https://github.com/3liz/QgisDynamicLayersPlugin/blob/master/README.md"))
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-        QgsApplication.processingRegistry().removeProvider(self.provider)
-        for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr('&Dynamic Layers'),
-                action)
-            self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar
+        if self.provider:
+            QgsApplication.processingRegistry().removeProvider(self.provider)
+
+        if self.generate_projects_action:
+            self.iface.removePluginMenu("Dynamic Layers", self.generate_projects_action)
+            del self.generate_projects_action
+
+        if self.main_dialog_action:
+            self.iface.removePluginMenu("Dynamic Layers", self.main_dialog_action)
+            del self.main_dialog_action
+
+        if self.help_action_about_menu:
+            self.iface.pluginHelpMenu().removeAction(self.help_action_about_menu)
+            del self.help_action_about_menu
 
     def clear_log(self):
         """
@@ -794,7 +767,7 @@ class DynamicLayers:
     ##
     # Global actions
     ##
-    def on_apply_variables_clicked(self, source: str):
+    def on_apply_variables_clicked(self):
         """
         Replace layers datasource with new datasource created
         by replace variables in dynamicDatasource
@@ -812,7 +785,7 @@ class DynamicLayers:
 
             # Set search and replace dictionary
             # Collect variables names and values
-            if source == 'table':
+            if self.dlg.radio_variables_from_table.isChecked():
                 search_and_replace_dictionary = {}
                 for row in range(self.dlg.twVariableList.rowCount()):
                     v_name = self.dlg.twVariableList.item(row, 0).data(QtVar.EditRole)
@@ -841,6 +814,14 @@ class DynamicLayers:
 
             # Set project as dirty
             self.project.setDirty(True)
+
+    @staticmethod
+    def generate_projects_clicked():
+        dialog = processing.createAlgorithmDialog(
+            "dynamic_layers:generate_projects",
+            {}
+        )
+        dialog.show()
 
     def run(self):
         """Run method that performs all the real work"""
