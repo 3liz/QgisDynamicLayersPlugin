@@ -20,6 +20,7 @@ from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QAction, QDesktopServices, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
+    QHeaderView,
     QMenu,
     QMessageBox,
     QTableWidgetItem,
@@ -279,6 +280,9 @@ class DynamicLayers:
         col_count = len(columns)
         self.dlg.twLayers.setColumnCount(col_count)
         self.dlg.twLayers.setHorizontalHeaderLabels(tuple(columns))
+        header = self.dlg.twLayers.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
 
         # load content from project layers
         for layer in self.project.mapLayers().values():
@@ -531,6 +535,10 @@ class DynamicLayers:
             self.dlg.twVariableList.removeRow(row)
         self.dlg.twVariableList.setRowCount(0)
         self.dlg.twVariableList.setColumnCount(2)
+
+        header = self.dlg.twVariableList.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
 
         # Fill the table
         for i, variable in enumerate(variable_list[0]):
