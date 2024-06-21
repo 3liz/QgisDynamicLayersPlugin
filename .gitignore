@@ -2,6 +2,9 @@
 *~
 *.pyc
 
+# QGIS-Plugin-CI
+dynamic_layers/i18n
+
 # Tests data
 symbology-style.db
 *_attachments.zip

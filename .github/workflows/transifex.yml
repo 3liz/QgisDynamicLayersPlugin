@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - master
-#    paths:
-#      - '**.py'
-#      - '**.ui'
+    paths:
+      - '**.py'
+      - '**.ui'
 
 jobs:
   build:
