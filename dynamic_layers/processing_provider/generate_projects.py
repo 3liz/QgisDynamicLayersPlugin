@@ -6,9 +6,9 @@ from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
-    QgsProcessingParameterBoolean,
     QgsProcessingParameterFolderDestination,
 )
 from qgis.PyQt.QtCore import QCoreApplication

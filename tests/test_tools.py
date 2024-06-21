@@ -2,20 +2,15 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-import unittest
 import tempfile
+import unittest
+
 from pathlib import Path
 
 from dynamic_layers.tools import side_car_files
 
 
 class TestTools(unittest.TestCase):
-
-    def setUp(self):
-        self.temp_dir = tempfile.TemporaryDirectory()
-
-    def tearDown(self):
-        self.temp_dir.cleanup()
 
     def test_sidecar_files(self):
         """ Test to detect side-car files. """

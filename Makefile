@@ -1,6 +1,14 @@
 SHELL:=bash
 
+.PHONY: tests isort lint lint-preview lint-fix
+
 PYTHON_PKG=dynamic_layers
+
+tests:
+	@python3 -m unittest
+
+isort:
+	@isort .
 
 lint:
 	@ruff check $(PYTHON_PKG)

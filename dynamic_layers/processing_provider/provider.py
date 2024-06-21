@@ -1,5 +1,5 @@
-from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
+from qgis.PyQt.QtGui import QIcon
 
 from dynamic_layers.processing_provider.generate_projects import (
     GenerateProjects,
