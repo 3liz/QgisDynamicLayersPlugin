@@ -50,10 +50,9 @@ class TestBasicReplacement(BaseTests):
         )
 
         # Replace
-        variables = {
+        engine.search_and_replace_dictionary = {
             'folder': folder_2,
         }
-        engine.search_and_replace_dictionary = variables
 
         engine.set_dynamic_layers_datasource_from_dic()
         engine.set_dynamic_project_properties(project, "Test title", "Test abstract")
