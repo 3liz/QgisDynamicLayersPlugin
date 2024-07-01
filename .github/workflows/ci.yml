@@ -1,0 +1,114 @@
+name: Tests 🎳
+
+on:
+  push:
+    tags:
+      - "*"
+    branches:
+      - master
+    paths:
+      - 'dynamic_layers/**'
+      - '.docker/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'dynamic_layers/**'
+
+jobs:
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          architecture: x64
+
+      - name: Install Python requirements
+        run: pip install -r requirements/dev.txt
+
+      - name: Run flake8
+        run: flake8
+#
+#  tests:
+#    runs-on: ubuntu-latest
+#    defaults:
+#      run:
+#        working-directory: .docker
+#    strategy:
+#      matrix:
+#        qgis_version: [
+#          "release-3_34",
+#          "release-3_28",
+#          "latest",
+#        ]
+#    steps:
+#
+#      - name: Check out repository
+#        uses: actions/checkout@v4
+#
+#      - name: Make env
+#        run: cd .. && make env QGIS_VERSION=${{ matrix.qgis_version }}
+#
+#      - name: Launching docker compose
+#        run: ./start.sh
+#
+#      - name: Running tests
+#        run: ./exec.sh
+
+  release:
+#    needs: [tests, flake8]
+
+    runs-on: ubuntu-latest
+    if: github.repository_owner == '3liz' && contains(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Qt lrelease
+        run: |
+          sudo apt-get update
+          sudo apt-get install qttools5-dev-tools
+
+      - name: Install Python requirements
+        run: pip install -r requirements/packaging.txt
+
+      - name : Fetch current changelog
+        run: qgis-plugin-ci changelog ${{ env.RELEASE_VERSION }} >> release.md
+
+      - name: Create release on GitHub
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          bodyFile: release.md
+          token: ${{ secrets.BOT_HUB_TOKEN }}
+
+      - name: Package and deploy the zip
+        run: >-
+          qgis-plugin-ci
+          -v
+          release ${{ env.RELEASE_VERSION }}
+          --github-token ${{ secrets.BOT_HUB_TOKEN }}
+          --transifex-token ${{ secrets.TRANSIFEX_TOKEN }}
+          --create-plugin-repo
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.BOT_HUB_TOKEN }}
+          repository: 3liz/3liz.github.io
+          event-type: merge-plugins
+          client-payload: '{"name": "dynamic_layers", "version": "${{ env.RELEASE_VERSION }}", "url": "https://github.com/3liz/QgisDynamicLayersPlugin/releases/latest/download/plugins.xml"}'

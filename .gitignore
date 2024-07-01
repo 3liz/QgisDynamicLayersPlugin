@@ -4,6 +4,7 @@
 
 # QGIS-Plugin-CI
 dynamic_layers/i18n
+dynamic_layers.*.*.*.zip
 
 # Tests data
 symbology-style.db
