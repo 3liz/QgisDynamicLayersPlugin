@@ -72,10 +72,6 @@ class DynamicLayers:
         # Layers attribute that can be shown and optionally changed in the plugin
         self.layersTable = [
             {
-                'key': 'id',
-                'display': self.tr('ID'),
-                'editable': False,
-            }, {
                 'key': 'name',
                 'display': self.tr('Name'),
                 'editable': False,
@@ -318,6 +314,7 @@ class DynamicLayers:
                 new_item.setData(QtVar.EditRole, value)
                 if attr['key'] == 'name':
                     new_item.setIcon(QgsIconUtils.iconForLayer(layer))
+                    new_item.setToolTip(layer.id())
 
                 # Add cell data to lineData
                 # encode it in the file system encoding, only if needed
@@ -825,6 +822,8 @@ class DynamicLayers:
 
     @staticmethod
     def generate_projects_clicked():
+        """ Open the Processing algorithm dialog. """
+        # noinspection PyUnresolvedReferences
         dialog = processing.createAlgorithmDialog(
             "dynamic_layers:generate_projects",
             {}
