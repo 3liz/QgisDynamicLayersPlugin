@@ -15,5 +15,5 @@ class GenerateProjects:
         self.field = field
         self.destination = destination
 
-    def process(self):
-        pass
+    def process(self) -> bool:
+        return True

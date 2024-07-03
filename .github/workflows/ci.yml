@@ -17,24 +17,58 @@ on:
 
 jobs:
 
-  flake8:
+  unittests:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
 
-      - name: Checkout
-        uses: actions/checkout@v4
+#    - name: Extract branch name
+#      shell: bash
+#      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+#      id: extract_branch
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          architecture: x64
+    - name: Install Python dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install flake8 pytest
 
-      - name: Install Python requirements
-        run: pip install -r requirements/dev.txt
+    - name: Install APT dependencies
+      run: |
+        sudo wget -O /etc/apt/keyrings/qgis-archive-keyring.gpg https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+        sudo sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/qgis-archive-keyring.gpg] https://qgis.org/ubuntu-ltr $(lsb_release -cs) main" >> /etc/apt/sources.list'
+        sudo apt update
+        sudo apt install qgis xvfb
 
-      - name: Run flake8
-        run: flake8
+#    - name: Lint with flake8
+#      run: |
+        # stop the build if there are Python syntax errors or undefined names
+#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      run: |
+        xvfb-run pytest -v
+
+
+#  flake8:
+#    runs-on: ubuntu-latest
+#    steps:
+#
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: "3.10"
+#          architecture: x64
+#
+#      - name: Install Python requirements
+#        run: pip install -r requirements/dev.txt
+#
+#      - name: Run flake8
+#        run: flake8
 #
 #  tests:
 #    runs-on: ubuntu-latest
