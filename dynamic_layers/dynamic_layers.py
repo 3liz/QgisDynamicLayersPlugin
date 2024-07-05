@@ -73,10 +73,6 @@ class DynamicLayers:
         # Layers attribute that can be shown and optionally changed in the plugin
         self.layersTable = [
             {
-                'key': 'id',
-                'display': self.tr('ID'),
-                'editable': False,
-            }, {
                 'key': 'name',
                 'display': self.tr('Name'),
                 'editable': False,
@@ -298,7 +294,7 @@ class DynamicLayers:
             self.dlg.twLayers.setRowCount(tw_row_count + 1)
             self.dlg.twLayers.setColumnCount(col_count)
 
-            if layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True):
+            if layer.customProperty(CustomProperty.DynamicDatasourceActive):
                 bg = QtVar.Green
             else:
                 bg = QtVar.Transparent
@@ -318,6 +314,8 @@ class DynamicLayers:
 
                 # Item value
                 value = self.get_layer_property(layer, attr['key'])
+                if attr['key'] == 'dynamicDatasourceActive':
+                    value = '✔' if value else ''
                 new_item.setData(QtVar.EditRole, value)
                 if attr['key'] == 'name':
                     # noinspection PyArgumentList
@@ -376,7 +374,7 @@ class DynamicLayers:
             row = lines[0].row()
 
             # Get layer
-            layer_id = self.dlg.twLayers.item(row, 0).data(QtVar.EditRole)
+            layer_id = self.dlg.twLayers.item(row, 0).data(QtVar.UserRole)
             layer = self.project.mapLayer(layer_id)
             if not layer:
                 show_layer_properties = False
@@ -413,7 +411,9 @@ class DynamicLayers:
                     widget.setCurrentIndex(list_dic[val])
 
         # "active" checkbox
-        is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True)
+        is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
+        if is_active is None:
+            is_active = False
         self.dlg.cbDatasourceActive.setChecked(is_active)
 
     def on_cb_datasource_active_change(self):
@@ -435,18 +435,18 @@ class DynamicLayers:
         row = lines[0].row()
 
         # Get the status of active checkbox
-        input_value = str(self.dlg.cbDatasourceActive.isChecked())
+        input_value = self.dlg.cbDatasourceActive.isChecked()
 
         # Change layer line background color in the table
         if self.dlg.cbDatasourceActive.isChecked():
             bg = QtVar.Green
         else:
             bg = QtVar.Transparent
-        for i in range(0, 3):
+        for i in range(0, len(self.layerPropertiesInputs) - 1):
             self.dlg.twLayers.item(row, i).setBackground(bg)
 
         # Change data for the corresponding column in the layers table
-        self.dlg.twLayers.item(row, 2).setData(QtVar.EditRole, input_value)
+        self.dlg.twLayers.item(row, 1).setData(QtVar.EditRole, '✔' if input_value else '')
 
         # Record the new value in the project
         self.selectedLayer.setCustomProperty(CustomProperty.DynamicDatasourceActive, input_value)

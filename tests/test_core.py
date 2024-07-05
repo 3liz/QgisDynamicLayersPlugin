@@ -33,7 +33,7 @@ class TestBasicReplacement(BaseTests):
         engine.set_dynamic_layers_from_project(project)
         self.assertDictEqual({}, engine._dynamic_layers)
 
-        vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, str(True))
+        vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, True)
         dynamic_source = vector.source()
 
         self.assertIn(folder_1, dynamic_source)

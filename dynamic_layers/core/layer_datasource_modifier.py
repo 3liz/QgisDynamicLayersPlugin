@@ -24,7 +24,7 @@ class LayerDataSourceModifier:
         Initialize class instance
         """
         self.layer = layer
-        self.dynamic_datasource_active = layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True)
+        self.dynamic_datasource_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
         self.dynamic_datasource_content = layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
     def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):

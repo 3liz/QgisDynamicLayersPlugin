@@ -80,7 +80,7 @@ class DynamicLayersEngine:
         """ Check all maplayers in the given project which are dynamic. """
         self._dynamic_layers = {
             lid: layer for lid, layer in project.mapLayers().items() if
-            layer.customProperty(CustomProperty.DynamicDatasourceActive) == str(True) and layer.customProperty(
+            layer.customProperty(CustomProperty.DynamicDatasourceActive) and layer.customProperty(
                 CustomProperty.DynamicDatasourceContent)
         }
 
