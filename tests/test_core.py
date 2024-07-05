@@ -68,9 +68,9 @@ class TestBasicReplacement(BaseTests):
         project = QgsProject()
 
         folder_1 = 'folder_1'
-        # folder_2 = 'folder_2'
-        # folder_3 = 'folder_3'
-        # folder_token = '$folder'
+        folder_2 = 'folder_2'
+        folder_3 = 'folder_3'
+        folder_token = '$folder'
 
         vector = QgsVectorLayer(str(Path(f"fixtures/{folder_1}/lines.geojson")), "Layer 1")
         project.addMapLayer(vector)
@@ -96,7 +96,7 @@ class TestBasicReplacement(BaseTests):
         generator = GenerateProjects(project, coverage, coverage.fields().at(1), Path(self.temp_dir.name))
         self.assertTrue(generator.process())
 
-        self.assertTrue(Path(self.temp_dir))
+        self.assertTrue(Path(self.temp_dir.name).exists())
 
 
 if __name__ == '__main__':

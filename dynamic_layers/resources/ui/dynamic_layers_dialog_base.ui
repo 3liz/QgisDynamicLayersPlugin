@@ -19,7 +19,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="tab_layers">
       <attribute name="title">
        <string>Configure layers</string>
       </attribute>
@@ -151,7 +151,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tab_project">
       <attribute name="title">
        <string>Configure project</string>
       </attribute>
@@ -239,7 +239,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tab_variables">
       <attribute name="title">
        <string>Set variables</string>
       </attribute>
@@ -394,7 +394,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tab_log">
       <attribute name="title">
        <string>Log</string>
       </attribute>
@@ -411,7 +411,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
+     <widget class="QWidget" name="tab_about">
       <attribute name="title">
        <string>About and Help</string>
       </attribute>

@@ -64,6 +64,7 @@ class DynamicLayers:
 
             QCoreApplication.installTranslator(self.translator)
 
+        # noinspection PyArgumentList
         self.project = QgsProject.instance()
 
         # Create the dialog (after translation) and keep reference
@@ -72,6 +73,10 @@ class DynamicLayers:
         # Layers attribute that can be shown and optionally changed in the plugin
         self.layersTable = [
             {
+                'key': 'id',
+                'display': self.tr('ID'),
+                'editable': False,
+            }, {
                 'key': 'name',
                 'display': self.tr('Name'),
                 'editable': False,
@@ -98,6 +103,7 @@ class DynamicLayers:
     # noinspection PyPep8Naming
     def initProcessing(self):
         self.provider = Provider()
+        # noinspection PyArgumentList
         QgsApplication.processingRegistry().addProvider(self.provider)
 
     # noinspection PyPep8Naming
@@ -111,6 +117,7 @@ class DynamicLayers:
         self.main_dialog_action.triggered.connect(self.run)
         self.menu.addAction(self.main_dialog_action)
 
+        # noinspection PyArgumentList
         self.generate_projects_action = QAction(
             QIcon(QgsApplication.iconPath("processingAlgorithm.svg")),
             self.tr("Generate projects"),
@@ -135,8 +142,7 @@ class DynamicLayers:
         self.initDone = False
 
         # Actions when row selection changes
-        sm = self.dlg.twLayers.selectionModel()
-        sm.selectionChanged.connect(self.on_row_selection_changed)
+        self.dlg.twLayers.selectionModel().selectionChanged.connect(self.on_row_selection_changed)
 
         # Actions when the layer properties are changed panel
         self.dlg.cbDatasourceActive.stateChanged.connect(self.on_cb_datasource_active_change)
@@ -229,6 +235,7 @@ class DynamicLayers:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         if self.provider:
+            # noinspection PyArgumentList
             QgsApplication.processingRegistry().removeProvider(self.provider)
 
         if self.generate_projects_action:
@@ -313,7 +320,9 @@ class DynamicLayers:
                 value = self.get_layer_property(layer, attr['key'])
                 new_item.setData(QtVar.EditRole, value)
                 if attr['key'] == 'name':
+                    # noinspection PyArgumentList
                     new_item.setIcon(QgsIconUtils.iconForLayer(layer))
+                    new_item.setData(QtVar.UserRole, layer.id())
                     new_item.setToolTip(layer.id())
 
                 # Add cell data to lineData
@@ -637,16 +646,8 @@ class DynamicLayers:
         self.dlg.twVariableList.removeRow(self.dlg.twVariableList.currentRow())
 
     def on_variable_item_changed(self, item):
-        """
-        if not self.initDone:
-            return
-        Change the variable item
-        """
-        if not self.initDone:
-            return
-
+        """ Change the variable item. """
         # Get row and column
-        # row = item.row()
         col = item.column()
 
         # Only allow edition of value
@@ -671,7 +672,6 @@ class DynamicLayers:
             return
 
         # Check if project has got some WMS capabilities
-
         # Title
         p_title = ''
         if self.project.readEntry('ProjectTitle', '/PluginDynamicLayers'):
@@ -832,7 +832,6 @@ class DynamicLayers:
 
     def run(self):
         """Run method that performs all the real work"""
-
         self.initDone = False
 
         # Populate the layers table

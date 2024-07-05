@@ -16,6 +16,7 @@ FORM_CLASS, _ = uic.loadUiType(ui_file)
 
 
 class DynamicLayersDialog(QDialog, FORM_CLASS):
+    # noinspection PyArgumentList
     def __init__(self, parent: QDialog = None):
         """Constructor."""
         # noinspection PyArgumentList
@@ -43,6 +44,27 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
         self.btCopyFromLayer.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
         self.btCopyFromProject.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
+
+        self.tab_widget.setTabIcon(
+            self.tab_widget.indexOf(self.tab_layers),
+            QIcon(QgsApplication.iconPath('mActionLayoutManager.svg'))
+        )
+        self.tab_widget.setTabIcon(
+            self.tab_widget.indexOf(self.tab_project),
+            QIcon(QgsApplication.iconPath('mIconFolderProject.svg'))
+        )
+        self.tab_widget.setTabIcon(
+            self.tab_widget.indexOf(self.tab_variables),
+            QIcon(QgsApplication.iconPath('mIconExpression.svg'))
+        )
+        self.tab_widget.setTabIcon(
+            self.tab_widget.indexOf(self.tab_log),
+            QIcon(QgsApplication.iconPath('mMessageLog.svg'))
+        )
+        self.tab_widget.setTabIcon(
+            self.tab_widget.indexOf(self.tab_about),
+            QIcon(QgsApplication.iconPath('mActionHelpContents.svg'))
+        )
 
         # Temporary disabled
         self.inProjectShortName.setVisible(False)

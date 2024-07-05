@@ -28,3 +28,4 @@ class QtVar:
     ItemIsEnabled = Qt.ItemIsEnabled
     EditRole = Qt.EditRole
     WaitCursor = Qt.WaitCursor
+    UserRole = Qt.UserRole
