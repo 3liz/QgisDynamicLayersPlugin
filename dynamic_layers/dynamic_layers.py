@@ -414,6 +414,12 @@ class DynamicLayers:
         is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
         if is_active is None:
             is_active = False
+
+        if isinstance(is_active, str):
+            # Temporary to migrate old projects containing string variables
+            # Now, only boolean variables are saved as custom property
+            is_active = True if is_active == str(True) else False
+
         self.dlg.cbDatasourceActive.setChecked(is_active)
 
     def on_cb_datasource_active_change(self):

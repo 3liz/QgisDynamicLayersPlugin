@@ -8,7 +8,7 @@ from qgis.core import QgsApplication
 from qgis.gui import QgsExpressionBuilderDialog
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
 folder = Path(__file__).resolve().parent
 ui_file = folder / 'resources' / 'ui' / 'dynamic_layers_dialog_base.ui'
@@ -66,9 +66,40 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             QIcon(QgsApplication.iconPath('mActionHelpContents.svg'))
         )
 
+        help_template = "{}\n{}\n{} {}".format(
+            self.tr(
+                'Variables should be written either with $variable or ${variable}.'
+            ),
+            self.tr(
+                'The second option is necessary if you want to concatenate a dynamic string with a fixed string.'
+            ),
+            self.tr(
+                'See the Python documentation about "Template strings".'
+            ),
+            "https://docs.python.org/3/library/string.html#template-strings"
+        )
+        list_templates = (
+            # Layers tab
+            self.label_datasource_template,
+            self.dynamicDatasourceContent,
+            self.label_title_template,
+            self.titleTemplate,
+            self.label_abstract_template,
+            self.abstractTemplate,
+            # Project tab
+            self.projectTitleLabel,
+            self.inProjectTitle,
+            self.label_project_shortname_template,
+            self.projectDescriptionLabel,
+            self.inProjectAbstract,
+        )
+        for widget in list_templates:
+            widget: QWidget
+            widget.setToolTip(help_template)
+
         # Temporary disabled
         self.inProjectShortName.setVisible(False)
-        self.label_5.setVisible(False)
+        self.label_project_shortname_template.setVisible(False)
 
         self.radio_variables_from_table.setChecked(True)
         self.radio_variables_from_layer.toggled.connect(self.origin_variable_toggled)
