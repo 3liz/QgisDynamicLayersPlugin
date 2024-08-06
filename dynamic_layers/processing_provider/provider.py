@@ -2,7 +2,7 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
 from dynamic_layers.processing_provider.generate_projects import (
-    GenerateProjects,
+    GenerateProjectsAlgorithm,
 )
 from dynamic_layers.tools import resources_path
 
@@ -10,7 +10,7 @@ from dynamic_layers.tools import resources_path
 class Provider(QgsProcessingProvider):
 
     def loadAlgorithms(self, *args, **kwargs):
-        self.addAlgorithm(GenerateProjects())
+        self.addAlgorithm(GenerateProjectsAlgorithm())
 
     def id(self, *args, **kwargs):
         return 'dynamic_layers'

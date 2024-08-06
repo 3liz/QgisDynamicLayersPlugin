@@ -32,7 +32,7 @@ from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.definitions import CustomProperty, QtVar
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
-from dynamic_layers.tools import resources_path
+from dynamic_layers.tools import resources_path, tr
 
 
 class DynamicLayers:
@@ -74,12 +74,12 @@ class DynamicLayers:
         self.layersTable = [
             {
                 'key': 'name',
-                'display': self.tr('Name'),
+                'display': tr('Name'),
                 'editable': False,
                 'type': 'string'
             }, {
                 'key': 'dynamicDatasourceActive',
-                'display': self.tr('Dynamic Datasource Active'),
+                'display': tr('Dynamic Datasource Active'),
                 'editable': False,
                 'type': 'string'
             },
@@ -108,7 +108,7 @@ class DynamicLayers:
         self.menu = QMenu("Dynamic Layers")
         self.menu.setIcon(self.main_icon)
 
-        self.main_dialog_action = QAction(self.main_icon, self.tr("Setup the project"), self.iface.mainWindow())
+        self.main_dialog_action = QAction(self.main_icon, tr("Setup the project"), self.iface.mainWindow())
         # noinspection PyUnresolvedReferences
         self.main_dialog_action.triggered.connect(self.run)
         self.menu.addAction(self.main_dialog_action)
@@ -116,7 +116,7 @@ class DynamicLayers:
         # noinspection PyArgumentList
         self.generate_projects_action = QAction(
             QIcon(QgsApplication.iconPath("processingAlgorithm.svg")),
-            self.tr("Generate projects"),
+            tr("Generate projects"),
             self.iface.mainWindow()
         )
         # noinspection PyUnresolvedReferences
@@ -128,7 +128,7 @@ class DynamicLayers:
         self.initProcessing()
 
         # Open the online help
-        self.help_action_about_menu = QAction(self.main_icon, self.tr('Project generator'), self.iface.mainWindow())
+        self.help_action_about_menu = QAction(self.main_icon, tr('Project generator'), self.iface.mainWindow())
         self.iface.pluginHelpMenu().addAction(self.help_action_about_menu)
         # noinspection PyUnresolvedReferences
         self.help_action_about_menu.triggered.connect(self.open_help)
@@ -514,8 +514,8 @@ class DynamicLayers:
             box = QMessageBox(self.dlg)
             box.setIcon(QMessageBox.Question)
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
-            box.setWindowTitle(self.tr('Replace settings by layer properties'))
-            box.setText(self.tr(
+            box.setWindowTitle(tr('Replace settings by layer properties'))
+            box.setText(tr(
                 'You have already set some values for this layer, are you sure you want to reset these ?'))
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.setDefaultButton(QMessageBox.No)
@@ -575,7 +575,7 @@ class DynamicLayers:
         when the user clicks on the corresponding button
         """
         if not self.initDone:
-            self.update_log(self.tr('Init was not finished'))
+            self.update_log(tr('Init was not finished'))
             return
 
         # Get table and row count
@@ -587,13 +587,13 @@ class DynamicLayers:
 
         # Check if the variable is not already in the list
         if v_name in self.variableList:
-            self.update_log(self.tr('This variable is already in the list'))
+            self.update_log(tr('This variable is already in the list'))
             return
 
         # Add constraint of possible input values
         project = re.compile('^[a-zA-Z]+$')
         if not project.match(v_name):
-            self.update_log(self.tr('The variable must contain only lower case ascii letters !'))
+            self.update_log(tr('The variable must contain only lower case ascii letters !'))
             return
 
         # Set table properties
@@ -705,8 +705,8 @@ class DynamicLayers:
             box = QMessageBox(self.dlg)
             box.setIcon(QMessageBox.Question)
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
-            box.setWindowTitle(self.tr('Replace settings by project properties'))
-            box.setText(self.tr(
+            box.setWindowTitle(tr('Replace settings by project properties'))
+            box.setText(tr(
                 'You have already set some values for this project, are you sure you want to reset these ?'))
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.setDefaultButton(QMessageBox.No)
@@ -809,7 +809,7 @@ class DynamicLayers:
                 engine.set_search_and_replace_dictionary_from_layer(layer, exp)
 
             # Change layers datasource
-            engine.set_dynamic_layers_datasource_from_dic()
+            engine.set_dynamic_layers_datasource_from_dict()
 
             # Set project properties
             engine.set_dynamic_project_properties(self.project)

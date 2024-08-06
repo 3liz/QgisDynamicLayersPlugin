@@ -67,6 +67,7 @@ class DynamicLayersEngine:
             q_req = QgsFeatureRequest(q_exp)
             features = layer.getFeatures(q_req)
         else:
+            # noinspection PyArgumentList
             QgsMessageLog.logMessage(
                 f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}')
             features = layer.getFeatures()
@@ -84,7 +85,7 @@ class DynamicLayersEngine:
                 CustomProperty.DynamicDatasourceContent)
         }
 
-    def set_dynamic_layers_datasource_from_dic(self):
+    def set_dynamic_layers_datasource_from_dict(self):
         """
         For each layers with "active" status,
         Change the datasource by using the dynamicDatasourceContent

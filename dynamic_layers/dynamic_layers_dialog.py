@@ -10,6 +10,8 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QWidget
 
+from dynamic_layers.tools import tr
+
 folder = Path(__file__).resolve().parent
 ui_file = folder / 'resources' / 'ui' / 'dynamic_layers_dialog_base.ui'
 FORM_CLASS, _ = uic.loadUiType(ui_file)
@@ -67,13 +69,13 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         )
 
         help_template = "{}\n{}\n{} {}".format(
-            self.tr(
+            tr(
                 'Variables should be written either with $variable or ${variable}.'
             ),
-            self.tr(
+            tr(
                 'The second option is necessary if you want to concatenate a dynamic string with a fixed string.'
             ),
-            self.tr(
+            tr(
                 'See the Python documentation about "Template strings".'
             ),
             "https://docs.python.org/3/library/string.html#template-strings"

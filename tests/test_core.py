@@ -2,12 +2,12 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+import tempfile
 import unittest
 
 from pathlib import Path
 
-from qgis._core import QgsFeature
-from qgis.core import QgsProject, QgsVectorLayer, edit
+from qgis.core import QgsFeature, QgsProject, QgsVectorLayer, edit
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.core.generate_projects import GenerateProjects
@@ -19,6 +19,7 @@ class TestBasicReplacement(BaseTests):
 
     def test_replacement_map_layer(self):
         """ Test datasource can be replaced. """
+        # noinspection PyArgumentList
         project = QgsProject()
 
         folder_1 = 'folder_1'
@@ -56,7 +57,7 @@ class TestBasicReplacement(BaseTests):
             'folder': folder_2,
         }
 
-        engine.set_dynamic_layers_datasource_from_dic()
+        engine.set_dynamic_layers_datasource_from_dict()
         engine.set_dynamic_project_properties(project, "Test title", "Test abstract")
 
         self.assertIn(folder_2, vector.source())
@@ -65,6 +66,7 @@ class TestBasicReplacement(BaseTests):
 
     def test_generate_projects(self):
         """ Test generate a bunch of projects. """
+        # noinspection PyArgumentList
         project = QgsProject()
 
         folder_1 = 'folder_1'
@@ -76,27 +78,48 @@ class TestBasicReplacement(BaseTests):
         project.addMapLayer(vector)
         self.assertEqual(1, len(project.mapLayers()))
 
+        parent_project = Path(self.temp_dir).joinpath("parent.qgs")
+
+        project.setFileName(str(parent_project))
+        self.assertTrue(project.write())
+        self.assertTrue(parent_project.exists())
+
+        field = "name"
         coverage = QgsVectorLayer(
-            "None?&field=id:integer&field=name:string(20)&index=yes", "coverage", "memory")
+            f"None?&field=id:integer&field={field}:string(20)&index=yes", "coverage", "memory")
         with edit(coverage):
             feature = QgsFeature(coverage.fields())
             feature.setAttributes([0, "1"])
+            # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
             feature.setAttributes([0, "2"])
+            # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
             feature.setAttributes([0, "3"])
+            # noinspection PyArgumentList
             coverage.addFeature(feature)
 
         self.assertEqual(3, coverage.featureCount())
 
-        generator = GenerateProjects(project, coverage, coverage.fields().at(1), Path(self.temp_dir.name))
+        field_name = coverage.fields().at(1).name()
+        generator = GenerateProjects(project, coverage, field_name, Path(self.temp_dir))
         self.assertTrue(generator.process())
 
-        self.assertTrue(Path(self.temp_dir.name).exists())
+        unique_values = coverage.uniqueValues(coverage.fields().indexFromName(field_name))
+        self.assertSetEqual({'1', '2', '3'}, unique_values)
+
+        generator = GenerateProjects(project, coverage, field, project.homePath())
+        self.assertTrue(generator.process())
+
+        for i in unique_values:
+            expected_project = "{}_{}.qgs".format(project.baseName(), i)
+            self.assertTrue(
+                Path(self.temp_dir).joinpath(expected_project).exists(),
+                f"In folder {self.temp_dir}, {expected_project} for value = {i} does not exist")
 
 
 if __name__ == '__main__':

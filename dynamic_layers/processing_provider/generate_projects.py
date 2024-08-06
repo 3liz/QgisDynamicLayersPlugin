@@ -2,6 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+from pathlib import Path
+
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
@@ -14,10 +16,11 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 
-from dynamic_layers.tools import resources_path
+from dynamic_layers.core.generate_projects import GenerateProjects
+from dynamic_layers.tools import resources_path, tr
 
 
-class GenerateProjects(QgsProcessingAlgorithm):
+class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     FIELD = 'FIELD'
@@ -28,25 +31,25 @@ class GenerateProjects(QgsProcessingAlgorithm):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
-        return GenerateProjects()
+        return GenerateProjectsAlgorithm()
 
     def name(self):
         return 'generate_projects'
 
     def displayName(self):
-        return self.tr('Generate projects')
+        return tr('Generate projects')
 
     def icon(self):
         return QIcon(str(resources_path('icons', 'icon.png')))
 
     def shortHelpString(self):
-        return self.tr("Generate all projects for all unique values in the layer")
+        return tr("Generate all projects for all unique values in the layer")
 
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Coverage layer'),
+                tr('Coverage layer'),
                 [QgsProcessing.TypeVectorAnyGeometry]
             )
         )
@@ -54,7 +57,7 @@ class GenerateProjects(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.FIELD,
-                self.tr('Field having unique values'),
+                tr('Field having unique values'),
                 parentLayerParameterName=self.INPUT,
             )
         )
@@ -62,14 +65,14 @@ class GenerateProjects(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.COPY_SIDE_CAR_FILES,
-                self.tr('Copy all project side-car files'),
+                tr('Copy all project side-car files'),
             )
         )
 
         self.addParameter(
             QgsProcessingParameterFolderDestination(
                 self.OUTPUT,
-                self.tr('Destination folder')
+                tr('Destination folder')
             )
         )
 
@@ -79,9 +82,16 @@ class GenerateProjects(QgsProcessingAlgorithm):
             self.INPUT,
             context
         )
+        output_dir = Path(self.parameterAsString(parameters, self.OUTPUT, context))
 
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+
+        field = self.parameterAsString(parameters, self.FIELD, context)
+        index = source.fields().indexFromName(field)
+        unique_values = source.uniqueValues(index)
+        feedback.pushInfo(tr("Generating {} projects in {}").format(len(unique_values), output_dir))
+        feedback.pushDebugInfo(tr("List of uniques values") + " : " + ', '.join([str(i) for i in unique_values]))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -93,4 +103,8 @@ class GenerateProjects(QgsProcessingAlgorithm):
         )
         _ = sink
         _ = dest_id
+
+        generator = GenerateProjects(context.project(), source, field, feedback)
+        generator.process()
+
         return {self.OUTPUT: dest_id}

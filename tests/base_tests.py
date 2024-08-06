@@ -20,7 +20,8 @@ class BaseTests(unittest.TestCase):
         cls.qgs.exitQgis()
 
     def setUp(self):
-        self.temp_dir = tempfile.TemporaryDirectory()
+        self.temp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        self.temp_dir.cleanup()
+        # self.temp_dir.cleanup()
+        pass

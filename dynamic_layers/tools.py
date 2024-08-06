@@ -6,6 +6,8 @@ from pathlib import Path
 from string import Template
 from typing import List
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 """ Tools to work with resources files. """
 
 
@@ -37,3 +39,7 @@ def side_car_files(file_path: Path) -> List[Path]:
 
     results.sort()
     return results
+
+
+def tr(message: str) -> str:
+    return QCoreApplication.translate('DynamicLayers', message)
