@@ -2,7 +2,6 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-import tempfile
 import unittest
 
 from pathlib import Path
@@ -112,7 +111,7 @@ class TestBasicReplacement(BaseTests):
         unique_values = coverage.uniqueValues(coverage.fields().indexFromName(field_name))
         self.assertSetEqual({'1', '2', '3'}, unique_values)
 
-        generator = GenerateProjects(project, coverage, field, project.homePath())
+        generator = GenerateProjects(project, coverage, field, Path(project.homePath()))
         self.assertTrue(generator.process())
 
         for i in unique_values:

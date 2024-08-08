@@ -333,7 +333,7 @@
           <item>
            <layout class="QFormLayout" name="formLayout_2">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="label_name_variable">
               <property name="text">
                <string>Name</string>
               </property>
@@ -347,7 +347,7 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="label_value_variable">
               <property name="text">
                <string>Value</string>
               </property>

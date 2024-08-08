@@ -294,7 +294,13 @@ class DynamicLayers:
             self.dlg.twLayers.setRowCount(tw_row_count + 1)
             self.dlg.twLayers.setColumnCount(col_count)
 
-            if layer.customProperty(CustomProperty.DynamicDatasourceActive):
+            custom_property = layer.customProperty(CustomProperty.DynamicDatasourceActive)
+            if isinstance(custom_property, str):
+                # Temporary to migrate old projects containing string variables
+                # Now, only boolean variables are saved as custom property
+                custom_property = True if custom_property == str(True) else False
+
+            if custom_property:
                 bg = QtVar.Green
             else:
                 bg = QtVar.Transparent

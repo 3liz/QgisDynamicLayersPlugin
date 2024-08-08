@@ -99,6 +99,36 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             widget: QWidget
             widget.setToolTip(help_template)
 
+        help_variables_layer = tr(
+            "Choose a vector layer and then filter the layer with a QGIS expression to have a single feature. In this "
+            "case, each field will be used as a variable name with its according field value for the content of the "
+            "variable."
+        )
+        widgets = (
+            self.radio_variables_from_layer,
+            self.inVariableSourceLayer,
+            self.inVariableSourceLayerExpression,
+            self.bt_open_expression,
+        )
+        for widget in widgets:
+            widget: QWidget
+            widget.setToolTip(help_variables_layer)
+
+        help_variables_table = tr("You can add or remove variables in the table by using the form at the bottom.")
+        widgets = (
+            self.radio_variables_from_table,
+            self.twVariableList,
+            self.label_name_variable,
+            self.inVariableName,
+            self.label_value_variable,
+            self.inVariableValue,
+            self.btAddVariable,
+            self.btRemoveVariable,
+        )
+        for widget in widgets:
+            widget: QWidget
+            widget.setToolTip(help_variables_table)
+
         # Temporary disabled
         self.inProjectShortName.setVisible(False)
         self.label_project_shortname_template.setVisible(False)

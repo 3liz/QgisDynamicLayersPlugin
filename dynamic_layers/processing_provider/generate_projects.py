@@ -3,6 +3,7 @@ __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
 from pathlib import Path
+from typing import Tuple
 
 from qgis.core import (
     QgsProcessing,
@@ -13,10 +14,10 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterFolderDestination,
 )
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 
 from dynamic_layers.core.generate_projects import GenerateProjects
+from dynamic_layers.definitions import CustomProperty
 from dynamic_layers.tools import resources_path, tr
 
 
@@ -26,9 +27,6 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
     FIELD = 'FIELD'
     COPY_SIDE_CAR_FILES = "COPY_SIDE_CAR_FILES"
     OUTPUT = 'OUTPUT'
-
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
         return GenerateProjectsAlgorithm()
@@ -46,6 +44,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         return tr("Generate all projects for all unique values in the layer")
 
     def initAlgorithm(self, config=None):
+        # noinspection PyUnresolvedReferences
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
@@ -75,6 +74,21 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
                 tr('Destination folder')
             )
         )
+
+    def checkParameterValues(self, parameters, context) -> Tuple[bool, str]:
+        layers = context.project().mapLayers().values()
+        flag = False
+        for layer in layers:
+            if layer.customProperty(CustomProperty.DynamicDatasourceActive):
+                flag = True
+                break
+
+        if not flag:
+            # TODO check configuration, maybe only at the project level
+            msg = tr("You must have at least one layer with the configuration.")
+            return False, msg
+
+        return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
         source = self.parameterAsSource(
