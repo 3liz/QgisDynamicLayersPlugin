@@ -2,9 +2,13 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+import string
+
 from pathlib import Path
+from typing import List
 
 from qgis.core import (
+    QgsExpression,
     QgsProcessingFeatureSource,
     QgsProcessingFeedback,
     QgsProject,
@@ -22,6 +26,7 @@ class GenerateProjects:
             project: QgsProject,
             coverage: QgsVectorLayer | QgsProcessingFeatureSource,
             field: str,
+            template_destination: string.Template,
             destination: Path,
             feedback: QgsProcessingFeedback = None,
     ):
@@ -29,7 +34,14 @@ class GenerateProjects:
         self.coverage = coverage
         self.field = field
         self.destination = destination
+        self.template_destination = template_destination
         self.feedback = feedback
+
+    def project_path_identifiers(self) -> List[str]:
+        """List of identifiers in the string template. """
+        # TODO In Python 3.11, use the new function get_identifiers
+        return [
+            s[1] or s[2] for s in string.Template.pattern.findall(self.template_destination.template) if s[1] or s[2]]
 
     def process(self) -> bool:
         engine = DynamicLayersEngine()
@@ -38,17 +50,24 @@ class GenerateProjects:
         unique_values = self.coverage.uniqueValues(self.coverage.fields().indexFromName(self.field))
 
         base_path = self.project.fileName()
-        base_name = self.project.baseName()
+
+        if not self.destination.exists():
+            self.destination.mkdir()
+
+        token = self.project_path_identifiers()[0]
 
         for unique in unique_values:
-            engine.search_and_replace_dictionary = {
-                'folder': unique,
-            }
+            expression = QgsExpression.createFieldEqualityExpression(self.field, unique)
+            if self.feedback:
+                self.feedback.pushDebugInfo(tr('Expression generated {}').format(expression))
 
+            engine.set_search_and_replace_dictionary_from_layer(self.coverage, expression)
             engine.set_dynamic_layers_datasource_from_dict()
-            engine.set_dynamic_project_properties(self.project, "Test title", "Test abstract")
+            # TODO title and abstract
+            engine.set_dynamic_project_properties(self.project)
 
-            new_path = "{}/{}_{}.qgs".format(self.project.homePath(), base_name, unique)
+            new_file = self.template_destination.substitute({token: unique})
+            new_path = f"{self.destination}/{new_file}"
             if self.feedback:
                 self.feedback.pushDebugInfo(tr('Project written to {}').format(new_path))
             self.project.setFileName(new_path)

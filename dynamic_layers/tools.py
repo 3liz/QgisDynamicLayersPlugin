@@ -13,7 +13,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 def string_substitution(string: str, dictionary: dict) -> str:
     """ String substitution. """
-    return Template(string).substitute(dictionary)
+    return Template(string).safe_substitute(dictionary)
 
 
 def plugin_path(*args) -> Path:

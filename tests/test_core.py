@@ -2,6 +2,7 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+import string
 import unittest
 
 from pathlib import Path
@@ -72,8 +73,16 @@ class TestBasicReplacement(BaseTests):
         folder_2 = 'folder_2'
         folder_3 = 'folder_3'
         folder_token = '$folder'
+        template_destination = string.Template('test_${folder}_test.qgs')
+        layer_name = "Layer 1"
 
-        vector = QgsVectorLayer(str(Path(f"fixtures/{folder_1}/lines.geojson")), "Layer 1")
+        vector_path = Path(__file__).parent.joinpath(f"fixtures/{folder_1}/lines.geojson")
+        self.assertTrue(vector_path.exists(), str(vector_path))
+        vector = QgsVectorLayer(str(vector_path), layer_name)
+        vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, True)
+        vector.setCustomProperty(
+            CustomProperty.DynamicDatasourceContent,
+            str(vector_path).replace(folder_1, folder_token))
         project.addMapLayer(vector)
         self.assertEqual(1, len(project.mapLayers()))
 
@@ -83,42 +92,52 @@ class TestBasicReplacement(BaseTests):
         self.assertTrue(project.write())
         self.assertTrue(parent_project.exists())
 
-        field = "name"
+        field = "folder"
         coverage = QgsVectorLayer(
             f"None?&field=id:integer&field={field}:string(20)&index=yes", "coverage", "memory")
         with edit(coverage):
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([0, "1"])
+            feature.setAttributes([1, folder_1])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([0, "2"])
+            feature.setAttributes([2, folder_2])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([0, "3"])
+            feature.setAttributes([3, folder_3])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
         self.assertEqual(3, coverage.featureCount())
 
         field_name = coverage.fields().at(1).name()
-        generator = GenerateProjects(project, coverage, field_name, Path(self.temp_dir))
+        generator = GenerateProjects(project, coverage, field_name, template_destination, Path(self.temp_dir))
+
+        # TODO With Pyhton 3.11, switch to get_identifiers()
+        self.assertListEqual(['folder'], generator.project_path_identifiers())
+
         self.assertTrue(generator.process())
 
         unique_values = coverage.uniqueValues(coverage.fields().indexFromName(field_name))
-        self.assertSetEqual({'1', '2', '3'}, unique_values)
+        self.assertSetEqual({'folder_1', 'folder_2', 'folder_3'}, unique_values)
 
-        generator = GenerateProjects(project, coverage, field, Path(project.homePath()))
-        self.assertTrue(generator.process())
+        # generator = GenerateProjects(project, coverage, field, Path(project.homePath()))
+        # self.assertTrue(generator.process())
 
         for i in unique_values:
-            expected_project = "{}_{}.qgs".format(project.baseName(), i)
+            expected_project = template_destination.substitute({'folder': i})
+            expected_path = Path(self.temp_dir).joinpath(expected_project)
             self.assertTrue(
-                Path(self.temp_dir).joinpath(expected_project).exists(),
+                expected_path.exists(),
                 f"In folder {self.temp_dir}, {expected_project} for value = {i} does not exist")
+
+            child_project = QgsProject()
+            child_project.read(str(expected_path))
+            layer = child_project.mapLayersByName(layer_name)[0]
+            self.assertTrue(i in layer.source())
 
 
 if __name__ == '__main__':

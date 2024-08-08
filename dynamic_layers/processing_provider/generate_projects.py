@@ -2,6 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+import string
+
 from pathlib import Path
 from typing import Tuple
 
@@ -13,6 +15,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFolderDestination,
+    QgsProcessingParameterString,
 )
 from qgis.PyQt.QtGui import QIcon
 
@@ -26,6 +29,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
     FIELD = 'FIELD'
     COPY_SIDE_CAR_FILES = "COPY_SIDE_CAR_FILES"
+    TEMPLATE_DESTINATION = "TEMPLATE_DESTINATION"
     OUTPUT = 'OUTPUT'
 
     def createInstance(self):
@@ -68,6 +72,16 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
+        parameter = QgsProcessingParameterString(
+            self.TEMPLATE_DESTINATION,
+            tr('Template to use to format the final filename'),
+        )
+        parameter.setHelp(
+            "The template must have the extension and at least one field name as a Python string template, such as "
+            "'project_$province.qgs' when the layer has field called 'province'"
+        )
+        self.addParameter(parameter)
+
         self.addParameter(
             QgsProcessingParameterFolderDestination(
                 self.OUTPUT,
@@ -97,6 +111,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             context
         )
         output_dir = Path(self.parameterAsString(parameters, self.OUTPUT, context))
+        template_destination = string.Template(self.parameterAsString(parameters, self.TEMPLATE_DESTINATION, context))
 
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
@@ -107,18 +122,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(tr("Generating {} projects in {}").format(len(unique_values), output_dir))
         feedback.pushDebugInfo(tr("List of uniques values") + " : " + ', '.join([str(i) for i in unique_values]))
 
-        (sink, dest_id) = self.parameterAsSink(
-            parameters,
-            self.OUTPUT,
-            context,
-            source.fields(),
-            source.wkbType(),
-            source.sourceCrs()
-        )
-        _ = sink
-        _ = dest_id
-
-        generator = GenerateProjects(context.project(), source, field, feedback)
+        generator = GenerateProjects(context.project(), source, field, template_destination, output_dir, feedback)
         generator.process()
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT: str(output_dir)}
