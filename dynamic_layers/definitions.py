@@ -18,6 +18,10 @@ class ProjectProperty:
     Extent = 'WMSExtent'
 
 
+PLUGIN_SCOPE = 'PluginDynamicLayers'
+PLUGIN_SCOPE_KEY = f'/{PLUGIN_SCOPE}'
+
+
 # noinspection PyUnresolvedReferences
 class QtVar:
     Green = QColor(175, 208, 126)

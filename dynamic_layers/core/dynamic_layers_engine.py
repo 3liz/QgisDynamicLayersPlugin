@@ -19,7 +19,11 @@ from qgis.utils import iface
 from dynamic_layers.core.layer_datasource_modifier import (
     LayerDataSourceModifier,
 )
-from dynamic_layers.definitions import CustomProperty, ProjectProperty
+from dynamic_layers.definitions import (
+    PLUGIN_SCOPE,
+    CustomProperty,
+    ProjectProperty,
+)
 from dynamic_layers.tools import string_substitution
 
 
@@ -123,16 +127,14 @@ class DynamicLayersEngine:
 
         # title
         if not title:
-            xml = 'ProjectTitle'
-            val = project.readEntry('PluginDynamicLayers', xml)
+            val = project.readEntry(PLUGIN_SCOPE, 'ProjectTitle')
             if val:
                 title = val[0]
         self.set_project_property(project, ProjectProperty.Title, title)
 
         # abstract
         if not abstract:
-            xml = 'ProjectAbstract'
-            val = project.readEntry('PluginDynamicLayers', xml)
+            val = project.readEntry(PLUGIN_SCOPE, 'ProjectAbstract')
             if val:
                 abstract = val[0]
         self.set_project_property(project, ProjectProperty.Abstract, abstract)

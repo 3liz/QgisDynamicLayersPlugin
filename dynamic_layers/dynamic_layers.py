@@ -29,7 +29,12 @@ from qgis.PyQt.QtWidgets import (
 from qgis.utils import OverrideCursor
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
-from dynamic_layers.definitions import CustomProperty, QtVar
+from dynamic_layers.definitions import (
+    PLUGIN_SCOPE,
+    PLUGIN_SCOPE_KEY,
+    CustomProperty,
+    QtVar,
+)
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
 from dynamic_layers.tools import resources_path, tr
@@ -544,7 +549,7 @@ class DynamicLayers:
         Fill the variable table
         """
         # Get the list of variable from the project
-        variable_list = self.project.readListEntry('PluginDynamicLayers', 'VariableList')
+        variable_list = self.project.readListEntry(PLUGIN_SCOPE, 'VariableList')
         if not variable_list:
             return
 
@@ -626,7 +631,7 @@ class DynamicLayers:
         self.variableList.append(v_name)
 
         # Add variable to the project
-        self.project.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        self.project.writeEntry(PLUGIN_SCOPE, 'VariableList', self.variableList)
         self.project.setDirty(True)
 
     def on_remove_variable_clicked(self):
@@ -651,7 +656,7 @@ class DynamicLayers:
         self.variableList.remove(v_name)
 
         # Update project
-        self.project.writeEntry('PluginDynamicLayers', 'VariableList', self.variableList)
+        self.project.writeEntry(PLUGIN_SCOPE, 'VariableList', self.variableList)
         self.project.setDirty(True)
 
         # Remove selected lines
@@ -686,15 +691,15 @@ class DynamicLayers:
         # Check if project has got some WMS capabilities
         # Title
         p_title = ''
-        if self.project.readEntry('ProjectTitle', '/PluginDynamicLayers'):
-            p_title = self.project.readEntry('ProjectTitle', '/PluginDynamicLayers')[0]
+        if self.project.readEntry('ProjectTitle', PLUGIN_SCOPE_KEY):
+            p_title = self.project.readEntry('ProjectTitle', PLUGIN_SCOPE_KEY)[0]
         if not p_title and self.project.readEntry('WMSServiceTitle', "/"):
             p_title = self.project.readEntry('WMSServiceTitle', "/")[0]
 
         # Abstract
         p_abstract = ''
-        if self.project.readEntry('ProjectAbstract', '/PluginDynamicLayers'):
-            p_abstract = self.project.readEntry('ProjectAbstract', '/PluginDynamicLayers')[0]
+        if self.project.readEntry('ProjectAbstract', PLUGIN_SCOPE_KEY):
+            p_abstract = self.project.readEntry('ProjectAbstract', PLUGIN_SCOPE_KEY)[0]
         if not p_abstract and self.project.readEntry('WMSServiceAbstract', "/"):
             p_abstract = self.project.readEntry('WMSServiceAbstract', "/")[0]
 
@@ -753,7 +758,7 @@ class DynamicLayers:
 
         # Store value into the project
         xml = self.projectPropertiesInputs[prop]['xml']
-        self.project.writeEntry('PluginDynamicLayers', xml, val)
+        self.project.writeEntry(PLUGIN_SCOPE, xml, val)
         self.project.setDirty(True)
 
     def populate_project_properties(self):
@@ -765,7 +770,7 @@ class DynamicLayers:
         for prop, item in self.projectPropertiesInputs.items():
             widget = item['widget']
             xml = self.projectPropertiesInputs[prop]['xml']
-            val = self.project.readEntry('PluginDynamicLayers', xml)
+            val = self.project.readEntry(PLUGIN_SCOPE, xml)
             if val:
                 val = val[0]
             if not val:
