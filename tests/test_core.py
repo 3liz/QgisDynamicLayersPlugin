@@ -76,7 +76,7 @@ class TestBasicReplacement(BaseTests):
         template_destination = string.Template('test_${folder}_test.qgs')
         layer_name = "Layer 1"
 
-        vector_path = Path(__file__).parent.joinpath(f"fixtures/{folder_1}/lines.geojson")
+        vector_path = Path(__file__).parent.joinpath(f"fixtures/{folder_1}/lines_1.geojson")
         self.assertTrue(vector_path.exists(), str(vector_path))
         vector = QgsVectorLayer(str(vector_path), layer_name)
         vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, True)
@@ -116,7 +116,7 @@ class TestBasicReplacement(BaseTests):
         field_name = coverage.fields().at(1).name()
         generator = GenerateProjects(project, coverage, field_name, template_destination, Path(self.temp_dir))
 
-        # TODO With Pyhton 3.11, switch to get_identifiers()
+        # TODO With Python 3.11, switch to get_identifiers()
         self.assertListEqual(['folder'], generator.project_path_identifiers())
 
         self.assertTrue(generator.process())
