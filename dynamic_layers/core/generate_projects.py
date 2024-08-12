@@ -5,6 +5,7 @@ __email__ = 'info@3liz.org'
 import string
 
 from pathlib import Path
+from shutil import copyfile
 from typing import List
 
 from qgis.core import (
@@ -16,7 +17,7 @@ from qgis.core import (
 )
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
-from dynamic_layers.tools import tr
+from dynamic_layers.tools import side_car_files, tr
 
 
 class GenerateProjects:
@@ -28,6 +29,7 @@ class GenerateProjects:
             field: str,
             template_destination: string.Template,
             destination: Path,
+            copy_side_car_files: bool,
             feedback: QgsProcessingFeedback = None,
     ):
         self.project = project
@@ -35,6 +37,7 @@ class GenerateProjects:
         self.field = field
         self.destination = destination
         self.template_destination = template_destination
+        self.copy_side_car_files = copy_side_car_files
         self.feedback = feedback
 
     def project_path_identifiers(self) -> List[str]:
@@ -73,5 +76,10 @@ class GenerateProjects:
             self.project.setFileName(new_path)
             self.project.write()
             self.project.setFileName(base_path)
+
+            if self.copy_side_car_files:
+                files = side_car_files(Path(base_path))
+                for a_file in files:
+                    copyfile(a_file, new_path + a_file.suffix)
 
         return True

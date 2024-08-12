@@ -87,6 +87,8 @@ class TestBasicReplacement(BaseTests):
         self.assertEqual(1, len(project.mapLayers()))
 
         parent_project = Path(self.temp_dir).joinpath("parent.qgs")
+        side_car = Path(self.temp_dir).joinpath("parent.qgs.png")
+        side_car.touch()
 
         project.setFileName(str(parent_project))
         self.assertTrue(project.write())
@@ -114,7 +116,8 @@ class TestBasicReplacement(BaseTests):
         self.assertEqual(3, coverage.featureCount())
 
         field_name = coverage.fields().at(1).name()
-        generator = GenerateProjects(project, coverage, field_name, template_destination, Path(self.temp_dir))
+        generator = GenerateProjects(
+            project, coverage, field_name, template_destination, Path(self.temp_dir), True)
 
         # TODO With Python 3.11, switch to get_identifiers()
         self.assertListEqual(['folder'], generator.project_path_identifiers())
@@ -133,6 +136,12 @@ class TestBasicReplacement(BaseTests):
             self.assertTrue(
                 expected_path.exists(),
                 f"In folder {self.temp_dir}, {expected_project} for value = {i} does not exist")
+
+            # Test sidecar
+            side = Path(str(expected_path) + ".png")
+            self.assertTrue(
+                side.exists(),
+                f"In folder {self.temp_dir}, {side} for value = {i} does not exist for the side car file")
 
             child_project = QgsProject()
             child_project.read(str(expected_path))

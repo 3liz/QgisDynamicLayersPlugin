@@ -68,7 +68,11 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.COPY_SIDE_CAR_FILES,
-                tr('Copy all project side-car files'),
+                tr(
+                    'Copy all project side-car files, for instance copy "project_photo.qgs.png" if the file is '
+                    'existing.'
+                ),
+                defaultValue=True,
             )
         )
 
@@ -110,6 +114,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             self.INPUT,
             context
         )
+        copy_side_car_files = self.parameterAsBool(parameters, self.COPY_SIDE_CAR_FILES, context)
         output_dir = Path(self.parameterAsString(parameters, self.OUTPUT, context))
         template_destination = string.Template(self.parameterAsString(parameters, self.TEMPLATE_DESTINATION, context))
 
@@ -121,8 +126,10 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         unique_values = source.uniqueValues(index)
         feedback.pushInfo(tr("Generating {} projects in {}").format(len(unique_values), output_dir))
         feedback.pushDebugInfo(tr("List of uniques values") + " : " + ', '.join([str(i) for i in unique_values]))
+        feedback.pushDebugInfo(tr("Copy side car files") + " : " + str(copy_side_car_files))
 
-        generator = GenerateProjects(context.project(), source, field, template_destination, output_dir, feedback)
+        generator = GenerateProjects(
+            context.project(), source, field, template_destination, output_dir, copy_side_car_files, feedback)
         generator.process()
 
         return {self.OUTPUT: str(output_dir)}
