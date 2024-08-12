@@ -1,0 +1,50 @@
+name: 📖 Documentation
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/publish-doc.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Get source code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+        cache: "pip"
+        cache-dependency-path: "requirements/doc.txt"
+
+    - name: Set up NodeJS (for search index prebuilding)
+      uses: actions/setup-node@v3
+      with:
+        node-version: '12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r requirements/doc.txt
+
+    - name: Copy CHANGELOG.md and CONTRIBUTING.md
+      run: |
+        cp CHANGELOG.md docs/
+        cp CONTRIBUTING.md docs/
+
+    - name: Deploy to Github Pages
+      run: |
+        git config --global user.name "${{ secrets.BOT_NAME }}"
+        git config --global user.email "${{ secrets.BOT_MAIL }}"
+        mkdocs gh-deploy --clean --force --verbose

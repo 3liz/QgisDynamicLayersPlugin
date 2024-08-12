@@ -1,0 +1,80 @@
+site_name: DynamicLayers
+site_author: 3Liz
+site_description: DynamicLayers
+site_url: https://docs.3liz.org/QgisDynamicLayersPlugin/
+repo_url: https://github.com/3liz/QgisDynamicLayersPlugin/
+copyright: '<span class="copyleft">&copy;</span> 3Liz'
+
+docs_dir: docs
+site_dir: build
+
+nav:
+    - docs.3liz.org: '../'
+    - Home: index.md
+    - Changelog: changelog.md
+
+plugins:
+  - search
+  - git-revision-date-localized
+
+markdown_extensions:
+  - toc:
+      permalink: "#"
+  - meta:
+  - pymdownx.highlight:
+      linenums: true
+      linenums_style: pymdownx.inline
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.magiclink:
+  - pymdownx.tasklist:
+  - pymdownx.snippets:
+  - pymdownx.keys:
+  - attr_list:
+  - admonition:
+  - pymdownx.details:
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js
+  - https://unpkg.com/mermaid@8.6.4/dist/mermaid.min.js
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css
+
+theme:
+  name: material
+  font: false
+  icon:
+    repo: fontawesome/brands/github-alt
+  language: 'en'
+  logo: icon.png
+  favicon: icon.png
+  palette:
+    accent: deep-orange
+    primary: green
+    scheme: default
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/3LIZ_news
+
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/3liz
+
+    - icon: fontawesome/brands/github
+      link: https://github.com/3liz/
+
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/3liz
+
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCYYW2CTWR_84kB6pt2zCWbQ
