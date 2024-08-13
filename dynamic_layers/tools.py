@@ -6,14 +6,51 @@ from pathlib import Path
 from string import Template
 from typing import List
 
+from qgis.core import (
+    QgsExpression,
+    QgsExpressionContext,
+    QgsExpressionContextScope,
+    QgsExpressionContextUtils,
+    QgsFeature,
+    QgsProject,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QCoreApplication
 
 """ Tools to work with resources files. """
 
 
-def string_substitution(string: str, dictionary: dict) -> str:
+def string_substitution(
+        input_string: str,
+        variables: dict,
+        use_python: bool = True,
+        project: QgsProject = None,
+        layer: QgsVectorLayer = None,
+        feature: QgsFeature = None
+) -> str:
     """ String substitution. """
-    return Template(string).safe_substitute(dictionary)
+    if use_python:
+        return Template(input_string).safe_substitute(variables)
+
+    expression = QgsExpression(input_string)
+    scope = QgsExpressionContextScope()
+    for key, value in variables.items():
+        scope.addVariable(QgsExpressionContextScope.StaticVariable(key, value, True, True))
+
+    context = QgsExpressionContext()
+    context.appendScope(QgsExpressionContextUtils.globalScope())
+
+    if project:
+        context.appendScope(QgsExpressionContextUtils.projectScope(project))
+
+    if layer:
+        context.appendScope(QgsExpressionContextUtils.layerScope(layer))
+
+    if feature:
+        context.setFeature(feature)
+
+    context.appendScope(scope)
+    return expression.evaluate(context)
 
 
 def plugin_path(*args) -> Path:

@@ -7,7 +7,7 @@ import unittest
 
 from pathlib import Path
 
-from dynamic_layers.tools import side_car_files
+from dynamic_layers.tools import side_car_files, string_substitution
 
 
 class TestTools(unittest.TestCase):
@@ -30,3 +30,10 @@ class TestTools(unittest.TestCase):
             expected = [side_1, side_2]
             expected.sort()
             self.assertListEqual(expected, side_car_files(test))
+
+    def test_string_substitution(self):
+        """ Test string substitution. """
+        self.assertEqual(
+            "Hello 1",
+            string_substitution("'Hello ' || @here", {'here': 1}, use_python=False)
+        )
