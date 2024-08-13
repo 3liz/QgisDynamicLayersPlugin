@@ -66,7 +66,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="bt_open_expression">
+             <widget class="QPushButton" name="inVariableSourceLayerExpression_exp">
               <property name="text">
                <string notr="true">E</string>
               </property>
@@ -195,15 +195,26 @@
           <string>QGIS Server properties</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLineEdit" name="inProjectTitle"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inProjectTitle_exp">
+              <property name="text">
+               <string notr="true">E</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="projectTitleLabel">
             <property name="text">
              <string>Project title</string>
             </property>
            </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="inProjectTitle"/>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_project_shortname_template">
@@ -213,7 +224,18 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="inProjectShortName"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLineEdit" name="inProjectShortName"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inProjectShortName_exp">
+              <property name="text">
+               <string notr="true">E</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="projectDescriptionLabel">
@@ -223,7 +245,18 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QTextEdit" name="inProjectAbstract"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QTextEdit" name="inProjectAbstract"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inProjectAbstract_exp">
+              <property name="text">
+               <string notr="true">E</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -288,9 +321,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-268</y>
+            <y>-313</y>
             <width>770</width>
-            <height>944</height>
+            <height>958</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -354,25 +387,47 @@
                  <string>Source properties</string>
                 </property>
                 <layout class="QFormLayout" name="formLayout_4">
-                 <item row="0" column="0">
+                 <item row="1" column="0">
                   <widget class="QLabel" name="label_datasource_template">
                    <property name="text">
                     <string>Datasource template</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
+                 <item row="1" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_6">
+                   <item>
+                    <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="dynamicDatasourceContent_exp">
+                     <property name="text">
+                      <string notr="true">E</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
-                 <item row="1" column="0">
+                 <item row="2" column="0">
                   <widget class="QLabel" name="label_name_template">
                    <property name="text">
                     <string>Name template</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="dynamic_name_content"/>
+                 <item row="2" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_7">
+                   <item>
+                    <widget class="QLineEdit" name="dynamic_name_content"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="dynamic_name_content_exp">
+                     <property name="text">
+                      <string notr="true">E</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>
@@ -383,6 +438,20 @@
                  <string>QGIS Server properties</string>
                 </property>
                 <layout class="QFormLayout" name="formLayout_5">
+                 <item row="0" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <item>
+                    <widget class="QLineEdit" name="titleTemplate"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="titleTemplate_exp">
+                     <property name="text">
+                      <string notr="true">E</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_title_template">
                    <property name="text">
@@ -390,8 +459,19 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="titleTemplate"/>
+                 <item row="1" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_9">
+                   <item>
+                    <widget class="QPlainTextEdit" name="abstractTemplate"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="abstractTemplate_exp">
+                     <property name="text">
+                      <string notr="true">E</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_abstract_template">
@@ -399,9 +479,6 @@
                     <string>Abstract template</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QPlainTextEdit" name="abstractTemplate"/>
                  </item>
                 </layout>
                </widget>

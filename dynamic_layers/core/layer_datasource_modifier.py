@@ -110,9 +110,11 @@ class LayerDataSourceModifier:
         if title != '':
             source_title = title
 
+        source_title = f"'{source_title}'"
+
         title_template = self.layer.customProperty(CustomProperty.TitleTemplate)
-        if title_template and title_template.strip() != '':
-            source_title = title_template.strip()
+        if title_template and title_template not in ("", "''"):
+            source_title = title_template
 
         # Search and replace content
         self.layer.setTitle(
@@ -124,9 +126,10 @@ class LayerDataSourceModifier:
 
         # Name
         source_name = self.layer.name().strip()
+        source_name = f"'{source_name}'"
         name_template = self.layer.customProperty(CustomProperty.NameTemplate)
-        if name_template and name_template.strip() != '':
-            source_name = name_template.strip()
+        if name_template and name_template not in ("", "''"):
+            source_name = name_template
 
         # Search and replace content
         self.layer.setName(
@@ -140,10 +143,11 @@ class LayerDataSourceModifier:
         source_abstract = ''
         if self.layer.abstract().strip() != '':
             source_abstract = self.layer.abstract().strip()
+        source_abstract = f"'{source_abstract}'"
 
         abstract_template = self.layer.customProperty(CustomProperty.AbstractTemplate)
-        if abstract_template and abstract_template.strip() != '':
-            source_abstract = abstract_template.strip()
+        if abstract_template and abstract_template not in ("", "''"):
+            source_abstract = abstract_template
 
         self.layer.setAbstract(
             string_substitution(

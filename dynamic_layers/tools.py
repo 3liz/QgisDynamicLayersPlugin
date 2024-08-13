@@ -3,7 +3,6 @@ __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
 from pathlib import Path
-from string import Template
 from typing import List
 
 from qgis.core import (
@@ -12,6 +11,7 @@ from qgis.core import (
     QgsExpressionContextScope,
     QgsExpressionContextUtils,
     QgsFeature,
+    QgsProcessingException,
     QgsProject,
     QgsVectorLayer,
 )
@@ -23,16 +23,12 @@ from qgis.PyQt.QtCore import QCoreApplication
 def string_substitution(
         input_string: str,
         variables: dict,
-        use_python: bool = True,
         project: QgsProject = None,
         layer: QgsVectorLayer = None,
-        feature: QgsFeature = None
+        feature: QgsFeature = None,
+        is_template: bool = False,
 ) -> str:
     """ String substitution. """
-    if use_python:
-        return Template(input_string).safe_substitute(variables)
-
-    expression = QgsExpression(input_string)
     scope = QgsExpressionContextScope()
     for key, value in variables.items():
         scope.addVariable(QgsExpressionContextScope.StaticVariable(key, value, True, True))
@@ -50,6 +46,14 @@ def string_substitution(
         context.setFeature(feature)
 
     context.appendScope(scope)
+
+    if is_template:
+        return QgsExpression.replaceExpressionText(input_string, context)
+
+    expression = QgsExpression(input_string)
+    if expression.hasEvalError() or expression.hasParserError():
+        raise QgsProcessingException(f"Invalid QGIS expression : {input_string}")
+
     return expression.evaluate(context)
 
 

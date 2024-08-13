@@ -132,17 +132,17 @@ class DynamicLayersEngine:
 
         # Title
         val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Title)
-        if val:
+        if val[1] and val[0]:
             self.set_project_property(project, WmsProjectProperty.Title, val[0])
 
         # Shortname
         val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName)
-        if val:
+        if val[1] and val[0]:
             self.set_project_property(project, WmsProjectProperty.ShortName, val[0])
 
         # Abstract
         val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract)
-        if val:
+        if val[1] and val[0]:
             self.set_project_property(project, WmsProjectProperty.Abstract, val[0])
 
     def set_project_property(self, project: QgsProject, project_property: Annotated[str, WmsProjectProperty], val: str):

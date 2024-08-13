@@ -11,7 +11,7 @@ hide:
 This plugin helps to change the datasource's of many layers at once, for example to create different versions of the
 same project on different extents.
 
-You can use some variables such as `$myvar` inside the layer datasource template, and then define these variables
+You can use some variables such as `@myvar` inside the layer datasource template, and then define these variables
 (from a table or from an input vector source).
 
 Finally, you can apply the variables values on every configured layer via the **apply** button, and you can see the

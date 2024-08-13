@@ -2,14 +2,28 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+from functools import partial
 from pathlib import Path
+from typing import Union
 
-from qgis.core import QgsApplication
+from qgis.core import (
+    QgsApplication,
+    QgsExpressionContext,
+    QgsExpressionContextScope,
+    QgsExpressionContextUtils,
+)
 from qgis.gui import QgsExpressionBuilderDialog
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QWidget
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QLineEdit,
+    QTextEdit,
+    QWidget,
+)
 
+from dynamic_layers.definitions import QtVar
 from dynamic_layers.tools import tr
 
 folder = Path(__file__).resolve().parent
@@ -25,6 +39,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         super().__init__(parent)
         self.setupUi(self)
         self.tab_widget.setCurrentIndex(0)
+        self.is_expression = True
         self.button_box.button(QDialogButtonBox.Close).clicked.connect(self.close)
 
         self.btAddVariable.setText("")
@@ -38,11 +53,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.btRemoveVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyRemove.svg')))
 
         self.btClearLog.setIcon(QIcon(":/images/themes/default/console/iconClearConsole.svg"))
-
-        self.bt_open_expression.setText("")
-        self.bt_open_expression.setToolTip("")
-        self.bt_open_expression.setIcon(QIcon(QgsApplication.iconPath('mIconExpression.svg')))
-        self.bt_open_expression.clicked.connect(self.open_expression_builder)
 
         self.btCopyFromLayer.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
         self.btCopyFromProject.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
@@ -68,40 +78,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             QIcon(QgsApplication.iconPath('mActionHelpContents.svg'))
         )
 
-        help_template = "{}\n{}\n{} {}".format(
-            tr(
-                'Variables should be written either with $variable or ${variable}.'
-            ),
-            tr(
-                'The second option is necessary if you want to concatenate a dynamic string with a fixed string.'
-            ),
-            tr(
-                'See the Python documentation about "Template strings".'
-            ),
-            "https://docs.python.org/3/library/string.html#template-strings"
-        )
-        list_templates = (
-            # Project tab
-            self.projectTitleLabel,
-            self.inProjectTitle,
-            self.label_project_shortname_template,
-            self.inProjectShortName,
-            self.projectDescriptionLabel,
-            self.inProjectAbstract,
-            # Layers tab
-            self.label_datasource_template,
-            self.dynamicDatasourceContent,
-            self.label_name_template,
-            self.dynamic_name_content,
-            self.label_title_template,
-            self.titleTemplate,
-            self.label_abstract_template,
-            self.abstractTemplate,
-        )
-        for widget in list_templates:
-            widget: QWidget
-            widget.setToolTip(help_template)
-
         help_variables_layer = tr(
             "Choose a vector layer and then filter the layer with a QGIS expression to have a single feature. In this "
             "case, each field will be used as a variable name with its according field value for the content of the "
@@ -111,7 +87,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             self.radio_variables_from_layer,
             self.inVariableSourceLayer,
             self.inVariableSourceLayerExpression,
-            self.bt_open_expression,
+            self.inVariableSourceLayerExpression_exp,
         )
         for widget in widgets:
             widget: QWidget
@@ -132,23 +108,88 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             widget: QWidget
             widget.setToolTip(help_variables_table)
 
-        self.radio_variables_from_table.setChecked(True)
+        self.is_table_variable_based = True
+        self.radio_variables_from_table.setChecked(self.is_table_variable_based)
         self.radio_variables_from_layer.toggled.connect(self.origin_variable_toggled)
         self.origin_variable_toggled()
 
+        self.expression_widgets = [
+            # Variables
+            self.inVariableSourceLayerExpression_exp,
+        ]
+        debug = [
+            # Project
+            self.inProjectTitle_exp,
+            self.inProjectShortName_exp,
+            self.inProjectAbstract_exp,
+            # Layer
+            self.dynamicDatasourceContent_exp,
+            self.dynamic_name_content_exp,
+            self.titleTemplate_exp,
+            self.abstractTemplate_exp,
+        ]
+        if not self.is_expression:
+            for widget in debug:
+                widget.setVisible(False)
+        self.expression_widgets.extend(debug)
+        for widget in self.expression_widgets:
+            widget.setText("")
+            widget.setToolTip("")
+            widget.setIcon(QIcon(QgsApplication.iconPath('mIconExpression.svg')))
+            widget.clicked.connect(partial(self.open_expression_builder, widget.objectName()))
+
     def origin_variable_toggled(self):
-        self.widget_layer.setEnabled(self.radio_variables_from_layer.isChecked())
-        self.widget_table.setEnabled(not self.radio_variables_from_layer.isChecked())
+        self.is_table_variable_based = self.radio_variables_from_table.isChecked()
+        self.widget_layer.setEnabled(not self.is_table_variable_based)
+        self.widget_table.setEnabled(self.is_table_variable_based)
 
-    def open_expression_builder(self):
+    def variables(self) -> dict:
+        """ The list of variables in the table. """
+        data = {}
+
+        if not self.is_table_variable_based:
+            return data
+
+        for row in range(self.twVariableList.rowCount()):
+            v_name = self.twVariableList.item(row, 0).data(QtVar.EditRole)
+            v_value = self.twVariableList.item(row, 1).data(QtVar.EditRole)
+            data[v_name] = v_value
+        return data
+
+    def open_expression_builder(self, source: str):
         """ Open the expression builder helper. """
-        layer = self.inVariableSourceLayer.currentLayer()
-        if not layer:
-            return
+        if self.is_table_variable_based:
+            layer = None
+        else:
+            layer = self.inVariableSourceLayer.currentLayer()
+            if not layer:
+                return
 
-        dialog = QgsExpressionBuilderDialog(layer)
+        context = QgsExpressionContext()
+        context.appendScope(QgsExpressionContextUtils.globalScope())
+
+        scope = QgsExpressionContextScope()
+        for key, value in self.variables().items():
+            scope.addVariable(QgsExpressionContextScope.StaticVariable(key, value))
+
+        context.appendScope(scope)
+
+        widget: Union[QLineEdit, QTextEdit] = getattr(self, source.replace("_exp", ""))
+
+        dialog = QgsExpressionBuilderDialog(layer, context=context)
+        if isinstance(widget, QLineEdit):
+            content = widget.text()
+        else:
+            content = widget.toPlainText()
+        dialog.setExpressionText(content)
         result = dialog.exec()
+
         if result != QDialog.Accepted:
             return
 
-        self.inVariableSourceLayerExpression.setText(dialog.expressionText())
+        content = dialog.expressionText()
+
+        if isinstance(widget, QLineEdit):
+            widget.setText(content)
+        else:
+            widget.setPlainText(content)

@@ -2,20 +2,19 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-import string
-
 from pathlib import Path
 from typing import Tuple
 
 from qgis.core import (
+    QgsExpression,
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterBoolean,
+    QgsProcessingParameterExpression,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFolderDestination,
-    QgsProcessingParameterString,
 )
 from qgis.PyQt.QtGui import QIcon
 
@@ -29,7 +28,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
     FIELD = 'FIELD'
     COPY_SIDE_CAR_FILES = "COPY_SIDE_CAR_FILES"
-    TEMPLATE_DESTINATION = "TEMPLATE_DESTINATION"
+    EXPRESSION_DESTINATION = "TEMPLATE_DESTINATION"
     OUTPUT = 'OUTPUT'
 
     def createInstance(self):
@@ -76,14 +75,12 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        parameter = QgsProcessingParameterString(
-            self.TEMPLATE_DESTINATION,
-            tr('Template to use to format the final filename'),
+        parameter = QgsProcessingParameterExpression(
+            self.EXPRESSION_DESTINATION,
+            tr('QGIS Expression to format the final filename. It must end with .qgs or .qgz'),
+            parentLayerParameterName=self.INPUT,
         )
-        parameter.setHelp(
-            "The template must have the extension and at least one field name as a Python string template, such as "
-            "'project_$province.qgs' when the layer has field called 'province'. It's not the QGIS expression syntax."
-        )
+        parameter.setHelp("The template must have the extension.")
         self.addParameter(parameter)
 
         self.addParameter(
@@ -116,27 +113,29 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     def processAlgorithm(self, parameters, context, feedback):
-        source = self.parameterAsSource(
+        source = self.parameterAsVectorLayer(
             parameters,
             self.INPUT,
             context
         )
         copy_side_car_files = self.parameterAsBool(parameters, self.COPY_SIDE_CAR_FILES, context)
         output_dir = Path(self.parameterAsString(parameters, self.OUTPUT, context))
-        template_destination = string.Template(self.parameterAsString(parameters, self.TEMPLATE_DESTINATION, context))
+        expression_destination = self.parameterAsExpression(parameters, self.EXPRESSION_DESTINATION, context)
+        expression = QgsExpression(expression_destination)
+        if expression.hasParserError():
+            raise QgsProcessingException(expression.parserErrorString())
 
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
         field = self.parameterAsString(parameters, self.FIELD, context)
-        index = source.fields().indexFromName(field)
-        unique_values = source.uniqueValues(index)
+        unique_values = source.uniqueValues(source.fields().indexFromName(field))
         feedback.pushInfo(tr("Generating {} projects in {}").format(len(unique_values), output_dir))
         feedback.pushDebugInfo(tr("List of uniques values") + " : " + ', '.join([str(i) for i in unique_values]))
         feedback.pushDebugInfo(tr("Copy side car files") + " : " + str(copy_side_car_files))
 
         generator = GenerateProjects(
-            context.project(), source, field, template_destination, output_dir, copy_side_car_files, feedback)
+            context.project(), source, field, expression_destination, output_dir, copy_side_car_files, feedback)
         generator.process()
 
         return {self.OUTPUT: str(output_dir)}

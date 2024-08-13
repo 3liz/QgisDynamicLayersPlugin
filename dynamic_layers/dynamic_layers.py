@@ -13,6 +13,7 @@ from qgis.core import (
     QgsApplication,
     QgsIconUtils,
     QgsMapLayer,
+    QgsProcessingException,
     QgsProject,
 )
 from qgis.gui import QgisInterface
@@ -77,6 +78,7 @@ class DynamicLayers:
 
         # Create the dialog (after translation) and keep reference
         self.dlg = DynamicLayersDialog()
+        self.is_expression = self.dlg.is_expression
 
         # Layers attribute that can be shown and optionally changed in the plugin
         self.layersTable = [
@@ -469,7 +471,8 @@ class DynamicLayers:
             bg = QtVar.Green
         else:
             bg = QtVar.Transparent
-        for i in range(0, len(self.layerPropertiesInputs) - 1):
+
+        for i in range(0, len(self.layerPropertiesInputs) - 2):
             self.dlg.twLayers.item(row, i).setBackground(bg)
 
         # Change data for the corresponding column in the layers table
@@ -500,8 +503,11 @@ class DynamicLayers:
         if item['wType'] == 'text':
             input_value = item['widget'].text()
 
+        if input_value == "''":
+            input_value = ''
+
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty(item['xml'], input_value)
+        self.selectedLayer.setCustomProperty(item['xml'], input_value.strip())
         self.project.setDirty(True)
 
     def on_copy_from_layer(self):
@@ -549,12 +555,14 @@ class DynamicLayers:
                 return
 
         # Set the dynamic datasource content input
-        self.dlg.dynamicDatasourceContent.setPlainText(uri)
+        self.dlg.dynamicDatasourceContent.setPlainText(f"'{uri}'" if self.is_expression else uri)
 
         # Set templates for title and abstract
-        self.dlg.abstractTemplate.setPlainText(abstract)
-        self.dlg.titleTemplate.setText(title)
-        self.dlg.dynamic_name_content.setText(name)
+        self.dlg.abstractTemplate.setPlainText(f"'{abstract}'" if self.is_expression else abstract)
+
+        self.dlg.titleTemplate.setText(f"'{title}'" if self.is_expression else title)
+
+        self.dlg.dynamic_name_content.setText(f"'{name}'" if self.is_expression else name)
 
     ##
     # Variables tab
@@ -755,8 +763,8 @@ class DynamicLayers:
         if not self.project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
             self.project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
-        self.dlg.inProjectTitle.setText(p_title)
-        self.dlg.inProjectAbstract.setText(p_abstract)
+        self.dlg.inProjectTitle.setText(f"'{p_title}'" if self.is_expression else p_title)
+        self.dlg.inProjectAbstract.setText(f"'{p_abstract}'" if self.is_expression else p_abstract)
 
     def on_project_property_changed(self, prop: str) -> str | None:
         """
@@ -825,46 +833,45 @@ class DynamicLayers:
             self.dlg.message_bar.pushCritical(self.tr("Fail"), self.tr("Initialisation was not finished"))
             return
 
-        with OverrideCursor(QtVar.WaitCursor):
+        try:
+            with OverrideCursor(QtVar.WaitCursor):
 
-            # Use the engine class to do the job
-            engine = DynamicLayersEngine()
+                # Use the engine class to do the job
+                engine = DynamicLayersEngine()
 
-            # Set the dynamic layers list
-            engine.set_dynamic_layers_from_project(self.project)
+                # Set the dynamic layers list
+                engine.set_dynamic_layers_from_project(self.project)
 
-            # Set search and replace dictionary
-            # Collect variables names and values
-            if self.dlg.radio_variables_from_table.isChecked():
-                search_and_replace_dictionary = {}
-                for row in range(self.dlg.twVariableList.rowCount()):
-                    v_name = self.dlg.twVariableList.item(row, 0).data(QtVar.EditRole)
-                    v_value = self.dlg.twVariableList.item(row, 1).data(QtVar.EditRole)
-                    search_and_replace_dictionary[v_name] = v_value
-                engine.search_and_replace_dictionary = search_and_replace_dictionary
-            else:
-                layer = self.dlg.inVariableSourceLayer.currentLayer()
-                exp = self.dlg.inVariableSourceLayerExpression.text()
-                engine.set_search_and_replace_dictionary_from_layer(layer, exp)
+                # Set search and replace dictionary
+                # Collect variables names and values
+                if self.dlg.is_table_variable_based:
+                    engine.search_and_replace_dictionary = self.dlg.variables()
+                else:
+                    layer = self.dlg.inVariableSourceLayer.currentLayer()
+                    exp = self.dlg.inVariableSourceLayerExpression.text()
+                    engine.set_search_and_replace_dictionary_from_layer(layer, exp)
 
-            # Change layers datasource
-            engine.set_dynamic_layers_datasource_from_dict()
+                # Change layers datasource
+                engine.set_dynamic_layers_datasource_from_dict()
 
-            # Set project properties
-            engine.set_dynamic_project_properties(self.project)
+                # Set project properties
+                engine.set_dynamic_project_properties(self.project)
 
-            # Set extent layer
-            engine.extent_layer = self.dlg.inExtentLayer.currentLayer()
+                # Set extent layer
+                engine.extent_layer = self.dlg.inExtentLayer.currentLayer()
 
-            # Set extent margin
-            engine.extent_margin = self.dlg.inExtentMargin.value()
+                # Set extent margin
+                engine.extent_margin = self.dlg.inExtentMargin.value()
 
-            # Set new extent
-            engine.set_project_extent(self.project)
+                # Set new extent
+                engine.set_project_extent(self.project)
+        except QgsProcessingException as e:
+            self.dlg.message_bar.pushCritical(self.tr("Parsing expression error"), str(e))
+            return
 
-            # Set project as dirty
-            self.project.setDirty(True)
-            self.dlg.message_bar.pushSuccess("👍", self.tr("Current project has been updated"))
+        # Set project as dirty
+        self.project.setDirty(True)
+        self.dlg.message_bar.pushSuccess("👍", self.tr("Current project has been updated"))
 
     @staticmethod
     def generate_projects_clicked():

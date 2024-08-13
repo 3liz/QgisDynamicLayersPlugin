@@ -35,5 +35,9 @@ class TestTools(unittest.TestCase):
         """ Test string substitution. """
         self.assertEqual(
             "Hello 1",
-            string_substitution("'Hello ' || @here", {'here': 1}, use_python=False)
+            string_substitution("Hello [% @here %]", {'here': 1}, is_template=True)
+        )
+        self.assertEqual(
+            "Hello 1",
+            string_substitution("concat('Hello ', @here)", {'here': 1}, is_template=False)
         )
