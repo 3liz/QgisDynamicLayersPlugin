@@ -158,6 +158,11 @@ class DynamicLayers:
                 'wType': 'textarea',
                 'xml': LayerPropertiesXml.DynamicDatasourceContent,
             },
+            'name': {
+                'widget': self.dlg.dynamic_name_content,
+                'wType': 'text',
+                'xml': LayerPropertiesXml.NameTemplate,
+            },
             'title': {
                 'widget': self.dlg.titleTemplate,
                 'wType': 'text',
@@ -261,15 +266,11 @@ class DynamicLayers:
             del self.help_action_about_menu
 
     def clear_log(self):
-        """
-        Clear the log
-        """
+        """ Clear the log. """
         self.dlg.txtLog.clear()
 
     def update_log(self, msg: str):
-        """
-        Update the log
-        """
+        """ Update the log. """
         self.dlg.txtLog.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
         suffix = '</span>'
@@ -516,16 +517,20 @@ class DynamicLayers:
         uri = self.selectedLayer.dataProvider().dataSourceUri().split('|')[0]
         abstract = self.selectedLayer.abstract()
         title = self.selectedLayer.title()
+        name = self.selectedLayer.name()
 
         # Previous values
         previous_uri = self.dlg.dynamicDatasourceContent.toPlainText()
         previous_abstract = self.dlg.abstractTemplate.toPlainText()
         previous_title = self.dlg.titleTemplate.text()
+        previous_name = self.dlg.titleTemplate.text()
 
         ask = False
         if previous_uri != '' and previous_uri != uri:
             ask = True
         if previous_abstract != '' and previous_abstract != abstract:
+            ask = True
+        if previous_name != '' and previous_name != name:
             ask = True
         if previous_title != '' and previous_title != title:
             ask = True
@@ -549,6 +554,7 @@ class DynamicLayers:
         # Set templates for title and abstract
         self.dlg.abstractTemplate.setPlainText(abstract)
         self.dlg.titleTemplate.setText(title)
+        self.dlg.dynamic_name_content.setText(name)
 
     ##
     # Variables tab
@@ -558,7 +564,7 @@ class DynamicLayers:
         Fill the variable table
         """
         # Get the list of variable from the project
-        variable_list = self.project.readListEntry(PLUGIN_SCOPE, 'VariableList')
+        variable_list = self.project.readListEntry(PLUGIN_SCOPE, PluginProjectProperty.VariableList)
         if not variable_list:
             return
 
@@ -602,8 +608,8 @@ class DynamicLayers:
         tw_row_count = self.dlg.twVariableList.rowCount()
 
         # Get input data
-        v_name = str(self.dlg.inVariableName.text()).strip(' \t')
-        v_value = str(self.dlg.inVariableValue.text()).strip(' \t')
+        v_name = self.dlg.inVariableName.text().strip(' \t')
+        v_value = self.dlg.inVariableValue.text().strip(' \t')
 
         # Check if the variable is not already in the list
         if v_name in self.variableList:
@@ -613,7 +619,7 @@ class DynamicLayers:
         # Add constraint of possible input values
         project = re.compile('^[a-zA-Z]+$')
         if not project.match(v_name):
-            self.update_log(tr('The variable must contain only lower case ascii letters !'))
+            self.update_log(tr('The variable must contain only lower case ASCII letters !'))
             return
 
         # Set table properties
@@ -640,7 +646,7 @@ class DynamicLayers:
         self.variableList.append(v_name)
 
         # Add variable to the project
-        self.project.writeEntry(PLUGIN_SCOPE, 'VariableList', self.variableList)
+        self.project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.VariableList, self.variableList)
         self.project.setDirty(True)
 
     def on_remove_variable_clicked(self):
@@ -665,7 +671,7 @@ class DynamicLayers:
         self.variableList.remove(v_name)
 
         # Update project
-        self.project.writeEntry(PLUGIN_SCOPE, 'VariableList', self.variableList)
+        self.project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.VariableList, self.variableList)
         self.project.setDirty(True)
 
         # Remove selected lines
@@ -816,6 +822,7 @@ class DynamicLayers:
         by replace variables in dynamicDatasource
         """
         if not self.initDone:
+            self.dlg.message_bar.pushCritical(self.tr("Fail"), self.tr("Initialisation was not finished"))
             return
 
         with OverrideCursor(QtVar.WaitCursor):
@@ -857,6 +864,7 @@ class DynamicLayers:
 
             # Set project as dirty
             self.project.setDirty(True)
+            self.dlg.message_bar.pushSuccess("👍", self.tr("Current project has been updated"))
 
     @staticmethod
     def generate_projects_clicked():

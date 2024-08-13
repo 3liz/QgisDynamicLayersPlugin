@@ -15,6 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
+    <widget class="QgsMessageBar" name="message_bar" native="true"/>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tab_widget">
      <property name="currentIndex">
       <number>0</number>
@@ -187,48 +190,67 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>QGIS Server properties</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="projectTitleLabel">
+            <property name="text">
+             <string>Project title</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="inProjectTitle"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_project_shortname_template">
+            <property name="text">
+             <string>Project shortname</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="inProjectShortName"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="projectDescriptionLabel">
+            <property name="text">
+             <string>Project description</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QTextEdit" name="inProjectAbstract"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <layout class="QFormLayout" name="formLayout">
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
          </property>
          <item row="0" column="0">
-          <widget class="QLabel" name="projectTitleLabel">
-           <property name="text">
-            <string>Project title</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="inProjectTitle"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="projectDescriptionLabel">
-           <property name="text">
-            <string>Project description</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QTextEdit" name="inProjectAbstract"/>
-         </item>
-         <item row="3" column="0">
           <widget class="QLabel" name="label_4">
            <property name="text">
             <string>Extent layer</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="0" column="1">
           <widget class="QgsMapLayerComboBox" name="inExtentLayer"/>
          </item>
-         <item row="4" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
             <string>Extent margin</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="1" column="1">
           <widget class="QSpinBox" name="inExtentMargin">
            <property name="suffix">
             <string notr="true">%</string>
@@ -240,16 +262,6 @@
             <number>20</number>
            </property>
           </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_project_shortname_template">
-           <property name="text">
-            <string>Project shortname</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="inProjectShortName"/>
          </item>
         </layout>
        </item>
@@ -276,9 +288,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
+            <y>-268</y>
             <width>770</width>
-            <height>677</height>
+            <height>944</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -337,46 +349,62 @@
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout_2">
-                  <item>
-                   <widget class="QLabel" name="label_datasource_template">
-                    <property name="text">
-                     <string>Datasource template</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" name="verticalLayout">
-                  <item>
-                   <widget class="QLabel" name="label_title_template">
-                    <property name="text">
-                     <string>Title template</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLineEdit" name="titleTemplate"/>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_abstract_template">
-                    <property name="text">
-                     <string>Abstract template</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPlainTextEdit" name="abstractTemplate"/>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
+               <widget class="QGroupBox" name="groupBox_3">
+                <property name="title">
+                 <string>Source properties</string>
+                </property>
+                <layout class="QFormLayout" name="formLayout_4">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_datasource_template">
+                   <property name="text">
+                    <string>Datasource template</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QPlainTextEdit" name="dynamicDatasourceContent"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_name_template">
+                   <property name="text">
+                    <string>Name template</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="dynamic_name_content"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_4">
+                <property name="title">
+                 <string>QGIS Server properties</string>
+                </property>
+                <layout class="QFormLayout" name="formLayout_5">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_title_template">
+                   <property name="text">
+                    <string>Title template</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="titleTemplate"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_abstract_template">
+                   <property name="text">
+                    <string>Abstract template</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QPlainTextEdit" name="abstractTemplate"/>
+                 </item>
+                </layout>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btCopyFromLayer">
@@ -484,6 +512,12 @@
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
    <header>qgis.gui</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsMessageBar</class>
+   <extends>QWidget</extends>
+   <header>qgis.gui</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

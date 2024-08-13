@@ -81,13 +81,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             "https://docs.python.org/3/library/string.html#template-strings"
         )
         list_templates = (
-            # Layers tab
-            self.label_datasource_template,
-            self.dynamicDatasourceContent,
-            self.label_title_template,
-            self.titleTemplate,
-            self.label_abstract_template,
-            self.abstractTemplate,
             # Project tab
             self.projectTitleLabel,
             self.inProjectTitle,
@@ -95,6 +88,15 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             self.inProjectShortName,
             self.projectDescriptionLabel,
             self.inProjectAbstract,
+            # Layers tab
+            self.label_datasource_template,
+            self.dynamicDatasourceContent,
+            self.label_name_template,
+            self.dynamic_name_content,
+            self.label_title_template,
+            self.titleTemplate,
+            self.label_abstract_template,
+            self.abstractTemplate,
         )
         for widget in list_templates:
             widget: QWidget

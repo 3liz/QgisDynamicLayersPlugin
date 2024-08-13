@@ -9,6 +9,9 @@ from qgis.PyQt.QtGui import QColor
 class CustomProperty:
     DynamicDatasourceActive = 'dynamicDatasourceActive'
     DynamicDatasourceContent = 'dynamicDatasourceContent'
+    NameTemplate = 'nameTemplate'
+    TitleTemplate = 'titleTemplate'
+    AbstractTemplate = 'abstractTemplate'
 
 
 class WmsProjectProperty:
@@ -27,10 +30,12 @@ class PluginProjectProperty:
     ExtentMargin = 'ExtentMargin'
     VariableSourceLayer = 'VariableSourceLayer'
     VariableSourceLayerExpression = 'VariableSourceLayerExpression'
+    VariableList = 'VariableList'
 
 
 class LayerPropertiesXml:
     DynamicDatasourceContent = 'dynamicDatasourceContent'
+    NameTemplate = 'nameTemplate'
     TitleTemplate = 'titleTemplate'
     AbstractTemplate = 'abstractTemplate'
 

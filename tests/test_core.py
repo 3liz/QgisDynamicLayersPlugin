@@ -35,9 +35,11 @@ class TestBasicReplacement(BaseTests):
         self.assertTupleEqual(('', False), project.readEntry(WmsProjectProperty.ShortName, "/"))
 
         # Set a short name template
-        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName, "Shortname " + folder_token)
+        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName, f"Shortname {folder_token}")
+        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract, f"Abstract {folder_token}")
+        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Title, f"Title {folder_token}")
 
-        vector = QgsVectorLayer(str(Path(f"fixtures/{folder_1}/lines.geojson")), "Layer 1")
+        vector = QgsVectorLayer(str(Path(f"fixtures/{folder_1}/lines.geojson")), f"Layer {folder_1}")
         project.addMapLayer(vector)
         self.assertEqual(1, len(project.mapLayers()))
 
@@ -54,6 +56,9 @@ class TestBasicReplacement(BaseTests):
 
         dynamic_source = dynamic_source.replace(folder_1, folder_token)
         vector.setCustomProperty(CustomProperty.DynamicDatasourceContent, dynamic_source)
+        vector.setCustomProperty(CustomProperty.NameTemplate, f"Custom layer name {folder_token}")
+        vector.setCustomProperty(CustomProperty.TitleTemplate, f"Custom layer title {folder_token}")
+        vector.setCustomProperty(CustomProperty.AbstractTemplate, f"Custom layer abstract {folder_token}")
 
         engine.set_dynamic_layers_from_project(project)
         self.assertDictEqual(
@@ -75,10 +80,26 @@ class TestBasicReplacement(BaseTests):
         self.assertNotIn(folder_1, vector.source())
         self.assertNotIn(folder_token, vector.source())
 
-        # Check short name
+        # Layer properties
+        self.assertEqual(f"Custom layer name {folder_2}", vector.name())
+        self.assertEqual(f"Custom layer title {folder_2}", vector.title())
+        self.assertEqual(f"Custom layer abstract {folder_2}", vector.abstract())
+
+        # Project properties
+        # Short name
         self.assertTupleEqual(
             (f'Shortname {folder_2}', True),
             project.readEntry(WmsProjectProperty.ShortName, "/")
+        )
+        # Abstract
+        self.assertTupleEqual(
+            (f'Abstract {folder_2}', True),
+            project.readEntry(WmsProjectProperty.Abstract, "/")
+        )
+        # WMS
+        self.assertTupleEqual(
+            ('1', True),
+            project.readEntry(WmsProjectProperty.Capabilities, "/")
         )
 
     def test_generate_projects(self):

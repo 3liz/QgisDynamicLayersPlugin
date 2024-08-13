@@ -106,14 +106,32 @@ class LayerDataSourceModifier:
         # Layer title
         # First check that we have a title
         source_title = self.layer.name().strip()
-        if self.layer.title().strip() != '':
-            source_title = self.layer.title().strip()
-        if self.layer.customProperty('titleTemplate') and self.layer.customProperty('titleTemplate').strip() != '':
-            source_title = self.layer.customProperty('titleTemplate').strip()
+        title = self.layer.title().strip()
+        if title != '':
+            source_title = title
+
+        title_template = self.layer.customProperty(CustomProperty.TitleTemplate)
+        if title_template and title_template.strip() != '':
+            source_title = title_template.strip()
+
         # Search and replace content
         self.layer.setTitle(
             string_substitution(
                 source_title,
+                search_and_replace_dictionary,
+            ),
+        )
+
+        # Name
+        source_name = self.layer.name().strip()
+        name_template = self.layer.customProperty(CustomProperty.NameTemplate)
+        if name_template and name_template.strip() != '':
+            source_name = name_template.strip()
+
+        # Search and replace content
+        self.layer.setName(
+            string_substitution(
+                source_name,
                 search_and_replace_dictionary,
             ),
         )
@@ -123,9 +141,9 @@ class LayerDataSourceModifier:
         if self.layer.abstract().strip() != '':
             source_abstract = self.layer.abstract().strip()
 
-        abstract_template = self.layer.customProperty('abstractTemplate')
+        abstract_template = self.layer.customProperty(CustomProperty.AbstractTemplate)
         if abstract_template and abstract_template.strip() != '':
-            source_abstract = self.layer.customProperty('abstractTemplate').strip()
+            source_abstract = abstract_template.strip()
 
         self.layer.setAbstract(
             string_substitution(
@@ -140,6 +158,7 @@ class LayerDataSourceModifier:
                 alias = self.layer.attributeAlias(fid)
                 if not alias:
                     continue
+
                 new_alias = string_substitution(
                     alias,
                     search_and_replace_dictionary,

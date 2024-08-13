@@ -25,7 +25,8 @@ from a [commit](https://github.com/3liz/QgisDynamicLayersPlugin/actions/workflow
 
 ## Usage
 
-At first, you must set up a QGIS project with some layers. This project will serve as a basis to create derived child projects.
+At first, you must set up a QGIS project with some layers. This project will serve as a basis to create derived child
+projects.
 Once you have a project, you can open the plugin main dialog.
 
 ### Configure layers
