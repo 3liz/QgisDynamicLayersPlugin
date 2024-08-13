@@ -90,7 +90,7 @@ class TestBasicReplacement(BaseTests):
         folder_2 = 'folder_2'
         folder_3 = 'folder_3'
         folder_token = '$folder'
-        template_destination = string.Template('test_${folder}_test.qgs')
+        template_destination = string.Template('test ${folder} $name test.qgs')
         layer_name = "Layer 1"
 
         vector_path = Path(__file__).parent.joinpath(f"fixtures/{folder_1}/lines_1.geojson")
@@ -115,21 +115,26 @@ class TestBasicReplacement(BaseTests):
         self.assertTrue(parent_project.exists())
 
         field = "folder"
+        name = "name"
         coverage = QgsVectorLayer(
-            f"None?&field=id:integer&field={field}:string(20)&index=yes", "coverage", "memory")
+            f"None?&"
+            f"field=id:integer&"
+            f"field={field}:string(20)&"
+            f"field={name}:string(20)&"
+            f"index=yes", "coverage", "memory")
         with edit(coverage):
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([1, folder_1])
+            feature.setAttributes([1, folder_1, "Name 1"])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([2, folder_2])
+            feature.setAttributes([2, folder_2, "Name 2"])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
             feature = QgsFeature(coverage.fields())
-            feature.setAttributes([3, folder_3])
+            feature.setAttributes([3, folder_3, "Name 3"])
             # noinspection PyArgumentList
             coverage.addFeature(feature)
 
@@ -139,35 +144,37 @@ class TestBasicReplacement(BaseTests):
         generator = GenerateProjects(
             project, coverage, field_name, template_destination, Path(self.temp_dir), True)
 
-        # TODO With Python 3.11, switch to get_identifiers()
-        self.assertListEqual(['folder'], generator.project_path_identifiers())
-
         self.assertTrue(generator.process())
 
         unique_values = coverage.uniqueValues(coverage.fields().indexFromName(field_name))
         self.assertSetEqual({'folder_1', 'folder_2', 'folder_3'}, unique_values)
 
-        for i in unique_values:
-            expected_project = template_destination.substitute({'folder': i})
+        for feature in coverage.getFeatures():
+            expected_project = template_destination.substitute(
+                {
+                    'folder': feature[field],
+                    'name': feature[name],
+                }
+            )
             expected_path = Path(self.temp_dir).joinpath(expected_project)
             self.assertTrue(
                 expected_path.exists(),
-                f"In folder {self.temp_dir}, {expected_project} for value = {i} does not exist")
+                f"In folder {self.temp_dir}, {expected_project} for value = {feature[field]} does not exist")
 
             # Test sidecar
             side = Path(str(expected_path) + ".png")
             self.assertTrue(
                 side.exists(),
-                f"In folder {self.temp_dir}, {side} for value = {i} does not exist for the side car file")
+                f"In folder {self.temp_dir}, {side} for value = {feature[field]} does not exist for the side car file")
 
             child_project = QgsProject()
             child_project.read(str(expected_path))
             layer = child_project.mapLayersByName(layer_name)[0]
-            self.assertTrue(i in layer.source())
+            self.assertTrue(feature[field] in layer.source())
 
             # Check short name
             self.assertTupleEqual(
-                (f'Abstract {folder_2}', True),
+                (f'Abstract {feature[field]}', True),
                 child_project.readEntry(WmsProjectProperty.Abstract, "/")
             )
 

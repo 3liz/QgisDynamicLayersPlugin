@@ -9,7 +9,7 @@ from shutil import copyfile
 from typing import List
 
 from qgis.core import (
-    QgsExpression,
+    QgsFeatureRequest,
     QgsProcessingFeatureSource,
     QgsProcessingFeedback,
     QgsProject,
@@ -32,6 +32,7 @@ class GenerateProjects:
             copy_side_car_files: bool,
             feedback: QgsProcessingFeedback = None,
     ):
+        """ Constructor. """
         self.project = project
         self.coverage = coverage
         self.field = field
@@ -40,36 +41,31 @@ class GenerateProjects:
         self.copy_side_car_files = copy_side_car_files
         self.feedback = feedback
 
-    def project_path_identifiers(self) -> List[str]:
-        """List of identifiers in the string template. """
-        # TODO In Python 3.11, use the new function get_identifiers
-        return [
-            s[1] or s[2] for s in string.Template.pattern.findall(self.template_destination.template) if s[1] or s[2]]
-
     def process(self) -> bool:
+        """ Generate all projects needed according to the coverage layer. """
         engine = DynamicLayersEngine()
         engine.set_dynamic_layers_from_project(self.project)
-
-        unique_values = self.coverage.uniqueValues(self.coverage.fields().indexFromName(self.field))
 
         base_path = self.project.fileName()
 
         if not self.destination.exists():
             self.destination.mkdir()
 
-        token = self.project_path_identifiers()[0]
+        fields = self.coverage.fields().names()
 
-        for unique in unique_values:
-            expression = QgsExpression.createFieldEqualityExpression(self.field, unique)
+        request = QgsFeatureRequest()
+        # noinspection PyUnresolvedReferences
+        request.setFlags(QgsFeatureRequest.NoGeometry)
+        for feature in self.coverage.getFeatures(request):
+            engine.set_search_and_replace_dictionary_from_feature(self.coverage, feature)
+
             if self.feedback:
-                self.feedback.pushDebugInfo(tr('Expression generated {}').format(expression))
+                self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
 
-            engine.set_search_and_replace_dictionary_from_layer(self.coverage, expression)
             engine.set_dynamic_layers_datasource_from_dict()
-            # TODO title and abstract
             engine.set_dynamic_project_properties(self.project)
 
-            new_file = self.template_destination.substitute({token: unique})
+            new_file = self.template_destination.substitute(dict(zip(fields, feature.attributes())))
             new_path = f"{self.destination}/{new_file}"
             if self.feedback:
                 self.feedback.pushDebugInfo(tr('Project written to {}').format(new_path))

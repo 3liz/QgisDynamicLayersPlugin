@@ -82,7 +82,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         )
         parameter.setHelp(
             "The template must have the extension and at least one field name as a Python string template, such as "
-            "'project_$province.qgs' when the layer has field called 'province'"
+            "'project_$province.qgs' when the layer has field called 'province'. It's not the QGIS expression syntax."
         )
         self.addParameter(parameter)
 
@@ -104,6 +104,13 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
         if not flag:
             # TODO check configuration, maybe only at the project level
             msg = tr("You must have at least one layer with the configuration.")
+            return False, msg
+
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        field = self.parameterAsString(parameters, self.FIELD, context)
+        unique_values = source.uniqueValues(source.fields().indexFromName(field))
+        if len(unique_values) != source.featureCount():
+            msg = tr("You field '{}' does not have unique values within the given layer.")
             return False, msg
 
         return super().checkParameterValues(parameters, context)

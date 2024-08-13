@@ -80,6 +80,10 @@ class DynamicLayersEngine:
         # Take only first feature
         feature = QgsFeature()
         features.nextFeature(feature)
+        self.set_search_and_replace_dictionary_from_feature(layer, feature)
+
+    def set_search_and_replace_dictionary_from_feature(self, layer: QgsVectorLayer, feature: QgsFeature):
+        """ Set a feature for the dictionary. """
         self.search_and_replace_dictionary = dict(zip(layer.fields().names(), feature.attributes()))
 
     def set_dynamic_layers_from_project(self, project: QgsProject):
