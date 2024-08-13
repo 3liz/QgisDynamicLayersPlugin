@@ -33,7 +33,10 @@ from dynamic_layers.definitions import (
     PLUGIN_SCOPE,
     PLUGIN_SCOPE_KEY,
     CustomProperty,
+    LayerPropertiesXml,
+    PluginProjectProperty,
     QtVar,
+    WmsProjectProperty,
 )
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
@@ -153,17 +156,17 @@ class DynamicLayers:
             'datasource': {
                 'widget': self.dlg.dynamicDatasourceContent,
                 'wType': 'textarea',
-                'xml': 'dynamicDatasourceContent',
+                'xml': LayerPropertiesXml.DynamicDatasourceContent,
             },
             'title': {
                 'widget': self.dlg.titleTemplate,
                 'wType': 'text',
-                'xml': 'titleTemplate',
+                'xml': LayerPropertiesXml.TitleTemplate,
             },
             'abstract': {
                 'widget': self.dlg.abstractTemplate,
                 'wType': 'textarea',
-                'xml': 'abstractTemplate',
+                'xml': LayerPropertiesXml.AbstractTemplate,
             },
         }
         for key, item in self.layerPropertiesInputs.items():
@@ -185,32 +188,37 @@ class DynamicLayers:
             'title': {
                 'widget': self.dlg.inProjectTitle,
                 'wType': 'text',
-                'xml': 'ProjectTitle',
+                'xml': PluginProjectProperty.Title,
             },
             'abstract': {
                 'widget': self.dlg.inProjectAbstract,
                 'wType': 'textarea',
-                'xml': 'ProjectAbstract',
+                'xml': PluginProjectProperty.Abstract,
+            },
+            'shortname': {
+                'widget': self.dlg.inProjectShortName,
+                'wType': 'text',
+                'xml': PluginProjectProperty.ShortName,
             },
             'extentLayer': {
                 'widget': self.dlg.inExtentLayer,
                 'wType': 'list',
-                'xml': 'ExtentLayer',
+                'xml': PluginProjectProperty.ExtentLayer,
             },
             'extentMargin': {
                 'widget': self.dlg.inExtentMargin,
                 'wType': 'spinbox',
-                'xml': 'ExtentMargin',
+                'xml': PluginProjectProperty.ExtentMargin,
             },
             'variableSourceLayer': {
                 'widget': self.dlg.inVariableSourceLayer,
                 'wType': 'list',
-                'xml': 'VariableSourceLayer',
+                'xml': PluginProjectProperty.VariableSourceLayer,
             },
             'variableSourceLayerExpression': {
                 'widget': self.dlg.inVariableSourceLayerExpression,
                 'wType': 'text',
-                'xml': 'VariableSourceLayerExpression',
+                'xml': PluginProjectProperty.VariableSourceLayerExpression,
             },
         }
         for key, item in self.projectPropertiesInputs.items():
@@ -231,7 +239,8 @@ class DynamicLayers:
     @staticmethod
     def open_help():
         """Opens the html help file content with default browser"""
-        QDesktopServices.openUrl(QUrl("https://github.com/3liz/QgisDynamicLayersPlugin/blob/master/README.md"))
+        # noinspection PyArgumentList
+        QDesktopServices.openUrl(QUrl("https://docs.3liz.org/QgisDynamicLayersPlugin/"))
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -691,21 +700,32 @@ class DynamicLayers:
         # Check if project has got some WMS capabilities
         # Title
         p_title = ''
-        if self.project.readEntry('ProjectTitle', PLUGIN_SCOPE_KEY):
-            p_title = self.project.readEntry('ProjectTitle', PLUGIN_SCOPE_KEY)[0]
-        if not p_title and self.project.readEntry('WMSServiceTitle', "/"):
-            p_title = self.project.readEntry('WMSServiceTitle', "/")[0]
+        if self.project.readEntry(PluginProjectProperty.Title, PLUGIN_SCOPE_KEY):
+            p_title = self.project.readEntry(PluginProjectProperty.Title, PLUGIN_SCOPE_KEY)[0]
+        if not p_title and self.project.readEntry(WmsProjectProperty.Title, "/"):
+            p_title = self.project.readEntry(WmsProjectProperty.Title, "/")[0]
+
+        # Shortname
+        p_shortname = ''
+        if self.project.readEntry(PluginProjectProperty.ShortName, PLUGIN_SCOPE_KEY):
+            p_shortname = self.project.readEntry(PluginProjectProperty.ShortName, PLUGIN_SCOPE_KEY)[0]
+        if not p_shortname and self.project.readEntry(WmsProjectProperty.ShortName, "/"):
+            p_shortname = self.project.readEntry(WmsProjectProperty.ShortName, "/")[0]
 
         # Abstract
         p_abstract = ''
-        if self.project.readEntry('ProjectAbstract', PLUGIN_SCOPE_KEY):
-            p_abstract = self.project.readEntry('ProjectAbstract', PLUGIN_SCOPE_KEY)[0]
-        if not p_abstract and self.project.readEntry('WMSServiceAbstract', "/"):
-            p_abstract = self.project.readEntry('WMSServiceAbstract', "/")[0]
+        if self.project.readEntry(PluginProjectProperty.Abstract, PLUGIN_SCOPE_KEY):
+            p_abstract = self.project.readEntry(PluginProjectProperty.Abstract, PLUGIN_SCOPE_KEY)[0]
+        if not p_abstract and self.project.readEntry(WmsProjectProperty.Abstract, "/"):
+            p_abstract = self.project.readEntry(WmsProjectProperty.Abstract, "/")[0]
 
         ask = False
         previous_title = self.dlg.inProjectTitle.text()
         if previous_title != '' and previous_title != p_title:
+            ask = True
+
+        previous_shortname = self.dlg.inProjectShortName.text()
+        if previous_shortname != '' and previous_shortname != p_shortname:
             ask = True
 
         previous_abstract = self.dlg.inProjectAbstract.toPlainText()
@@ -715,6 +735,7 @@ class DynamicLayers:
         if ask:
             box = QMessageBox(self.dlg)
             box.setIcon(QMessageBox.Question)
+            # noinspection PyArgumentList
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
             box.setWindowTitle(tr('Replace settings by project properties'))
             box.setText(tr(
@@ -725,8 +746,8 @@ class DynamicLayers:
             if result == QMessageBox.No:
                 return
 
-        if not self.project.readEntry('WMSServiceCapabilities', "/")[1]:
-            self.project.writeEntry('WMSServiceCapabilities', "/", str(True))
+        if not self.project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
+            self.project.writeEntry(WmsProjectProperty.Capabilities, "/", str(True))
 
         self.dlg.inProjectTitle.setText(p_title)
         self.dlg.inProjectAbstract.setText(p_abstract)

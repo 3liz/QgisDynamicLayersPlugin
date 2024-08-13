@@ -18,7 +18,7 @@ email=info@3liz.com
 # Tags are comma separated with spaces allowed
 tags=feature, layers, project, dynamic, datasource
 
-homepage=https://github.com/3liz/QgisDynamicLayersPlugin/
+homepage=https://docs.3liz.org/QgisDynamicLayersPlugin/
 tracker=https://github.com/3liz/QgisDynamicLayersPlugin/issues
 repository=https://github.com/3liz/QgisDynamicLayersPlugin/issues
 category=Plugins

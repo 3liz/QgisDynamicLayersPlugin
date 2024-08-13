@@ -92,6 +92,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             self.projectTitleLabel,
             self.inProjectTitle,
             self.label_project_shortname_template,
+            self.inProjectShortName,
             self.projectDescriptionLabel,
             self.inProjectAbstract,
         )
@@ -128,10 +129,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         for widget in widgets:
             widget: QWidget
             widget.setToolTip(help_variables_table)
-
-        # Temporary disabled
-        self.inProjectShortName.setVisible(False)
-        self.label_project_shortname_template.setVisible(False)
 
         self.radio_variables_from_table.setChecked(True)
         self.radio_variables_from_layer.toggled.connect(self.origin_variable_toggled)

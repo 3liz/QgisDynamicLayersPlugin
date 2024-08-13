@@ -11,7 +11,7 @@ from qgis.core import QgsFeature, QgsProject, QgsVectorLayer, edit
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.core.generate_projects import GenerateProjects
-from dynamic_layers.definitions import CustomProperty
+from dynamic_layers.definitions import PLUGIN_SCOPE, CustomProperty
 from tests.base_tests import BaseTests
 
 
@@ -126,9 +126,6 @@ class TestBasicReplacement(BaseTests):
 
         unique_values = coverage.uniqueValues(coverage.fields().indexFromName(field_name))
         self.assertSetEqual({'folder_1', 'folder_2', 'folder_3'}, unique_values)
-
-        # generator = GenerateProjects(project, coverage, field, Path(project.homePath()))
-        # self.assertTrue(generator.process())
 
         for i in unique_values:
             expected_project = template_destination.substitute({'folder': i})

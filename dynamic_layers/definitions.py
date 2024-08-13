@@ -11,11 +11,28 @@ class CustomProperty:
     DynamicDatasourceContent = 'dynamicDatasourceContent'
 
 
-class ProjectProperty:
+class WmsProjectProperty:
     Abstract = 'WMSServiceAbstract'
     Title = 'WMSServiceTitle'
     ShortName = 'WMSRootName'
     Extent = 'WMSExtent'
+    Capabilities = 'WMSServiceCapabilities'
+
+
+class PluginProjectProperty:
+    Title = 'ProjectTitle'
+    Abstract = 'ProjectAbstract'
+    ShortName = 'ProjectShortName'
+    ExtentLayer = 'ExtentLayer'
+    ExtentMargin = 'ExtentMargin'
+    VariableSourceLayer = 'VariableSourceLayer'
+    VariableSourceLayerExpression = 'VariableSourceLayerExpression'
+
+
+class LayerPropertiesXml:
+    DynamicDatasourceContent = 'dynamicDatasourceContent'
+    TitleTemplate = 'titleTemplate'
+    AbstractTemplate = 'abstractTemplate'
 
 
 PLUGIN_SCOPE = 'PluginDynamicLayers'

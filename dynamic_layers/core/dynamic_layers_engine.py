@@ -22,7 +22,8 @@ from dynamic_layers.core.layer_datasource_modifier import (
 from dynamic_layers.definitions import (
     PLUGIN_SCOPE,
     CustomProperty,
-    ProjectProperty,
+    PluginProjectProperty,
+    WmsProjectProperty,
 )
 from dynamic_layers.tools import string_substitution
 
@@ -115,31 +116,39 @@ class DynamicLayersEngine:
         self.iface.actionDraw().trigger()
         self.iface.mapCanvas().refresh()
 
-    def set_dynamic_project_properties(self, project: QgsProject, title: str = None, abstract: str = None):
+    def set_dynamic_project_properties(
+            self, project: QgsProject, title: str = None, short_name: str = None, abstract: str = None):
         """
-        Set some project properties : title, abstract
+        Set some project properties : title, short name, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
         and by using the search and replace dictionary
         """
         # Make sure WMS Service is active
-        if not project.readEntry('WMSServiceCapabilities', "/")[1]:
-            project.writeEntry('WMSServiceCapabilities', "/", "True")
+        if not project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
+            project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
-        # title
+        # Title
         if not title:
-            val = project.readEntry(PLUGIN_SCOPE, 'ProjectTitle')
+            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Title)
             if val:
                 title = val[0]
-        self.set_project_property(project, ProjectProperty.Title, title)
+        self.set_project_property(project, WmsProjectProperty.Title, title)
 
-        # abstract
+        # Shortname
+        if not short_name:
+            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName)
+            if val:
+                short_name = val[0]
+        self.set_project_property(project, WmsProjectProperty.ShortName, short_name)
+
+        # Abstract
         if not abstract:
-            val = project.readEntry(PLUGIN_SCOPE, 'ProjectAbstract')
+            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract)
             if val:
                 abstract = val[0]
-        self.set_project_property(project, ProjectProperty.Abstract, abstract)
+        self.set_project_property(project, WmsProjectProperty.Abstract, abstract)
 
-    def set_project_property(self, project: QgsProject, project_property: Annotated[str, ProjectProperty], val: str):
+    def set_project_property(self, project: QgsProject, project_property: Annotated[str, WmsProjectProperty], val: str):
         """
         Set a project property
         And replace variable if found in the properties
@@ -180,7 +189,7 @@ class DynamicLayersEngine:
                 p_extent.yMaximum(),
             ]
             p_wms_extent = [str(i) for i in p_wms_extent]
-            project.writeEntry(ProjectProperty.Extent, '', p_wms_extent)
+            project.writeEntry(WmsProjectProperty.Extent, '', p_wms_extent)
 
             # Zoom canvas to extent
             if self.iface:
