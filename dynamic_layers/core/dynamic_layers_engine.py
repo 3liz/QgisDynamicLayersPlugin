@@ -116,8 +116,7 @@ class DynamicLayersEngine:
         self.iface.actionDraw().trigger()
         self.iface.mapCanvas().refresh()
 
-    def set_dynamic_project_properties(
-            self, project: QgsProject, title: str = None, short_name: str = None, abstract: str = None):
+    def set_dynamic_project_properties(self, project: QgsProject):
         """
         Set some project properties : title, short name, abstract
         based on the templates stored in the project file in <PluginDynamicLayers>
@@ -128,25 +127,19 @@ class DynamicLayersEngine:
             project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
         # Title
-        if not title:
-            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Title)
-            if val:
-                title = val[0]
-        self.set_project_property(project, WmsProjectProperty.Title, title)
+        val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Title)
+        if val:
+            self.set_project_property(project, WmsProjectProperty.Title, val[0])
 
         # Shortname
-        if not short_name:
-            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName)
-            if val:
-                short_name = val[0]
-        self.set_project_property(project, WmsProjectProperty.ShortName, short_name)
+        val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ShortName)
+        if val:
+            self.set_project_property(project, WmsProjectProperty.ShortName, val[0])
 
         # Abstract
-        if not abstract:
-            val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract)
-            if val:
-                abstract = val[0]
-        self.set_project_property(project, WmsProjectProperty.Abstract, abstract)
+        val = project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract)
+        if val:
+            self.set_project_property(project, WmsProjectProperty.Abstract, val[0])
 
     def set_project_property(self, project: QgsProject, project_property: Annotated[str, WmsProjectProperty], val: str):
         """

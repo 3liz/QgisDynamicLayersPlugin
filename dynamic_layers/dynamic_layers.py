@@ -747,7 +747,7 @@ class DynamicLayers:
                 return
 
         if not self.project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
-            self.project.writeEntry(WmsProjectProperty.Capabilities, "/", str(True))
+            self.project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
         self.dlg.inProjectTitle.setText(p_title)
         self.dlg.inProjectAbstract.setText(p_abstract)
