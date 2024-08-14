@@ -48,13 +48,15 @@ def string_substitution(
     context.appendScope(scope)
 
     if is_template:
-        return QgsExpression.replaceExpressionText(input_string, context)
+        output = QgsExpression.replaceExpressionText(input_string, context)
+        return output
 
     expression = QgsExpression(input_string)
     if expression.hasEvalError() or expression.hasParserError():
         raise QgsProcessingException(f"Invalid QGIS expression : {input_string}")
 
-    return expression.evaluate(context)
+    output = expression.evaluate(context)
+    return output
 
 
 def plugin_path(*args) -> Path:

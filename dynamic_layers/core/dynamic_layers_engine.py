@@ -8,7 +8,6 @@ from qgis.core import (
     QgsExpression,
     QgsFeature,
     QgsFeatureRequest,
-    QgsMapLayer,
     QgsMessageLog,
     QgsProject,
     QgsRectangle,
@@ -32,10 +31,10 @@ class DynamicLayersEngine:
 
     def __init__(self):
         """ Dynamic Layers Engine constructor. """
-        self._extent_layer = None
-        self._extent_margin = None
-        self._dynamic_layers: dict = {}
-        self._search_and_replace_dictionary: dict = {}
+        self.extent_layer = None
+        self.extent_margin = None
+        self.dynamic_layers: dict = {}
+        self.variables: dict = {}
         self.iface = iface
 
         # For expressions
@@ -43,31 +42,7 @@ class DynamicLayersEngine:
         self.layer = None
         self.feature = None
 
-    @property
-    def extent_layer(self) -> QgsMapLayer:
-        return self._extent_layer
-
-    @extent_layer.setter
-    def extent_layer(self, layer: QgsMapLayer):
-        self._extent_layer = layer
-
-    @property
-    def extent_margin(self) -> int:
-        return self._extent_margin
-
-    @extent_margin.setter
-    def extent_margin(self, extent: int):
-        self._extent_margin = extent
-
-    @property
-    def search_and_replace_dictionary(self) -> dict:
-        return self._search_and_replace_dictionary
-
-    @search_and_replace_dictionary.setter
-    def search_and_replace_dictionary(self, values: dict):
-        self._search_and_replace_dictionary = values
-
-    def set_search_and_replace_dictionary_from_layer(self, layer: QgsVectorLayer, expression: str):
+    def set_layer_and_expression(self, layer: QgsVectorLayer, expression: str):
         """ Set the search and replace dictionary from a given layer and an expression.
 
         The first found feature is the data source
@@ -85,36 +60,31 @@ class DynamicLayersEngine:
         # Take only first feature
         feature = QgsFeature()
         features.nextFeature(feature)
-        self.set_search_and_replace_dictionary_from_feature(layer, feature)
+        self.set_layer_and_feature(layer, feature)
 
-    def set_search_and_replace_dictionary_from_feature(self, layer: QgsVectorLayer, feature: QgsFeature):
+    def set_layer_and_feature(self, layer: QgsVectorLayer, feature: QgsFeature):
         """ Set a feature for the dictionary. """
         self.layer = layer
         self.feature = feature
-        self.search_and_replace_dictionary = dict(zip(layer.fields().names(), feature.attributes()))
 
     def discover_dynamic_layers_from_project(self, project: QgsProject):
         """ Check all maplayers in the given project which are dynamic. """
         self.project = project
-        self._dynamic_layers = {
+        self.dynamic_layers = {
             lid: layer for lid, layer in project.mapLayers().items() if
             layer.customProperty(CustomProperty.DynamicDatasourceActive) and layer.customProperty(
                 CustomProperty.DynamicDatasourceContent)
         }
 
-    def update_dynamic_layers_datasource_from_dict(self):
+    def update_dynamic_layers_datasource(self):
         """
         For each layers with "active" status,
         Change the datasource by using the dynamicDatasourceContent
         And the given search&replace dictionary
         """
-        if len(self.search_and_replace_dictionary) < 1:
-            return
-
-        for lid, layer in self._dynamic_layers.items():
-            # Change datasource
+        for layer in self.dynamic_layers.values():
             a = LayerDataSourceModifier(layer, self.project, self.layer, self.feature)
-            a.set_new_source_uri_from_dict(self.search_and_replace_dictionary)
+            a.compute_new_uri(self.variables)
 
             if not self.iface:
                 continue
@@ -161,7 +131,7 @@ class DynamicLayersEngine:
         # Replace variable in given val via dictionary
         val = string_substitution(
             input_string=val,
-            variables=self.search_and_replace_dictionary,
+            variables=self.variables,
             project=self.project,
             layer=self.layer,
             feature=self.feature,

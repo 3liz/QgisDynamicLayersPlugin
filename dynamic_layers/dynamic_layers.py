@@ -845,14 +845,14 @@ class DynamicLayers:
                 # Set search and replace dictionary
                 # Collect variables names and values
                 if self.dlg.is_table_variable_based:
-                    engine.search_and_replace_dictionary = self.dlg.variables()
+                    engine.variables = self.dlg.variables()
                 else:
                     layer = self.dlg.inVariableSourceLayer.currentLayer()
                     exp = self.dlg.inVariableSourceLayerExpression.text()
-                    engine.set_search_and_replace_dictionary_from_layer(layer, exp)
+                    engine.set_layer_and_expression(layer, exp)
 
                 # Change layers datasource
-                engine.update_dynamic_layers_datasource_from_dict()
+                engine.update_dynamic_layers_datasource()
 
                 # Set project properties
                 engine.update_dynamic_project_properties()

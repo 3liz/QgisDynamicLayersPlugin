@@ -4,8 +4,13 @@ __email__ = 'info@3liz.org'
 
 import typing
 
-from qgis._core import QgsProject, QgsVectorLayer, QgsFeature
-from qgis.core import QgsMapLayer, QgsReadWriteContext
+from qgis.core import (
+    QgsFeature,
+    QgsMapLayer,
+    QgsProject,
+    QgsReadWriteContext,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
@@ -27,7 +32,7 @@ class LayerDataSourceModifier:
         # Content of the dynamic datasource
         self.dynamic_datasource_content = layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
-    def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):
+    def compute_new_uri(self, search_and_replace_dictionary: dict = None):
         """
         Get the dynamic datasource template,
         Replace variable with passed data,
@@ -44,6 +49,9 @@ class LayerDataSourceModifier:
             layer=self.layer_context,
             feature=self.feature
         )
+
+        if not new_uri:
+            raise Exception(f"New URI invalid : {new_uri}")
 
         # Set the layer datasource
         self.set_data_source(new_uri)

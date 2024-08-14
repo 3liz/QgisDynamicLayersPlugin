@@ -6,10 +6,9 @@ from functools import partial
 from pathlib import Path
 from typing import Union
 
-from qgis.PyQt.QtWidgets import QPlainTextEdit
-from qgis.core import QgsExpression
 from qgis.core import (
     QgsApplication,
+    QgsExpression,
     QgsExpressionContext,
     QgsExpressionContextScope,
     QgsExpressionContextUtils,
@@ -21,6 +20,7 @@ from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QLineEdit,
+    QPlainTextEdit,
     QTextEdit,
     QWidget,
 )

@@ -51,12 +51,12 @@ class GenerateProjects:
         # noinspection PyUnresolvedReferences
         request.setFlags(QgsFeatureRequest.NoGeometry)
         for feature in self.coverage.getFeatures(request):
-            engine.set_search_and_replace_dictionary_from_feature(self.coverage, feature)
+            engine.set_layer_and_feature(self.coverage, feature)
 
             if self.feedback:
                 self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
 
-            engine.update_dynamic_layers_datasource_from_dict()
+            engine.update_dynamic_layers_datasource()
             engine.update_dynamic_project_properties()
 
             new_file = string_substitution(
