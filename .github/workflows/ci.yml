@@ -177,12 +177,12 @@ jobs:
           token: ${{ secrets.BOT_HUB_TOKEN }}
 
       - name: Package and deploy the zip
-        # Without --github-token ${{ secrets.BOT_HUB_TOKEN }}
         run: >-
           qgis-plugin-ci
           -v
           release ${{ env.RELEASE_VERSION }}
           --transifex-token ${{ secrets.TRANSIFEX_TOKEN }}
+          --github-token ${{ secrets.BOT_HUB_TOKEN }}
           --create-plugin-repo
 
       - name: Repository Dispatch

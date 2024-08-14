@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## 0.6.0 - 2024-08-14
+
+* Support QGIS Expressions
 * Port to QGIS 3
+* Add Processing algorithm to generate many projects in batch
 
 ## 0.5 - 2016-09-08
 
