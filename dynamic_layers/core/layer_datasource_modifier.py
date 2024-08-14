@@ -4,6 +4,7 @@ __email__ = 'info@3liz.org'
 
 import typing
 
+from qgis._core import QgsProject, QgsVectorLayer, QgsFeature
 from qgis.core import QgsMapLayer, QgsReadWriteContext
 from qgis.PyQt.QtXml import QDomDocument
 
@@ -13,18 +14,17 @@ from dynamic_layers.tools import string_substitution
 
 class LayerDataSourceModifier:
 
-    # Content of the dynamic datasource
-    dynamic_datasource_content = None
-
-    # Datasource can be changed from dynamicDatasourceContent or not
-    dynamic_datasource_active = False
-
-    def __init__(self, layer: QgsMapLayer):
+    def __init__(self, layer: QgsMapLayer, project: QgsProject, layer_context: QgsVectorLayer, feature: QgsFeature):
         """
         Initialize class instance
         """
+        self.project = project
         self.layer = layer
+        self.layer_context = layer_context
+        self.feature = feature
+        # Datasource can be changed from dynamicDatasourceContent or not
         self.dynamic_datasource_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
+        # Content of the dynamic datasource
         self.dynamic_datasource_content = layer.customProperty(CustomProperty.DynamicDatasourceContent)
 
     def set_new_source_uri_from_dict(self, search_and_replace_dictionary: dict = None):
@@ -38,7 +38,12 @@ class LayerDataSourceModifier:
 
         # Set the new uri
         new_uri = string_substitution(
-            self.dynamic_datasource_content, search_and_replace_dictionary)
+            input_string=self.dynamic_datasource_content,
+            variables=search_and_replace_dictionary,
+            project=self.project,
+            layer=self.layer_context,
+            feature=self.feature
+        )
 
         # Set the layer datasource
         self.set_data_source(new_uri)
@@ -119,8 +124,11 @@ class LayerDataSourceModifier:
         # Search and replace content
         self.layer.setTitle(
             string_substitution(
-                source_title,
-                search_and_replace_dictionary,
+                input_string=source_title,
+                variables=search_and_replace_dictionary,
+                project=self.project,
+                layer=self.layer,
+                feature=self.feature,
             ),
         )
 
@@ -134,8 +142,11 @@ class LayerDataSourceModifier:
         # Search and replace content
         self.layer.setName(
             string_substitution(
-                source_name,
-                search_and_replace_dictionary,
+                input_string=source_name,
+                variables=search_and_replace_dictionary,
+                project=self.project,
+                layer=self.layer,
+                feature=self.feature,
             ),
         )
 
@@ -151,8 +162,11 @@ class LayerDataSourceModifier:
 
         self.layer.setAbstract(
             string_substitution(
-                source_abstract,
-                search_and_replace_dictionary,
+                input_string=source_abstract,
+                variables=search_and_replace_dictionary,
+                project=self.project,
+                layer=self.layer,
+                feature=self.feature,
             ),
         )
 
@@ -164,7 +178,10 @@ class LayerDataSourceModifier:
                     continue
 
                 new_alias = string_substitution(
-                    alias,
-                    search_and_replace_dictionary,
+                    input_string=alias,
+                    variables=search_and_replace_dictionary,
+                    project=self.project,
+                    layer=self.layer,
+                    feature=self.feature,
                 )
                 self.layer.setFieldAlias(fid, new_alias)

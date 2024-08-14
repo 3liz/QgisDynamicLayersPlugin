@@ -840,7 +840,7 @@ class DynamicLayers:
                 engine = DynamicLayersEngine()
 
                 # Set the dynamic layers list
-                engine.set_dynamic_layers_from_project(self.project)
+                engine.discover_dynamic_layers_from_project(self.project)
 
                 # Set search and replace dictionary
                 # Collect variables names and values
@@ -852,10 +852,10 @@ class DynamicLayers:
                     engine.set_search_and_replace_dictionary_from_layer(layer, exp)
 
                 # Change layers datasource
-                engine.set_dynamic_layers_datasource_from_dict()
+                engine.update_dynamic_layers_datasource_from_dict()
 
                 # Set project properties
-                engine.set_dynamic_project_properties(self.project)
+                engine.update_dynamic_project_properties()
 
                 # Set extent layer
                 engine.extent_layer = self.dlg.inExtentLayer.currentLayer()
@@ -864,7 +864,7 @@ class DynamicLayers:
                 engine.extent_margin = self.dlg.inExtentMargin.value()
 
                 # Set new extent
-                engine.set_project_extent(self.project)
+                engine.update_project_extent()
         except QgsProcessingException as e:
             self.dlg.message_bar.pushCritical(self.tr("Parsing expression error"), str(e))
             return

@@ -40,7 +40,7 @@ class GenerateProjects:
     def process(self) -> bool:
         """ Generate all projects needed according to the coverage layer. """
         engine = DynamicLayersEngine()
-        engine.set_dynamic_layers_from_project(self.project)
+        engine.discover_dynamic_layers_from_project(self.project)
 
         base_path = self.project.fileName()
 
@@ -56,8 +56,8 @@ class GenerateProjects:
             if self.feedback:
                 self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
 
-            engine.set_dynamic_layers_datasource_from_dict()
-            engine.set_dynamic_project_properties(self.project)
+            engine.update_dynamic_layers_datasource_from_dict()
+            engine.update_dynamic_project_properties()
 
             new_file = string_substitution(
                 input_string=self.expression_destination,

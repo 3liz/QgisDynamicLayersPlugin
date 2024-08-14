@@ -28,6 +28,7 @@ class TestBasicReplacement(BaseTests):
         # noinspection PyArgumentList
         project = QgsProject()
 
+        # We will use variables @, not fields ""
         token = '@x'
 
         # Empty short name
@@ -44,7 +45,7 @@ class TestBasicReplacement(BaseTests):
         self.assertEqual(1, len(project.mapLayers()))
 
         engine = DynamicLayersEngine()
-        engine.set_dynamic_layers_from_project(project)
+        engine.discover_dynamic_layers_from_project(project)
         self.assertDictEqual({}, engine._dynamic_layers)
 
         vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, True)
@@ -61,7 +62,7 @@ class TestBasicReplacement(BaseTests):
         vector.setCustomProperty(CustomProperty.TitleTemplate, f"concat('Custom layer title ', @x)")
         vector.setCustomProperty(CustomProperty.AbstractTemplate, f"concat('Custom layer abstract ', @x)")
 
-        engine.set_dynamic_layers_from_project(project)
+        engine.discover_dynamic_layers_from_project(project)
         self.assertDictEqual(
             {
                 vector.id(): vector
@@ -74,8 +75,8 @@ class TestBasicReplacement(BaseTests):
             'x': '2',
         }
 
-        engine.set_dynamic_layers_datasource_from_dict()
-        engine.set_dynamic_project_properties(project)
+        engine.update_dynamic_layers_datasource_from_dict()
+        engine.update_dynamic_project_properties()
 
         self.assertIn('folder_2', vector.source())
         self.assertNotIn('folder_1', vector.source())
@@ -109,7 +110,8 @@ class TestBasicReplacement(BaseTests):
         # noinspection PyArgumentList
         project = QgsProject()
 
-        template_destination = "concat('project_', @folder, ' ', @name, '.qgs')"
+        # We will use a coverage layer, so it uses fields "", not @
+        template_destination = "concat('project_', \"folder\", ' ', \"name\", '.qgs')"
         layer_name = "Layer 1"
 
         vector_path = Path(__file__).parent.joinpath(f"fixtures/folder_1/lines_1.geojson")
@@ -118,7 +120,7 @@ class TestBasicReplacement(BaseTests):
         vector.setCustomProperty(CustomProperty.DynamicDatasourceActive, True)
         vector.setCustomProperty(
             CustomProperty.DynamicDatasourceContent,
-            "concat('fixtures/folder_', @folder, '/lines_', @folder, '.geojson')"
+            "concat('fixtures/folder_', \"folder\", '/lines_', \"folder\", '.geojson')"
         )
         project.addMapLayer(vector)
         self.assertEqual(1, len(project.mapLayers()))
@@ -128,7 +130,7 @@ class TestBasicReplacement(BaseTests):
         side_car.touch()
 
         # Set abstract template
-        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract, "concat('Abstract ', @folder)")
+        project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract, "concat('Abstract ', \"folder\")")
 
         project.setFileName(str(parent_project))
         self.assertTrue(project.write())
@@ -171,11 +173,14 @@ class TestBasicReplacement(BaseTests):
 
         for feature in coverage.getFeatures():
             expected_project = string_substitution(
-                template_destination,
-                {
+                input_string=template_destination,
+                variables={
                         'folder': feature[field],
                         'name': feature[name],
-                    }
+                    },
+                project=project,
+                layer=coverage,
+                feature=feature,
                 )
             expected_path = Path(self.temp_dir).joinpath(expected_project)
             self.assertTrue(
