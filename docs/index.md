@@ -11,7 +11,7 @@ hide:
 This plugin helps to change the datasource's of many layers at once, for example to create different versions of the
 same project on different extents.
 
-You can use some variables such as `@myvar` inside the layer datasource template, and then define these variables
+You can use some expressions inside the layer datasource template, and then define these variables
 (from a table or from an input vector source).
 
 Finally, you can apply the variables values on every configured layer via the **apply** button, and you can see the
@@ -40,18 +40,17 @@ The project layers are listed in the table, which the following properties
 * **Dynamic Datasource Active** : True means the layer is activated : the dynamic datasource content set in the bottom
   text box will be used when applying variables on the project.
 
-The activated layers have a green background. You can sort the layers in the table by clicking on one of the header columns.
+The activated layers have a green background. You can sort the layers in the table by clicking on one of the header
+columns.
 
 #### Dynamic properties
 
-This interface allows you to activate dynamic datasource for the selected layers (the layer highlighted in the table above).
+This interface allows you to activate dynamic datasource for the selected layers (the layer highlighted in the table
+above).
 
 You can copy the current datasource from the layer definition by clicking on the **Copy from current datasource** button.
 
-Then you can change the datasource, and use variables, with the syntax `$varname` by changing `varname` by any name you
-want (but you need to use only letters and digits, no spaces or punctuation chars).
-
-Note, both syntax are valid : `$varname` or `${varname}` (which can become `language${languageCode}`).
+Then you can change the datasource, and use QGIS expressions.
 
 For example, if the original layer datasource for a Shapefile is
 
@@ -62,18 +61,18 @@ For example, if the original layer datasource for a Shapefile is
 You can use a "country" variable
 
 ```bash
-/tmp/town_${country}.shp
+'/tmp/town_' + @country + '.shp'
 ```
 
 You can use as many variables as needed, and for any type of datasource. For example, you could change a username or
 table definition of a PostGIS layer, or a `WHERE` clause, like this :
 
 ```sql
-service='myservice' sslmode=disable key='gid' table="(
+'service=\'myservice\'
+key=\'gid\' table="(
 SELECT row_number() OVER () AS gid, *
 FROM mytable
-WHERE year = ${year}
-)" sql=
+WHERE year = ' || "year" || ')" sql='
 ```
 
 #### Use variables in QGIS layer properties
@@ -98,7 +97,7 @@ This tab allows you to define 2 different things:
   You can also use variables in these parameters, such as the following example for the title
 
 ```
-Map of the towns of $country (year : ${year} )
+concat('Map of the towns of ', "country", ' (year : ', "year", ')')
 ```
 
 You can use the button **Copy properties from project** to get the title and description which are set in the project
