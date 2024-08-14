@@ -6,6 +6,8 @@ from functools import partial
 from pathlib import Path
 from typing import Union
 
+from qgis.PyQt.QtWidgets import QPlainTextEdit
+from qgis.core import QgsExpression
 from qgis.core import (
     QgsApplication,
     QgsExpressionContext,
@@ -117,7 +119,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             # Variables
             self.inVariableSourceLayerExpression_exp,
         ]
-        debug = [
+        temporary_list_expressions = [
             # Project
             self.inProjectTitle_exp,
             self.inProjectShortName_exp,
@@ -129,14 +131,22 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             self.abstractTemplate_exp,
         ]
         if not self.is_expression:
-            for widget in debug:
+            for widget in temporary_list_expressions:
                 widget.setVisible(False)
-        self.expression_widgets.extend(debug)
+        self.expression_widgets.extend(temporary_list_expressions)
         for widget in self.expression_widgets:
             widget.setText("")
             widget.setToolTip("")
             widget.setIcon(QIcon(QgsApplication.iconPath('mIconExpression.svg')))
             widget.clicked.connect(partial(self.open_expression_builder, widget.objectName()))
+
+            widget = self.input_expression_widget(widget.objectName())
+            if isinstance(widget, QLineEdit):
+                # QLineEdit
+                widget.editingFinished.connect(partial(self.validate_expression, widget.objectName()))
+            else:
+                # QPlainTextEdit
+                widget.textChanged.connect(partial(self.validate_expression, widget.objectName()))
 
     def origin_variable_toggled(self):
         self.is_table_variable_based = self.radio_variables_from_table.isChecked()
@@ -156,6 +166,33 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             data[v_name] = v_value
         return data
 
+    @staticmethod
+    def text_widget(widget) -> str:
+        """ Current text in the widget. """
+        if isinstance(widget, QLineEdit):
+            # QLineEdit
+            return widget.text()
+        else:
+            # QPlainTextEdit
+            return widget.toPlainText()
+
+    def validate_expression(self, source: str):
+        """ Show a warning background if the expression is incorrect. """
+        widget = getattr(self, source)
+        expression = QgsExpression(self.text_widget(widget))
+        if expression.hasEvalError() or expression.hasParserError():
+            if isinstance(widget, QLineEdit):
+                icon = QIcon(":/images/themes/default/mIconWarning.svg")
+                widget.addAction(icon, QLineEdit.LeadingPosition)
+            else:
+                widget.setStyleSheet("background-color: #55f3bc3c")
+        else:
+            actions = widget.actions()
+            if actions:
+                widget.removeAction(actions[0])
+            if isinstance(widget, QPlainTextEdit):
+                widget.setStyleSheet("")
+
     def open_expression_builder(self, source: str):
         """ Open the expression builder helper. """
         if self.is_table_variable_based:
@@ -174,14 +211,10 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
         context.appendScope(scope)
 
-        widget: Union[QLineEdit, QTextEdit] = getattr(self, source.replace("_exp", ""))
+        widget = self.input_expression_widget(source)
 
         dialog = QgsExpressionBuilderDialog(layer, context=context)
-        if isinstance(widget, QLineEdit):
-            content = widget.text()
-        else:
-            content = widget.toPlainText()
-        dialog.setExpressionText(content)
+        dialog.setExpressionText(self.text_widget(widget))
         result = dialog.exec()
 
         if result != QDialog.Accepted:
@@ -193,3 +226,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             widget.setText(content)
         else:
             widget.setPlainText(content)
+
+    def input_expression_widget(self, source) -> Union[QLineEdit, QTextEdit]:
+        """ Return the associated input text widget associated with an expression button. """
+        return getattr(self, source.replace("_exp", ""))
