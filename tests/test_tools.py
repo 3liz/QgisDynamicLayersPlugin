@@ -30,9 +30,9 @@ class TestTools(unittest.TestCase):
             expected = [side_1, side_2]
             expected.sort()
             self.assertListEqual(expected, side_car_files(test))
-
-    # def test_string_substitution(self):
-    #     """ Test string substitution. """
+    #
+    # def test_string_substitution_template(self):
+    #     """ Test string substitution template. """
     #     self.assertEqual(
     #         "Hello 1",
     #         string_substitution(
@@ -43,13 +43,16 @@ class TestTools(unittest.TestCase):
     #             is_template=True,
     #         )
     #     )
-        # self.assertEqual(
-        #     "Hello 1",
-        #     string_substitution(
-        #         input_string="concat('Hello ', @here)",
-        #         variables={
-        #             'here': 1
-        #         },
-        #         is_template=False,
-        #     )
-        # )
+    #
+    # def test_string_substitution_expression(self):
+    #     """ Test string substitution expression. """
+    #     self.assertEqual(
+    #         "Hello 1",
+    #         string_substitution(
+    #             input_string="concat('Hello ', @here)",
+    #             variables={
+    #                 'here': 1
+    #             },
+    #             is_template=False,
+    #         )
+    #     )

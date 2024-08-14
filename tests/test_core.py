@@ -65,7 +65,8 @@ class TestBasicReplacement(BaseTests):
         project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract, f"concat('Abstract ', \"folder\")")
         project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Title, f"concat('Title ', \"folder\")")
 
-        vector = QgsVectorLayer(str(Path(f"fixtures/folder_1/lines_1.geojson")), f"Layer folder_1")
+        vector = QgsVectorLayer(
+            str(Path(__file__).parent.joinpath(f"fixtures/folder_1/lines_1.geojson")), f"Layer folder_1")
         self.assertTrue(vector.isValid())
         project.addMapLayer(vector)
 
@@ -142,7 +143,8 @@ class TestBasicReplacement(BaseTests):
         project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Abstract, f"concat('Abstract ', @x)")
         project.writeEntry(PLUGIN_SCOPE, PluginProjectProperty.Title, f"concat('Title ', @x)")
 
-        vector = QgsVectorLayer(str(Path(f"fixtures/folder_1/lines_1.geojson")), f"Layer folder_1")
+        vector = QgsVectorLayer(
+            str(Path(__file__).parent.joinpath(f"fixtures/folder_1/lines_1.geojson")), f"Layer folder_1")
         self.assertTrue(vector.isValid())
         project.addMapLayer(vector)
 
