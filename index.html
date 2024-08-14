@@ -734,7 +734,7 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">#</a></h2>
 <p>This plugin helps to change the datasource's of many layers at once, for example to create different versions of the
 same project on different extents.</p>
-<p>You can use some variables such as <code>@myvar</code> inside the layer datasource template, and then define these variables
+<p>You can use some expressions inside the layer datasource template, and then define these variables
 (from a table or from an input vector source).</p>
 <p>Finally, you can apply the variables values on every configured layer via the <strong>apply</strong> button, and you can see the
 changes before saving the project.</p>
@@ -755,18 +755,18 @@ Once you have a project, you can open the plugin main dialog.</p>
 <li><strong>Dynamic Datasource Active</strong> : True means the layer is activated : the dynamic datasource content set in the bottom
   text box will be used when applying variables on the project.</li>
 </ul>
-<p>The activated layers have a green background. You can sort the layers in the table by clicking on one of the header columns.</p>
+<p>The activated layers have a green background. You can sort the layers in the table by clicking on one of the header
+columns.</p>
 <h4 id="dynamic-properties">Dynamic properties<a class="headerlink" href="#dynamic-properties" title="Permanent link">#</a></h4>
-<p>This interface allows you to activate dynamic datasource for the selected layers (the layer highlighted in the table above).</p>
+<p>This interface allows you to activate dynamic datasource for the selected layers (the layer highlighted in the table
+above).</p>
 <p>You can copy the current datasource from the layer definition by clicking on the <strong>Copy from current datasource</strong> button.</p>
-<p>Then you can change the datasource, and use variables, with the syntax <code>$varname</code> by changing <code>varname</code> by any name you
-want (but you need to use only letters and digits, no spaces or punctuation chars).</p>
-<p>Note, both syntax are valid : <code>$varname</code> or <code>${varname}</code> (which can become <code>language${languageCode}</code>).</p>
+<p>Then you can change the datasource, and use QGIS expressions.</p>
 <p>For example, if the original layer datasource for a Shapefile is</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>/tmp/town_france.shp
 </code></pre></div></td></tr></table></div>
 <p>You can use a "country" variable</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>/tmp/town_<span class="si">${</span><span class="nv">country</span><span class="si">}</span>.shp
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="s1">&#39;/tmp/town_&#39;</span><span class="w"> </span>+<span class="w"> </span>@country<span class="w"> </span>+<span class="w"> </span><span class="s1">&#39;.shp&#39;</span>
 </code></pre></div></td></tr></table></div>
 <p>You can use as many variables as needed, and for any type of datasource. For example, you could change a username or
 table definition of a PostGIS layer, or a <code>WHERE</code> clause, like this :</p>
@@ -774,11 +774,11 @@ table definition of a PostGIS layer, or a <code>WHERE</code> clause, like this :
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">service</span><span class="o">=</span><span class="s1">&#39;myservice&#39;</span><span class="w"> </span><span class="n">sslmode</span><span class="o">=</span><span class="n">disable</span><span class="w"> </span><span class="k">key</span><span class="o">=</span><span class="s1">&#39;gid&#39;</span><span class="w"> </span><span class="k">table</span><span class="o">=</span><span class="ss">&quot;(</span>
-<span class="ss">SELECT row_number() OVER () AS gid, *</span>
-<span class="ss">FROM mytable</span>
-<span class="ss">WHERE year = ${year}</span>
-<span class="ss">)&quot;</span><span class="w"> </span><span class="k">sql</span><span class="o">=</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="s1">&#39;service=\&#39;</span><span class="n">myservice</span><span class="err">\</span><span class="s1">&#39;</span>
+<span class="s1">key=\&#39;</span><span class="n">gid</span><span class="err">\</span><span class="s1">&#39; table=&quot;(</span>
+<span class="s1">SELECT row_number() OVER () AS gid, *</span>
+<span class="s1">FROM mytable</span>
+<span class="s1">WHERE year = &#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="ss">&quot;year&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">&#39;)&quot; sql=&#39;</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="use-variables-in-qgis-layer-properties">Use variables in QGIS layer properties<a class="headerlink" href="#use-variables-in-qgis-layer-properties" title="Permanent link">#</a></h4>
 <p>We have seen above that you can use variables to define a new layer datasource.</p>
@@ -797,7 +797,7 @@ table definition of a PostGIS layer, or a <code>WHERE</code> clause, like this :
 <li>Some project with QGIS Server : <strong>Project title</strong> and <strong>Project abstract</strong>.
   You can also use variables in these parameters, such as the following example for the title</li>
 </ul>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>Map of the towns of $country (year : ${year} )
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>concat(&#39;Map of the towns of &#39;, &quot;country&quot;, &#39; (year : &#39;, &quot;year&quot;, &#39;)&#39;)
 </code></pre></div></td></tr></table></div>
 <p>You can use the button <strong>Copy properties from project</strong> to get the title and description which are set in the project
 properties tab of QGIS ( Menu Project / Project properties / QGIS Server )</p>
@@ -917,7 +917,7 @@ You will have the following variables and values</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 13, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 14, 2024</span>
   </span>
 
     
