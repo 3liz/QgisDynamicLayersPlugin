@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.6.1 - 2024-08-20
+
+* Fix some Python errors
+
 ## 0.6.0 - 2024-08-14
 
 * Support QGIS Expressions
