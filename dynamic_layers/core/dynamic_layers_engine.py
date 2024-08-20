@@ -145,9 +145,9 @@ class DynamicLayersEngine:
         """
         # Get extent from extent layer (if given)
         p_extent = None
-        if self._extent_layer:
-            self._extent_layer.updateExtents()
-            p_extent = self._extent_layer.extent()
+        if self.extent_layer:
+            self.extent_layer.updateExtents()
+            p_extent = self.extent_layer.extent()
         else:
             if self.iface:
                 p_extent = self.iface.mapCanvas().extent()
@@ -156,9 +156,9 @@ class DynamicLayersEngine:
 
         # Add a margin
         if p_extent:
-            if self._extent_margin:
-                margin_x = p_extent.width() * self._extent_margin / 100
-                margin_y = p_extent.height() * self._extent_margin / 100
+            if self.extent_margin:
+                margin_x = p_extent.width() * self.extent_margin / 100
+                margin_y = p_extent.height() * self.extent_margin / 100
                 margin = max(margin_x, margin_y)
                 p_extent = p_extent.buffered(margin)
 
