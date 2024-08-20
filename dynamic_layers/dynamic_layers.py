@@ -6,6 +6,7 @@ import re
 
 from functools import partial
 from pathlib import Path
+from typing import Optional
 
 from qgis import processing
 from qgis.core import (
@@ -356,7 +357,7 @@ class DynamicLayers:
                 self.dlg.twLayers.setItem(tw_row_count, i, new_item)
 
     @staticmethod
-    def get_layer_property(layer: QgsMapLayer, prop: str) -> str | None:
+    def get_layer_property(layer: QgsMapLayer, prop: str) -> Optional[str]:
         """
         Get a layer property
         """
@@ -766,9 +767,9 @@ class DynamicLayers:
             self.project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
         self.dlg.inProjectTitle.setText(f"'{p_title}'" if self.is_expression else p_title)
-        self.dlg.inProjectAbstract.setText(f"'{p_abstract}'" if self.is_expression else p_abstract)
+        self.dlg.inProjectAbstract.setPlainText(f"'{p_abstract}'" if self.is_expression else p_abstract)
 
-    def on_project_property_changed(self, prop: str) -> str | None:
+    def on_project_property_changed(self, prop: str) -> Optional[str]:
         """
         Save project dynamic property in the project
         when the user changes the content
@@ -879,11 +880,10 @@ class DynamicLayers:
     def generate_projects_clicked():
         """ Open the Processing algorithm dialog. """
         # noinspection PyUnresolvedReferences
-        dialog = processing.createAlgorithmDialog(
+        processing.execAlgorithmDialog(
             "dynamic_layers:generate_projects",
             {}
         )
-        dialog.show()
 
     def run(self):
         """Run method that performs all the real work"""

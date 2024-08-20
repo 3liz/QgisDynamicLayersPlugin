@@ -7,6 +7,7 @@ import typing
 from qgis.core import (
     QgsFeature,
     QgsMapLayer,
+    QgsProcessingException,
     QgsProject,
     QgsReadWriteContext,
     QgsVectorLayer,
@@ -14,7 +15,7 @@ from qgis.core import (
 from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
-from dynamic_layers.tools import string_substitution
+from dynamic_layers.tools import string_substitution, tr
 
 
 class LayerDataSourceModifier:
@@ -51,7 +52,9 @@ class LayerDataSourceModifier:
         )
 
         if not new_uri:
-            raise Exception(f"New URI invalid : {new_uri}")
+            raise QgsProcessingException(tr(
+                "New URI is invalid. Was it a valid QGIS expression ?"
+            ) + " " + str(new_uri))
 
         # Set the layer datasource
         self.set_data_source(new_uri)
