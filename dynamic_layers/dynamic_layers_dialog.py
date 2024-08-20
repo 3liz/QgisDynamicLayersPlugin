@@ -153,9 +153,9 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.widget_layer.setEnabled(not self.is_table_variable_based)
         self.widget_table.setEnabled(self.is_table_variable_based)
 
-    def variables(self) -> dict:
+    def variables(self) -> dict[str, str]:
         """ The list of variables in the table. """
-        data = {}
+        data: dict[str, str] = {}
 
         if not self.is_table_variable_based:
             return data

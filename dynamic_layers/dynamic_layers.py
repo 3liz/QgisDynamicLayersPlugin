@@ -13,13 +13,15 @@ from qgis.core import (
     QgsApplication,
     QgsIconUtils,
     QgsMapLayer,
+    QgsMapLayerProxyModel,
     QgsProcessingException,
     QgsProject,
 )
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator, QUrl
-from qgis.PyQt.QtGui import QAction, QDesktopServices, QIcon, QTextCursor
+from qgis.PyQt.QtGui import QDesktopServices, QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import (
+    QAction,
     QDialogButtonBox,
     QHeaderView,
     QMenu,
@@ -41,7 +43,7 @@ from dynamic_layers.definitions import (
 )
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
-from dynamic_layers.tools import resources_path, tr
+from dynamic_layers.tools import plugin_path, resources_path, tr
 
 
 class DynamicLayers:
@@ -66,7 +68,7 @@ class DynamicLayers:
         self.plugin_dir = Path(__file__).resolve().parent
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = self.plugin_dir / 'i18n' / f'DynamicLayers_{locale}.qm'
+        locale_path = plugin_path('i18n', f'qgis_plugin_{locale}.qm')
         if locale_path.exists():
             self.translator = QTranslator()
             self.translator.load(str(locale_path))
@@ -772,7 +774,7 @@ class DynamicLayers:
         when the user changes the content
         """
         if not self.initDone:
-            return
+            return None
 
         widget = self.projectPropertiesInputs[prop]['widget']
         if prop in ('title', 'variableSourceLayerExpression'):
@@ -785,11 +787,11 @@ class DynamicLayers:
             if layer:
                 val = layer.id()
             else:
-                return
+                return None
         elif prop == 'extentMargin':
             val = widget.value()
         else:
-            return
+            return None
 
         # Store value into the project
         xml = self.projectPropertiesInputs[prop]['xml']
@@ -894,11 +896,11 @@ class DynamicLayers:
         self.populate_variable_table()
 
         # Populate the extent layer list
-        self.dlg.inExtentLayer.setFilters(Qgis.LayerFilter.VectorLayer)
+        self.dlg.inExtentLayer.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.dlg.inExtentLayer.setAllowEmptyLayer(True)
 
         # Populate the variable source layer combobox
-        self.dlg.inVariableSourceLayer.setFilters(Qgis.LayerFilter.VectorLayer)
+        self.dlg.inVariableSourceLayer.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.dlg.inVariableSourceLayer.setAllowEmptyLayer(False)
 
         # Copy project properties to corresponding tab
