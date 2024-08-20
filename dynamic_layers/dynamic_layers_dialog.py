@@ -179,8 +179,9 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
     def validate_expression(self, source: str):
         """ Show a warning background if the expression is incorrect. """
         widget = getattr(self, source)
+        text_input = self.text_widget(widget)
         expression = QgsExpression(self.text_widget(widget))
-        if expression.hasEvalError() or expression.hasParserError():
+        if text_input and (expression.hasEvalError() or expression.hasParserError()):
             if isinstance(widget, QLineEdit):
                 icon = QIcon(":/images/themes/default/mIconWarning.svg")
                 widget.addAction(icon, QLineEdit.LeadingPosition)
