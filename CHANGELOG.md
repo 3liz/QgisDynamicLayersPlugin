@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.6.2 - 2024-08-20
+
+* Fix some Python errors
+
 ## 0.6.1 - 2024-08-20
 
 * Fix some Python errors
