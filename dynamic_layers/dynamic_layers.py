@@ -833,7 +833,7 @@ class DynamicLayers:
         by replace variables in dynamicDatasource
         """
         if not self.initDone:
-            self.dlg.message_bar.pushCritical(self.tr("Fail"), self.tr("Initialisation was not finished"))
+            self.dlg.message_bar.pushCritical(tr("Fail"), tr("Initialisation was not finished"))
             return
 
         try:
@@ -869,12 +869,12 @@ class DynamicLayers:
                 # Set new extent
                 engine.update_project_extent()
         except QgsProcessingException as e:
-            self.dlg.message_bar.pushCritical(self.tr("Parsing expression error"), str(e))
+            self.dlg.message_bar.pushCritical(tr("Parsing expression error"), str(e))
             return
 
         # Set project as dirty
         self.project.setDirty(True)
-        self.dlg.message_bar.pushSuccess("👍", self.tr("Current project has been updated"))
+        self.dlg.message_bar.pushSuccess("👍", tr("Current project has been updated"))
 
     @staticmethod
     def generate_projects_clicked():
