@@ -7,11 +7,14 @@ from pathlib import Path
 from typing import Union
 
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsExpression,
     QgsExpressionContext,
     QgsExpressionContextScope,
     QgsExpressionContextUtils,
+    QgsMessageLog,
+    QgsProject,
 )
 from qgis.gui import QgsExpressionBuilderDialog
 from qgis.PyQt import uic
@@ -25,7 +28,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
-from dynamic_layers.definitions import QtVar
+from dynamic_layers.definitions import PLUGIN_MESSAGE, QtVar
 from dynamic_layers.tools import tr
 
 folder = Path(__file__).resolve().parent
@@ -155,11 +158,10 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
     def variables(self) -> dict[str, str]:
         """ The list of variables in the table. """
-        data: dict[str, str] = {}
-
         if not self.is_table_variable_based:
-            return data
+            return {}
 
+        data: dict[str, str] = {}
         for row in range(self.twVariableList.rowCount()):
             v_name = self.twVariableList.item(row, 0).data(QtVar.EditRole)
             v_value = self.twVariableList.item(row, 1).data(QtVar.EditRole)
@@ -196,23 +198,37 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
     def open_expression_builder(self, source: str):
         """ Open the expression builder helper. """
+        context = QgsExpressionContext()
+        context.appendScope(QgsExpressionContextUtils.globalScope())
+        context.appendScope(QgsExpressionContextUtils.projectScope(QgsProject.instance()))
+
         if self.is_table_variable_based:
             layer = None
+            scope = QgsExpressionContextScope()
+            for key, value in self.variables().items():
+                scope.addVariable(QgsExpressionContextScope.StaticVariable(key, value))
         else:
             layer = self.inVariableSourceLayer.currentLayer()
             if not layer:
                 return
-
-        context = QgsExpressionContext()
-        context.appendScope(QgsExpressionContextUtils.globalScope())
-
-        scope = QgsExpressionContextScope()
-        for key, value in self.variables().items():
-            scope.addVariable(QgsExpressionContextScope.StaticVariable(key, value))
+            scope = QgsExpressionContextUtils.layerScope(layer)
 
         context.appendScope(scope)
 
         widget = self.input_expression_widget(source)
+
+        if layer:
+            QgsMessageLog.logMessage(
+                f'Layer set in the expression builder : {layer.name()}',
+                PLUGIN_MESSAGE,
+                Qgis.Info,
+            )
+        else:
+            QgsMessageLog.logMessage(
+                f'List of variables : {",".join([j for j in self.variables().keys()])}',
+                PLUGIN_MESSAGE,
+                Qgis.Info,
+            )
 
         dialog = QgsExpressionBuilderDialog(layer, context=context)
         dialog.setExpressionText(self.text_widget(widget))

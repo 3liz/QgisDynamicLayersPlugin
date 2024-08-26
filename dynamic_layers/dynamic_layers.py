@@ -73,12 +73,13 @@ class DynamicLayers:
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
         locale_path = plugin_path('i18n', f'qgis_plugin_{locale}.qm')
-        self.translator = None
         if locale_path.exists():
+            # noinspection PyArgumentList
             self.translator = QTranslator()
             self.translator.load(str(locale_path))
-
-            QgsMessageLog.logMessage(f'Translation file {locale_path} found', PLUGIN_MESSAGE, Qgis.Warning)
+            # noinspection PyUnresolvedReferences
+            QgsMessageLog.logMessage(f'Translation file {locale_path} found', PLUGIN_MESSAGE, Qgis.Success)
+            # noinspection PyArgumentList
             QCoreApplication.installTranslator(self.translator)
 
         # noinspection PyArgumentList
