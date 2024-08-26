@@ -5,6 +5,7 @@ __email__ = 'info@3liz.org'
 from typing import Annotated
 
 from qgis.core import (
+    Qgis,
     QgsExpression,
     QgsFeature,
     QgsFeatureRequest,
@@ -19,6 +20,7 @@ from dynamic_layers.core.layer_datasource_modifier import (
     LayerDataSourceModifier,
 )
 from dynamic_layers.definitions import (
+    PLUGIN_MESSAGE,
     PLUGIN_SCOPE,
     CustomProperty,
     PluginProjectProperty,
@@ -54,7 +56,9 @@ class DynamicLayersEngine:
         else:
             # noinspection PyArgumentList
             QgsMessageLog.logMessage(
-                f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}')
+                f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}',
+                PLUGIN_MESSAGE, Qgis.Warning,
+            )
             features = layer.getFeatures()
 
         # Take only first feature
@@ -136,6 +140,11 @@ class DynamicLayersEngine:
             layer=self.layer,
             feature=self.feature,
         )
+        if val is None:
+            QgsMessageLog.logMessage(
+                f'The expression evaluation "{val}" for the project property "{project_property}" was None, '
+                f'it has been set to an empty string.', PLUGIN_MESSAGE, Qgis.Warning)
+            val = ""
         self.project.writeEntry(project_property, '', val)
 
     def update_project_extent(self) -> QgsRectangle:

@@ -32,7 +32,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
     OUTPUT = 'OUTPUT'
 
     def createInstance(self):
-        return GenerateProjectsAlgorithm()
+        return type(self)()
 
     def name(self):
         return 'generate_projects'
@@ -80,7 +80,7 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             tr('QGIS Expression to format the final filename. It must end with .qgs or .qgz'),
             parentLayerParameterName=self.INPUT,
         )
-        parameter.setHelp("The template must have the extension.")
+        parameter.setHelp(tr("The template must have the extension."))
         self.addParameter(parameter)
 
         self.addParameter(

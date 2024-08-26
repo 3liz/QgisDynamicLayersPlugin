@@ -33,6 +33,13 @@ class PluginProjectProperty:
     VariableList = 'VariableList'
 
 
+class WidgetType:
+    PlainText = 'PlainText'
+    Text = 'Text'
+    List = 'List'
+    SpinBox = 'SpinBox'
+
+
 class LayerPropertiesXml:
     DynamicDatasourceContent = 'dynamicDatasourceContent'
     NameTemplate = 'nameTemplate'
@@ -42,6 +49,7 @@ class LayerPropertiesXml:
 
 PLUGIN_SCOPE = 'PluginDynamicLayers'
 PLUGIN_SCOPE_KEY = f'/{PLUGIN_SCOPE}'
+PLUGIN_MESSAGE = 'DynamicLayers'
 
 
 # noinspection PyUnresolvedReferences

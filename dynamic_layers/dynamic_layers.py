@@ -15,6 +15,7 @@ from qgis.core import (
     QgsIconUtils,
     QgsMapLayer,
     QgsMapLayerProxyModel,
+    QgsMessageLog,
     QgsProcessingException,
     QgsProject,
 )
@@ -34,12 +35,14 @@ from qgis.utils import OverrideCursor
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.definitions import (
+    PLUGIN_MESSAGE,
     PLUGIN_SCOPE,
     PLUGIN_SCOPE_KEY,
     CustomProperty,
     LayerPropertiesXml,
     PluginProjectProperty,
     QtVar,
+    WidgetType,
     WmsProjectProperty,
 )
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
@@ -70,10 +73,12 @@ class DynamicLayers:
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
         locale_path = plugin_path('i18n', f'qgis_plugin_{locale}.qm')
+        self.translator = None
         if locale_path.exists():
             self.translator = QTranslator()
             self.translator.load(str(locale_path))
 
+            QgsMessageLog.logMessage(f'Translation file {locale_path} found', PLUGIN_MESSAGE, Qgis.Warning)
             QCoreApplication.installTranslator(self.translator)
 
         # noinspection PyArgumentList
@@ -104,10 +109,6 @@ class DynamicLayers:
 
         # Variables
         self.variableList = []
-
-    # noinspection PyMethodMayBeStatic
-    def tr(self, message: str) -> str:
-        return QCoreApplication.translate('DynamicLayers', message)
 
     # noinspection PyPep8Naming
     def initProcessing(self):
@@ -160,22 +161,22 @@ class DynamicLayers:
         self.layerPropertiesInputs = {
             'datasource': {
                 'widget': self.dlg.dynamicDatasourceContent,
-                'wType': 'textarea',
+                'wType': WidgetType.PlainText,
                 'xml': LayerPropertiesXml.DynamicDatasourceContent,
             },
             'name': {
                 'widget': self.dlg.dynamic_name_content,
-                'wType': 'text',
+                'wType': WidgetType.Text,
                 'xml': LayerPropertiesXml.NameTemplate,
             },
             'title': {
                 'widget': self.dlg.titleTemplate,
-                'wType': 'text',
+                'wType': WidgetType.Text,
                 'xml': LayerPropertiesXml.TitleTemplate,
             },
             'abstract': {
                 'widget': self.dlg.abstractTemplate,
-                'wType': 'textarea',
+                'wType': WidgetType.PlainText,
                 'xml': LayerPropertiesXml.AbstractTemplate,
             },
         }
@@ -197,50 +198,48 @@ class DynamicLayers:
         self.projectPropertiesInputs = {
             'title': {
                 'widget': self.dlg.inProjectTitle,
-                'wType': 'text',
+                'wType': WidgetType.Text,
                 'xml': PluginProjectProperty.Title,
             },
             'abstract': {
                 'widget': self.dlg.inProjectAbstract,
-                'wType': 'textarea',
+                'wType': WidgetType.PlainText,
                 'xml': PluginProjectProperty.Abstract,
             },
             'shortname': {
                 'widget': self.dlg.inProjectShortName,
-                'wType': 'text',
+                'wType': WidgetType.Text,
                 'xml': PluginProjectProperty.ShortName,
             },
             'extentLayer': {
                 'widget': self.dlg.inExtentLayer,
-                'wType': 'list',
+                'wType': WidgetType.List,
                 'xml': PluginProjectProperty.ExtentLayer,
             },
             'extentMargin': {
                 'widget': self.dlg.inExtentMargin,
-                'wType': 'spinbox',
+                'wType': WidgetType.SpinBox,
                 'xml': PluginProjectProperty.ExtentMargin,
             },
             'variableSourceLayer': {
                 'widget': self.dlg.inVariableSourceLayer,
-                'wType': 'list',
+                'wType': WidgetType.List,
                 'xml': PluginProjectProperty.VariableSourceLayer,
             },
             'variableSourceLayerExpression': {
                 'widget': self.dlg.inVariableSourceLayerExpression,
-                'wType': 'text',
+                'wType': WidgetType.Text,
                 'xml': PluginProjectProperty.VariableSourceLayerExpression,
             },
         }
         for key, item in self.projectPropertiesInputs.items():
             slot = partial(self.on_project_property_changed, key)
             control = item['widget']
-            if item['wType'] in ('text', 'spinbox'):
+            if item['wType'] in (WidgetType.Text, WidgetType.SpinBox):
                 control.editingFinished.connect(slot)
-            elif item['wType'] == 'textarea':
+            elif item['wType'] == WidgetType.PlainText:
                 control.textChanged.connect(slot)
-            elif item['wType'] == 'checkbox':
-                control.stateChanged.connect(slot)
-            elif item['wType'] == 'list':
+            elif item['wType'] == WidgetType.List:
                 control.currentIndexChanged.connect(slot)
 
         # Log
@@ -423,15 +422,13 @@ class DynamicLayers:
             val = layer.customProperty(item['xml'])
             if not val:
                 val = ''
-            if item['wType'] in ('text', ):
+            if item['wType'] == WidgetType.Text:
                 widget.setText(val)
-            elif item['wType'] == 'textarea':
+            elif item['wType'] == WidgetType.PlainText:
                 widget.setPlainText(val)
-            elif item['wType'] == 'spinbox':
+            elif item['wType'] == WidgetType.SpinBox:
                 widget.setValue(int(val))
-            elif item['wType'] == 'checkbox':
-                widget.setChecked(val)
-            elif item['wType'] == 'list':
+            elif item['wType'] == WidgetType.List:
                 list_dic = {widget.itemData(i): i for i in range(widget.count())}
                 if val in list_dic:
                     widget.setCurrentIndex(list_dic[val])
@@ -501,9 +498,9 @@ class DynamicLayers:
 
         # Get the new value
         input_value = ''
-        if item['wType'] == 'textarea':
+        if item['wType'] == WidgetType.PlainText:
             input_value = item['widget'].toPlainText()
-        if item['wType'] == 'text':
+        if item['wType'] == WidgetType.Text:
             input_value = item['widget'].text()
 
         if input_value == "''":
@@ -800,10 +797,7 @@ class DynamicLayers:
         self.project.setDirty(True)
 
     def populate_project_properties(self):
-        """
-        Fill in the project properties item
-        from XML
-        """
+        """ Fill in the project properties item from XML. """
         # Fill the property from the PluginDynamicLayers XML
         for prop, item in self.projectPropertiesInputs.items():
             widget = item['widget']
@@ -813,13 +807,13 @@ class DynamicLayers:
                 val = val[0]
             if not val:
                 continue
-            if item['wType'] in ('text', 'textarea'):
+            if item['wType'] == WidgetType.Text:
                 widget.setText(val)
-            elif item['wType'] == 'spinbox':
+            elif item['wType'] == WidgetType.PlainText:
+                widget.setPlainText(val)
+            elif item['wType'] == WidgetType.SpinBox:
                 widget.setValue(int(val))
-            elif item['wType'] == 'checkbox':
-                widget.setChecked(val)
-            elif item['wType'] == 'list':
+            elif item['wType'] == WidgetType.List:
                 list_dic = {widget.itemData(i): i for i in range(widget.count())}
                 if val in list_dic:
                     widget.setCurrentIndex(list_dic[val])
