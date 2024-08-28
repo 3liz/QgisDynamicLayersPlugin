@@ -50,27 +50,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="inVariableSourceLayerExpression">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Enter a QGIS valid expression</string>
-              </property>
-              <property name="placeholderText">
-               <string notr="true"/>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="inVariableSourceLayerExpression_exp">
-              <property name="text">
-               <string notr="true">E</string>
-              </property>
-             </widget>
+             <widget class="QgsFeaturePickerWidget" name="inFeatureSourceLayer"/>
             </item>
            </layout>
           </item>
@@ -338,8 +318,8 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-282</y>
-            <width>902</width>
+            <y>0</y>
+            <width>700</width>
             <height>931</height>
            </rect>
           </property>
@@ -619,6 +599,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QgsFeaturePickerWidget</class>
+   <extends>QWidget</extends>
+   <header>qgis.gui</header>
+  </customwidget>
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>

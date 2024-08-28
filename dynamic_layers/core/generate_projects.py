@@ -14,6 +14,7 @@ from qgis.core import (
 )
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
+from dynamic_layers.definitions import PLUGIN_SCOPE, PluginProjectProperty
 from dynamic_layers.tools import (
     log_message,
     side_car_files,
@@ -84,6 +85,11 @@ class GenerateProjects:
             if self.feedback:
                 if self.feedback.isCanceled():
                     break
+
+            engine.force_refresh_all_layer_extents()
+
+            # Set new extent
+            engine.update_project_extent()
 
             # Output file name
             log_message(tr("Compute new value for output file name"), Qgis.Info, self.feedback)

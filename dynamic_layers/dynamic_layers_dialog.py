@@ -83,20 +83,9 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             QIcon(QgsApplication.iconPath('mActionHelpContents.svg'))
         )
 
-        help_variables_layer = tr(
-            "Choose a vector layer and then filter the layer with a QGIS expression to have a single feature. In this "
-            "case, each field will be used as a variable name with its according field value for the content of the "
-            "variable."
-        )
-        widgets = (
-            self.radio_variables_from_layer,
-            self.inVariableSourceLayer,
-            self.inVariableSourceLayerExpression,
-            self.inVariableSourceLayerExpression_exp,
-        )
-        for widget in widgets:
-            widget: QWidget
-            widget.setToolTip(help_variables_layer)
+        self.inFeatureSourceLayer.setShowBrowserButtons(True)
+        self.inVariableSourceLayer.layerChanged.connect(self.source_layer_changed)
+        self.source_layer_changed()
 
         help_variables_table = tr("You can add or remove variables in the table by using the form at the bottom.")
         widgets = (
@@ -118,10 +107,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.radio_variables_from_layer.toggled.connect(self.origin_variable_toggled)
         self.origin_variable_toggled()
 
-        self.expression_widgets = [
-            # Variables
-            self.inVariableSourceLayerExpression_exp,
-        ]
+        self.expression_widgets = []
         temporary_list_expressions = [
             # Project
             self.inProjectTitle_exp,
@@ -167,6 +153,9 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             v_value = self.twVariableList.item(row, 1).data(QtVar.EditRole)
             data[v_name] = v_value
         return data
+
+    def source_layer_changed(self):
+        self.inFeatureSourceLayer.setLayer(self.inVariableSourceLayer.currentLayer())
 
     @staticmethod
     def text_widget(widget) -> str:

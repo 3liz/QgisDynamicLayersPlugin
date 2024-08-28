@@ -233,11 +233,6 @@ class DynamicLayers:
                 'wType': WidgetType.List,
                 'xml': PluginProjectProperty.VariableSourceLayer,
             },
-            'variableSourceLayerExpression': {
-                'widget': self.dlg.inVariableSourceLayerExpression,
-                'wType': WidgetType.Text,
-                'xml': PluginProjectProperty.VariableSourceLayerExpression,
-            },
         }
         for key, item in self.projectPropertiesInputs.items():
             slot = partial(self.on_project_property_changed, key)
@@ -776,24 +771,20 @@ class DynamicLayers:
         self.dlg.inProjectShortName.setText(p_shortname)
 
     def on_project_property_changed(self, prop: str) -> Optional[str]:
-        """
-        Save project dynamic property in the project
-        when the user changes the content
-        """
+        """ Save project dynamic property in the project. """
         if not self.initDone:
             return None
 
         widget = self.projectPropertiesInputs[prop]['widget']
-        if prop in ('title', 'variableSourceLayerExpression', 'shortname'):
+        if prop in ('title', 'shortname'):
             val = widget.text()
         elif prop == 'abstract':
             val = widget.toPlainText()
         elif prop in ('extentLayer', 'variableSourceLayer'):
             layer = widget.currentLayer()
-            if layer:
-                val = layer.id()
-            else:
+            if not layer:
                 return None
+            val = layer.id()
         elif prop == 'extentMargin':
             val = widget.value()
         else:
@@ -839,6 +830,10 @@ class DynamicLayers:
             self.dlg.message_bar.pushCritical(tr("Fail"), tr("Initialisation was not finished"))
             return
 
+        # Save all values from the project level
+        for key, item in self.projectPropertiesInputs.items():
+            self.on_project_property_changed(key)
+
         try:
             with OverrideCursor(QtVar.WaitCursor):
 
@@ -854,8 +849,8 @@ class DynamicLayers:
                     engine.variables = self.dlg.variables()
                 else:
                     layer = self.dlg.inVariableSourceLayer.currentLayer()
-                    exp = self.dlg.inVariableSourceLayerExpression.text()
-                    engine.set_layer_and_expression(layer, exp)
+                    feature = self.dlg.inFeatureSourceLayer.feature()
+                    engine.set_layer_and_feature(layer, feature)
 
                 # Change layers datasource
                 engine.update_dynamic_layers_datasource()
@@ -863,19 +858,11 @@ class DynamicLayers:
                 # Set project properties
                 engine.update_dynamic_project_properties()
 
-                # Set extent layer
-                engine.extent_layer = self.dlg.inExtentLayer.currentLayer()
+                engine.force_refresh_all_layer_extents()
 
-                # Set extent margin
-                engine.extent_margin = self.dlg.inExtentMargin.value()
-
-                for layer in self.project.mapLayers().values():
-                    # Force refresh layer extents
-                    if hasattr(layer, 'updateExtents'):
-                        layer.updateExtents(True)
-
-                # Set new extent
+                # Set extent layer and margin
                 engine.update_project_extent()
+
         except QgsProcessingException as e:
             log_message(str(e), Qgis.Critical, None)
             self.dlg.message_bar.pushCritical(tr("Parsing expression error"), str(e))

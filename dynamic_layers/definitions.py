@@ -29,7 +29,6 @@ class PluginProjectProperty:
     ExtentLayer = 'ExtentLayer'
     ExtentMargin = 'ExtentMargin'
     VariableSourceLayer = 'VariableSourceLayer'
-    VariableSourceLayerExpression = 'VariableSourceLayerExpression'
     VariableList = 'VariableList'
 
 

@@ -6,7 +6,14 @@ import unittest
 
 from pathlib import Path
 
-from qgis.core import QgsFeature, QgsProject, QgsVectorLayer, edit
+from qgis.core import (
+    QgsExpression,
+    QgsFeature,
+    QgsFeatureRequest,
+    QgsProject,
+    QgsVectorLayer,
+    edit,
+)
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.core.generate_projects import GenerateProjects
@@ -97,7 +104,11 @@ class TestBasicReplacement(BaseTests):
         )
 
         # Replace
-        engine.set_layer_and_expression(self._coverage_layer(), "\"folder\" = 'folder_2'")
+        request = QgsFeatureRequest(QgsExpression("\"folder\" = 'folder_2'"))
+        features = self._coverage_layer().getFeatures(request)
+        feature = QgsFeature()
+        features.nextFeature(feature)
+        engine.set_layer_and_feature(self._coverage_layer(), feature)
 
         engine.update_dynamic_layers_datasource()
         engine.update_dynamic_project_properties()
