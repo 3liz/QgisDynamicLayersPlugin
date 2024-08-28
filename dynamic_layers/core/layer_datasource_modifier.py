@@ -11,10 +11,8 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProject,
-    QgsReadWriteContext,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
 from dynamic_layers.tools import log_message, string_substitution, tr
@@ -76,28 +74,20 @@ class LayerDataSourceModifier:
         """
         Method to apply a new datasource to a vector Layer
         """
-        # TODO :: Change to QgsMapLayer::setDataSource
-        context = QgsReadWriteContext()
-        new_ds, new_uri = self.split_source(new_source_uri)
-        new_datasource_type = new_ds or self.layer.dataProvider().name()
+        self.layer.setDataSource(new_source_uri, self.layer.name(), self.layer.dataProvider().name())
 
-        # read layer definition
-        xml_document = QDomDocument("style")
-        # XMLMapLayers = QDomElement()
-        xml_map_layers = xml_document.createElement("maplayers")
-        # XMLMapLayer = QDomElement()
-        xml_map_layer = xml_document.createElement("maplayer")
-        self.layer.writeLayerXml(xml_map_layer, xml_document, context)
-
-        # apply layer definition
-        xml_map_layer.firstChildElement("datasource").firstChild().setNodeValue(new_uri)
-        xml_map_layer.firstChildElement("provider").firstChild().setNodeValue(new_datasource_type)
-        xml_map_layers.appendChild(xml_map_layer)
-        xml_document.appendChild(xml_map_layers)
-        self.layer.readLayerXml(xml_map_layer, context)
+        if not self.layer.isValid():
+            log_message(
+                tr(
+                    "Error, layer '{name}' is not valid, error : {error}"
+                ).format(self.layer.name(), self.layer.error()),
+                Qgis.Critical,
+                self.feedback,
+            )
+            return
 
         # Update layer extent
-        self.layer.updateExtents()
+        self.layer.updateExtents(True)
 
         # Update graduated symbol renderer
         if self.layer.renderer() and self.layer.renderer().type() == 'graduatedSymbol':
@@ -107,6 +97,7 @@ class LayerDataSourceModifier:
 
         # Reload layer
         self.layer.reload()
+        # self.layer.triggerRepaint()
 
     @staticmethod
     def split_source(source: str) -> typing.Tuple[str, str]:
@@ -192,23 +183,25 @@ class LayerDataSourceModifier:
         )
         self.layer.setAbstract(abstract)
 
-        # Set fields aliases
-        if self.layer.type() == QgsMapLayer.VectorLayer:
-            for fid, field in enumerate(self.layer.fields()):
-                alias = self.layer.attributeAlias(fid)
-                if not alias:
-                    continue
+        return
 
-                log_message(
-                    tr("Compute new value for layer {} field alias {}").format(self.layer.name(), alias),
-                    Qgis.Info,
-                    self.feedback,
-                )
-                new_alias = string_substitution(
-                    input_string=alias,
-                    variables=search_and_replace_dictionary,
-                    project=self.project,
-                    layer=self.layer,
-                    feature=self.feature,
-                )
-                self.layer.setFieldAlias(fid, new_alias)
+        # # Set fields aliases
+        # if self.layer.type() == QgsMapLayer.VectorLayer:
+        #     for fid, field in enumerate(self.layer.fields()):
+        #         alias = self.layer.attributeAlias(fid)
+        #         if not alias:
+        #             continue
+        #
+        #         log_message(
+        #             tr("Compute new value for layer {} field alias {}").format(self.layer.name(), alias),
+        #             Qgis.Info,
+        #             self.feedback,
+        #         )
+        #         new_alias = string_substitution(
+        #             input_string=alias,
+        #             variables=search_and_replace_dictionary,
+        #             project=self.project,
+        #             layer=self.layer,
+        #             feature=self.feature,
+        #         )
+        #         self.layer.setFieldAlias(fid, new_alias)

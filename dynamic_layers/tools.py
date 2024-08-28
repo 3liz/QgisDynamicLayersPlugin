@@ -35,6 +35,11 @@ def string_substitution(
         feedback: QgsProcessingFeedback = None,
 ) -> str:
     """ String substitution. """
+    if not input_string:
+        msg = tr("No expression to evaluate, returning empty string")
+        log_message(msg, Qgis.Info, feedback)
+        return ""
+
     msg = tr(
         "Evaluation of the expression '{expression}' \n"
         "with variables :\n").format(expression=input_string)
@@ -73,7 +78,9 @@ def string_substitution(
 
     expression = QgsExpression(input_string)
     if expression.hasEvalError() or expression.hasParserError():
-        raise QgsProcessingException(tr("Invalid QGIS expression : {}").format(input_string))
+        msg = tr("Invalid QGIS expression : {}").format(input_string)
+        log_message(msg, Qgis.Critical, feedback)
+        raise QgsProcessingException(msg)
 
     output = expression.evaluate(context)
     msg = tr("Output is {}").format(output)
@@ -84,9 +91,10 @@ def string_substitution(
 
 def log_message(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsProcessingFeedback = None):
     """ Log a message, either in the log panel, or in the Processing UI panel. """
+    # noinspection PyTypeChecker
+    QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, level)
+
     if not feedback:
-        # noinspection PyTypeChecker
-        QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, level)
         return
 
     if level == Qgis.Warning:
@@ -100,6 +108,16 @@ def log_message(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsPro
     else:
         feedback.pushDebugInfo(msg)
 
+
+def format_expression(input_text: str, is_expression: bool = True) -> str:
+    """ Format the text if it's an expression. """
+    if not is_expression:
+        return input_text
+
+    # Escaping ' to \'
+    input_text = input_text.replace("'", "\\'")
+    input_text = f"'{input_text}'"
+    return input_text
 
 
 def plugin_path(*args) -> Path:
