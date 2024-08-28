@@ -61,26 +61,29 @@ class GenerateProjects:
         # noinspection PyUnresolvedReferences
         request.setFlags(QgsFeatureRequest.NoGeometry)
         for i, feature in enumerate(self.coverage.getFeatures(request)):
-
-            if self.feedback.isCanceled():
-                break
-
-            engine.set_layer_and_feature(self.coverage, feature)
-
             if self.feedback:
+                if self.feedback.isCanceled():
+                    break
                 self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
 
+            engine.set_layer_and_feature(self.coverage, feature)
             engine.update_dynamic_layers_datasource()
-
-            if self.feedback.isCanceled():
-                break
+            if self.feedback:
+                if self.feedback.isCanceled():
+                    break
 
             for layer in self.project.mapLayers().values():
                 # Force refresh layer extents
                 if hasattr(layer, 'updateExtents'):
                     layer.updateExtents(True)
+            if self.feedback:
+                if self.feedback.isCanceled():
+                    break
 
             engine.update_dynamic_project_properties()
+            if self.feedback:
+                if self.feedback.isCanceled():
+                    break
 
             # Output file name
             log_message(tr("Compute new value for output file name"), Qgis.Info, self.feedback)
@@ -102,6 +105,7 @@ class GenerateProjects:
                 for a_file in files:
                     copyfile(a_file, str(new_path) + a_file.suffix)
 
-            self.feedback.setProgress(int(i * total))
+            if self.feedback:
+                self.feedback.setProgress(int(i * total))
 
         return True
