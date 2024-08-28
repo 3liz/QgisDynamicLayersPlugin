@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>826</width>
+    <width>958</width>
     <height>761</height>
    </rect>
   </property>
@@ -190,6 +190,30 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_11">
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btCopyFromProject">
+           <property name="text">
+            <string>Copy templates from project properties</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>QGIS Server properties</string>
@@ -298,13 +322,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="QPushButton" name="btCopyFromProject">
-         <property name="text">
-          <string>Copy templates from project properties</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_layers">
@@ -321,9 +338,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>373</width>
-            <height>975</height>
+            <y>-282</y>
+            <width>902</width>
+            <height>931</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -375,11 +392,35 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
               <item>
-               <widget class="QCheckBox" name="cbDatasourceActive">
-                <property name="text">
-                 <string>Activate dynamic datasource and properties</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <item>
+                 <widget class="QCheckBox" name="cbDatasourceActive">
+                  <property name="text">
+                   <string>Activate dynamic datasource and properties</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btCopyFromLayer">
+                  <property name="text">
+                   <string>Copy templates content from layer properties</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <widget class="QGroupBox" name="groupBox_3">
@@ -481,13 +522,6 @@
                   </widget>
                  </item>
                 </layout>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btCopyFromLayer">
-                <property name="text">
-                 <string>Copy templates content from layer properties</string>
-                </property>
                </widget>
               </item>
              </layout>
