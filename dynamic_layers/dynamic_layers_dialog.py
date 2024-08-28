@@ -15,6 +15,7 @@ from qgis.core import (
     QgsExpressionContextUtils,
     QgsMessageLog,
     QgsProject,
+    QgsVectorLayer,
 )
 from qgis.gui import QgsExpressionBuilderDialog
 from qgis.PyQt import uic
@@ -155,6 +156,9 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         return data
 
     def source_layer_changed(self):
+        layer = self.inVariableSourceLayer.currentLayer()
+        if not isinstance(layer, QgsVectorLayer):
+            return
         self.inFeatureSourceLayer.setLayer(self.inVariableSourceLayer.currentLayer())
 
     @staticmethod

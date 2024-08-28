@@ -2,16 +2,14 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from qgis.core import (
     Qgis,
-    QgsExpression,
     QgsFeature,
-    QgsFeatureRequest,
     QgsProcessingFeedback,
     QgsProject,
-    QgsRectangle,
+    QgsReferencedRectangle,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import NULL
@@ -179,7 +177,11 @@ class DynamicLayersEngine:
         self.project.writeEntry(WmsProjectProperty.Extent, '', p_wms_extent)
         log_message(tr("Writing the new extent to {}").format(WmsProjectProperty.Extent), Qgis.Info, self.feedback)
 
-        self.project.viewSettings.setDefaultViewExtent(p_extent)
+        if extent_layer:
+            georef_rectangle = QgsReferencedRectangle(p_extent, extent_layer.crs())
+        else:
+            georef_rectangle = QgsReferencedRectangle(p_extent, iface.mapCanvas().mapSettings().destinationCrs())
+        self.project.viewSettings().setDefaultViewExtent(georef_rectangle)
 
         # Zoom canvas to extent
         if self.iface:
