@@ -64,7 +64,7 @@ def string_substitution(
 
     context.appendScope(scope)
 
-    log(msg, Qgis.Info, feedback)
+    log_message(msg, Qgis.Info, feedback)
 
     if is_template:
         # noinspection PyArgumentList
@@ -77,27 +77,29 @@ def string_substitution(
 
     output = expression.evaluate(context)
     msg = tr("Output is {}").format(output)
-    log(msg, Qgis.Info, feedback)
+    log_message(msg, Qgis.Info, feedback)
 
     return output
 
 
-def log(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsProcessingFeedback = None):
+def log_message(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsProcessingFeedback = None):
     """ Log a message, either in the log panel, or in the Processing UI panel. """
-    if feedback:
-        if level == Qgis.Warning:
-            feedback.reportError(msg)
-        elif level == Qgis.Critical:
-            feedback.reportError(msg)
-        elif level == Qgis.Info:
-            feedback.pushDebugInfo(msg)
-        elif level == Qgis.Success:
-            feedback.pushInfo(msg)
-        else:
-            feedback.pushDebugInfo(msg)
-    else:
+    if not feedback:
         # noinspection PyTypeChecker
         QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, level)
+        return
+
+    if level == Qgis.Warning:
+        feedback.reportError(msg)
+    elif level == Qgis.Critical:
+        feedback.reportError(msg)
+    elif level == Qgis.Info:
+        feedback.pushDebugInfo(msg)
+    elif level == Qgis.Success:
+        feedback.pushInfo(msg)
+    else:
+        feedback.pushDebugInfo(msg)
+
 
 
 def plugin_path(*args) -> Path:

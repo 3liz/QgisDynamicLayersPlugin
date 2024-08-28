@@ -17,7 +17,7 @@ from qgis.core import (
 from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
-from dynamic_layers.tools import log, string_substitution, tr
+from dynamic_layers.tools import log_message, string_substitution, tr
 
 
 class LayerDataSourceModifier:
@@ -144,7 +144,7 @@ class LayerDataSourceModifier:
             source_title = title_template
 
         # Search and replace content
-        log(tr("Compute new value for layer title"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer title"), Qgis.Info, self.feedback)
         title = string_substitution(
             input_string=source_title,
             variables=search_and_replace_dictionary,
@@ -162,7 +162,7 @@ class LayerDataSourceModifier:
             source_name = name_template
 
         # Search and replace content
-        log(tr("Compute new value for layer name"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer name"), Qgis.Info, self.feedback)
         name = string_substitution(
             input_string=source_name,
             variables=search_and_replace_dictionary,
@@ -182,7 +182,7 @@ class LayerDataSourceModifier:
         if abstract_template and abstract_template not in ("", "''"):
             source_abstract = abstract_template
 
-        log(tr("Compute new value for layer abstract"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer abstract"), Qgis.Info, self.feedback)
         abstract = string_substitution(
             input_string=source_abstract,
             variables=search_and_replace_dictionary,
@@ -199,7 +199,7 @@ class LayerDataSourceModifier:
                 if not alias:
                     continue
 
-                log(
+                log_message(
                     tr("Compute new value for layer {} field alias {}").format(self.layer.name(), alias),
                     Qgis.Info,
                     self.feedback,

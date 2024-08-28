@@ -25,7 +25,7 @@ from dynamic_layers.definitions import (
     PluginProjectProperty,
     WmsProjectProperty,
 )
-from dynamic_layers.tools import log, string_substitution, tr
+from dynamic_layers.tools import log_message, string_substitution, tr
 
 
 class DynamicLayersEngine:
@@ -55,7 +55,7 @@ class DynamicLayersEngine:
             features = layer.getFeatures(q_req)
         else:
             # noinspection PyArgumentList
-            log(
+            log_message(
                 f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}',
                 Qgis.Warning,
                 self.feedback,
@@ -133,7 +133,7 @@ class DynamicLayersEngine:
         Set a project property
         And replace variable if found in the properties
         """
-        log(tr("Compute new project property for {}").format(project_property), self.feedback)
+        log_message(tr("Compute new project property for {}").format(project_property), Qgis.Info, self.feedback)
         # Replace variable in given val via dictionary
         val = string_substitution(
             input_string=val,
@@ -143,7 +143,7 @@ class DynamicLayersEngine:
             feature=self.feature,
         )
         if val is None:
-            log(
+            log_message(
                 f'The expression evaluation "{val}" for the project property "{project_property}" was None, '
                 f'it has been set to an empty string.',
                 Qgis.Warning,
