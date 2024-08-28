@@ -80,7 +80,7 @@ class LayerDataSourceModifier:
             log_message(
                 tr(
                     "Error, layer '{name}' is not valid, error : {error}"
-                ).format(self.layer.name(), self.layer.error()),
+                ).format(name=self.layer.name(), error=self.layer.error()),
                 Qgis.Critical,
                 self.feedback,
             )
@@ -96,7 +96,7 @@ class LayerDataSourceModifier:
                 self.layer.renderer().updateClasses(self.layer, self.layer.renderer().mode(), len(ranges))
 
         # Reload layer
-        self.layer.reload()
+        # self.layer.reload()
         # self.layer.triggerRepaint()
 
     @staticmethod

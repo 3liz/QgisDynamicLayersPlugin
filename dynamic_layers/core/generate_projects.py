@@ -55,16 +55,31 @@ class GenerateProjects:
 
         log_message(tr('Starting the loop over features'), Qgis.Info, self.feedback)
 
+        total = 100.0 / self.coverage.featureCount() if self.coverage.featureCount() else 0
+
         request = QgsFeatureRequest()
         # noinspection PyUnresolvedReferences
         request.setFlags(QgsFeatureRequest.NoGeometry)
-        for feature in self.coverage.getFeatures(request):
+        for i, feature in enumerate(self.coverage.getFeatures(request)):
+
+            if self.feedback.isCanceled():
+                break
+
             engine.set_layer_and_feature(self.coverage, feature)
 
             if self.feedback:
                 self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
 
             engine.update_dynamic_layers_datasource()
+
+            if self.feedback.isCanceled():
+                break
+
+            for layer in self.project.mapLayers().values():
+                # Force refresh layer extents
+                if hasattr(layer, 'updateExtents'):
+                    layer.updateExtents(True)
+
             engine.update_dynamic_project_properties()
 
             # Output file name
@@ -86,5 +101,7 @@ class GenerateProjects:
                 files = side_car_files(Path(base_path))
                 for a_file in files:
                     copyfile(a_file, str(new_path) + a_file.suffix)
+
+            self.feedback.setProgress(int(i * total))
 
         return True

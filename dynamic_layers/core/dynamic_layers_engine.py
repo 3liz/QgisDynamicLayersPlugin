@@ -14,6 +14,7 @@ from qgis.core import (
     QgsRectangle,
     QgsVectorLayer,
 )
+from qgis.PyQt.QtCore import NULL
 from qgis.utils import iface
 
 from dynamic_layers.core.layer_datasource_modifier import (
@@ -97,11 +98,13 @@ class DynamicLayersEngine:
             if layer.renderer() and layer.renderer().type() == 'graduatedSymbol':
                 layer.triggerRepaint()
 
+            layer.updateExtents(True)
+
         if not self.iface:
             return
 
-        self.iface.actionDraw().trigger()
-        self.iface.mapCanvas().refresh()
+        # self.iface.actionDraw().trigger()
+        # self.iface.mapCanvas().refresh()
 
     def update_dynamic_project_properties(self):
         """
@@ -142,9 +145,9 @@ class DynamicLayersEngine:
             layer=self.layer,
             feature=self.feature,
         )
-        if val is None:
+        if val is None or val == NULL:
             log_message(
-                f'The expression evaluation "{val}" for the project property "{project_property}" was None, '
+                f'The expression evaluation "{val}" for the project property "{project_property}" was None/NULL, '
                 f'it has been set to an empty string.',
                 Qgis.Warning,
                 self.feedback,
@@ -152,42 +155,41 @@ class DynamicLayersEngine:
             val = ""
         self.project.writeEntry(project_property, '', val)
 
-    def update_project_extent(self) -> QgsRectangle:
+    def update_project_extent(self):
         """
         Sets the project extent
         and corresponding XML property
         """
+        log_message(tr("Update project extant"), Qgis.Info, self.feedback)
         # Get extent from extent layer (if given)
         p_extent = None
         if self.extent_layer:
-            self.extent_layer.updateExtents()
+            self.extent_layer.updateExtents(True)
             p_extent = self.extent_layer.extent()
-        else:
-            if self.iface:
-                p_extent = self.iface.mapCanvas().extent()
+            log_message(tr("Extent from layer : {}").format(self.extent_layer.name()), Qgis.Info, self.feedback)
+
         if p_extent and p_extent.width() <= 0 and self.iface:
+            log_message(tr("Extent from iface"), Qgis.Info, self.feedback)
             p_extent = self.iface.mapCanvas().extent()
 
-        # Add a margin
-        if p_extent:
-            if self.extent_margin:
-                margin_x = p_extent.width() * self.extent_margin / 100
-                margin_y = p_extent.height() * self.extent_margin / 100
-                margin = max(margin_x, margin_y)
-                p_extent = p_extent.buffered(margin)
+        if not p_extent:
+            return
 
-            # Modify OWS WMS extent
-            p_wms_extent = [
-                p_extent.xMinimum(),
-                p_extent.yMinimum(),
-                p_extent.xMaximum(),
-                p_extent.yMaximum(),
-            ]
-            p_wms_extent = [str(i) for i in p_wms_extent]
-            self.project.writeEntry(WmsProjectProperty.Extent, '', p_wms_extent)
+        if self.extent_margin:
+            margin_x = p_extent.width() * self.extent_margin / 100
+            margin_y = p_extent.height() * self.extent_margin / 100
+            margin = max(margin_x, margin_y)
+            p_extent = p_extent.buffered(margin)
+            log_message(tr("with a margin of {}").format(margin), Qgis.Info, self.feedback)
 
-            # Zoom canvas to extent
-            if self.iface:
-                iface.mapCanvas().setExtent(p_extent)
+        # Modify WMS extent
+        p_wms_extent = [p_extent.xMinimum(), p_extent.yMinimum(), p_extent.xMaximum(), p_extent.yMaximum()]
+        p_wms_extent = [str(i) for i in p_wms_extent]
+        self.project.writeEntry(WmsProjectProperty.Extent, '', p_wms_extent)
+        log_message(tr("Writing the new extent to {}").format(WmsProjectProperty.Extent ), Qgis.Info, self.feedback)
 
-        return p_extent
+        # Zoom canvas to extent
+        if self.iface:
+            log_message(tr("Refresh map canvas"), Qgis.Info, self.feedback)
+            self.iface.mapCanvas().setExtent(p_extent)
+            self.iface.mapCanvas().refresh()

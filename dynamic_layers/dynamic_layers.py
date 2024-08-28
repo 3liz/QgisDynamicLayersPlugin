@@ -47,7 +47,13 @@ from dynamic_layers.definitions import (
 )
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
 from dynamic_layers.processing_provider.provider import Provider
-from dynamic_layers.tools import plugin_path, resources_path, tr
+from dynamic_layers.tools import (
+    format_expression,
+    log_message,
+    plugin_path,
+    resources_path,
+    tr,
+)
 
 
 class DynamicLayers:
@@ -521,10 +527,10 @@ class DynamicLayers:
             return
 
         # Get the layer datasource
-        uri = self.selectedLayer.dataProvider().dataSourceUri().split('|')[0]
-        abstract = self.selectedLayer.abstract()
-        title = self.selectedLayer.title()
-        name = self.selectedLayer.name()
+        uri = format_expression(self.selectedLayer.dataProvider().dataSourceUri().split('|')[0], self.is_expression)
+        abstract = format_expression(self.selectedLayer.abstract(), self.is_expression)
+        title = format_expression(self.selectedLayer.title(), self.is_expression)
+        name = format_expression(self.selectedLayer.name(), self.is_expression)
 
         # Previous values
         previous_uri = self.dlg.dynamicDatasourceContent.toPlainText()
@@ -555,15 +561,10 @@ class DynamicLayers:
             if result == QMessageBox.No:
                 return
 
-        # Set the dynamic datasource content input
-        self.dlg.dynamicDatasourceContent.setPlainText(f"'{uri}'" if self.is_expression else uri)
-
-        # Set templates for title and abstract
-        self.dlg.abstractTemplate.setPlainText(f"'{abstract}'" if self.is_expression else abstract)
-
-        self.dlg.titleTemplate.setText(f"'{title}'" if self.is_expression else title)
-
-        self.dlg.dynamic_name_content.setText(f"'{name}'" if self.is_expression else name)
+        self.dlg.dynamicDatasourceContent.setPlainText(uri)
+        self.dlg.abstractTemplate.setPlainText(abstract)
+        self.dlg.titleTemplate.setText(title)
+        self.dlg.dynamic_name_content.setText(name)
 
     ##
     # Variables tab
@@ -720,6 +721,8 @@ class DynamicLayers:
         if not p_title and self.project.readEntry(WmsProjectProperty.Title, "/"):
             p_title = self.project.readEntry(WmsProjectProperty.Title, "/")[0]
 
+        p_title = format_expression(p_title, self.is_expression)
+
         # Shortname
         p_shortname = ''
         if self.project.readEntry(PluginProjectProperty.ShortName, PLUGIN_SCOPE_KEY):
@@ -727,12 +730,16 @@ class DynamicLayers:
         if not p_shortname and self.project.readEntry(WmsProjectProperty.ShortName, "/"):
             p_shortname = self.project.readEntry(WmsProjectProperty.ShortName, "/")[0]
 
+        p_shortname = format_expression(p_shortname, self.is_expression)
+
         # Abstract
         p_abstract = ''
         if self.project.readEntry(PluginProjectProperty.Abstract, PLUGIN_SCOPE_KEY):
             p_abstract = self.project.readEntry(PluginProjectProperty.Abstract, PLUGIN_SCOPE_KEY)[0]
         if not p_abstract and self.project.readEntry(WmsProjectProperty.Abstract, "/"):
             p_abstract = self.project.readEntry(WmsProjectProperty.Abstract, "/")[0]
+
+        p_abstract = format_expression(p_abstract, self.is_expression)
 
         ask = False
         previous_title = self.dlg.inProjectTitle.text()
@@ -764,8 +771,9 @@ class DynamicLayers:
         if not self.project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
             self.project.writeEntry(WmsProjectProperty.Capabilities, "/", True)
 
-        self.dlg.inProjectTitle.setText(f"'{p_title}'" if self.is_expression else p_title)
-        self.dlg.inProjectAbstract.setPlainText(f"'{p_abstract}'" if self.is_expression else p_abstract)
+        self.dlg.inProjectTitle.setText(p_title)
+        self.dlg.inProjectAbstract.setPlainText(p_abstract)
+        self.dlg.inProjectShortName.setText(p_shortname)
 
     def on_project_property_changed(self, prop: str) -> Optional[str]:
         """
@@ -776,12 +784,11 @@ class DynamicLayers:
             return None
 
         widget = self.projectPropertiesInputs[prop]['widget']
-        if prop in ('title', 'variableSourceLayerExpression'):
+        if prop in ('title', 'variableSourceLayerExpression', 'shortname'):
             val = widget.text()
         elif prop == 'abstract':
             val = widget.toPlainText()
         elif prop in ('extentLayer', 'variableSourceLayer'):
-            # var = None
             layer = widget.currentLayer()
             if layer:
                 val = layer.id()
@@ -790,6 +797,7 @@ class DynamicLayers:
         elif prop == 'extentMargin':
             val = widget.value()
         else:
+            log_message(f'Unknown widget {prop}, please ask the developer', Qgis.Critical, None)
             return None
 
         # Store value into the project
@@ -861,9 +869,15 @@ class DynamicLayers:
                 # Set extent margin
                 engine.extent_margin = self.dlg.inExtentMargin.value()
 
+                for layer in self.project.mapLayers().values():
+                    # Force refresh layer extents
+                    if hasattr(layer, 'updateExtents'):
+                        layer.updateExtents(True)
+
                 # Set new extent
                 engine.update_project_extent()
         except QgsProcessingException as e:
+            log_message(str(e), Qgis.Critical, None)
             self.dlg.message_bar.pushCritical(tr("Parsing expression error"), str(e))
             return
 
