@@ -9,7 +9,7 @@ from qgis.core import (
     QgsExpression,
     QgsFeature,
     QgsFeatureRequest,
-    QgsMessageLog,
+    QgsProcessingFeedback,
     QgsProject,
     QgsRectangle,
     QgsVectorLayer,
@@ -20,24 +20,24 @@ from dynamic_layers.core.layer_datasource_modifier import (
     LayerDataSourceModifier,
 )
 from dynamic_layers.definitions import (
-    PLUGIN_MESSAGE,
     PLUGIN_SCOPE,
     CustomProperty,
     PluginProjectProperty,
     WmsProjectProperty,
 )
-from dynamic_layers.tools import string_substitution
+from dynamic_layers.tools import log, string_substitution, tr
 
 
 class DynamicLayersEngine:
 
-    def __init__(self):
+    def __init__(self, feedback: QgsProcessingFeedback = None):
         """ Dynamic Layers Engine constructor. """
         self.extent_layer = None
         self.extent_margin = None
         self.dynamic_layers: dict = {}
         self.variables: dict = {}
         self.iface = iface
+        self.feedback = feedback
 
         # For expressions
         self.project = None
@@ -55,9 +55,10 @@ class DynamicLayersEngine:
             features = layer.getFeatures(q_req)
         else:
             # noinspection PyArgumentList
-            QgsMessageLog.logMessage(
+            log(
                 f'An error occurred while parsing the given expression: {q_exp.parserErrorString()}',
-                PLUGIN_MESSAGE, Qgis.Warning,
+                Qgis.Warning,
+                self.feedback,
             )
             features = layer.getFeatures()
 
@@ -87,7 +88,7 @@ class DynamicLayersEngine:
         And the given search&replace dictionary
         """
         for layer in self.dynamic_layers.values():
-            a = LayerDataSourceModifier(layer, self.project, self.layer, self.feature)
+            a = LayerDataSourceModifier(layer, self.project, self.layer, self.feature, self.feedback)
             a.compute_new_uri(self.variables)
 
             if not self.iface:
@@ -132,6 +133,7 @@ class DynamicLayersEngine:
         Set a project property
         And replace variable if found in the properties
         """
+        log(tr("Compute new project property for {}").format(project_property), self.feedback)
         # Replace variable in given val via dictionary
         val = string_substitution(
             input_string=val,
@@ -141,9 +143,12 @@ class DynamicLayersEngine:
             feature=self.feature,
         )
         if val is None:
-            QgsMessageLog.logMessage(
+            log(
                 f'The expression evaluation "{val}" for the project property "{project_property}" was None, '
-                f'it has been set to an empty string.', PLUGIN_MESSAGE, Qgis.Warning)
+                f'it has been set to an empty string.',
+                Qgis.Warning,
+                self.feedback,
+            )
             val = ""
         self.project.writeEntry(project_property, '', val)
 

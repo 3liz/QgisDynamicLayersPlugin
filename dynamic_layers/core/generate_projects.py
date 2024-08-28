@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copyfile
 
 from qgis.core import (
+    Qgis,
     QgsFeatureRequest,
     QgsProcessingFeedback,
     QgsProject,
@@ -13,7 +14,7 @@ from qgis.core import (
 )
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
-from dynamic_layers.tools import side_car_files, string_substitution, tr
+from dynamic_layers.tools import log, side_car_files, string_substitution, tr
 
 
 class GenerateProjects:
@@ -39,13 +40,15 @@ class GenerateProjects:
 
     def process(self) -> bool:
         """ Generate all projects needed according to the coverage layer. """
-        engine = DynamicLayersEngine()
+        engine = DynamicLayersEngine(self.feedback)
         engine.discover_dynamic_layers_from_project(self.project)
 
         base_path = self.project.fileName()
 
         if not self.destination.exists():
             self.destination.mkdir()
+
+        log(tr('Starting the loop over features'), Qgis.Info, self.feedback)
 
         request = QgsFeatureRequest()
         # noinspection PyUnresolvedReferences
@@ -59,6 +62,8 @@ class GenerateProjects:
             engine.update_dynamic_layers_datasource()
             engine.update_dynamic_project_properties()
 
+            # Output file name
+            log(tr("Compute new value for output file name"), Qgis.Info, self.feedback)
             new_file = string_substitution(
                 input_string=self.expression_destination,
                 variables={},
@@ -67,8 +72,7 @@ class GenerateProjects:
                 feature=feature,
             )
             new_path = Path(f"{self.destination}/{new_file}")
-            if self.feedback:
-                self.feedback.pushDebugInfo(tr('Project written to {}').format(new_path.name))
+            log(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
             self.project.setFileName(str(new_path))
             self.project.write()
             self.project.setFileName(base_path)

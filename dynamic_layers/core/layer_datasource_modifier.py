@@ -5,9 +5,11 @@ __email__ = 'info@3liz.org'
 import typing
 
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsMapLayer,
     QgsProcessingException,
+    QgsProcessingFeedback,
     QgsProject,
     QgsReadWriteContext,
     QgsVectorLayer,
@@ -15,12 +17,19 @@ from qgis.core import (
 from qgis.PyQt.QtXml import QDomDocument
 
 from dynamic_layers.definitions import CustomProperty
-from dynamic_layers.tools import string_substitution, tr
+from dynamic_layers.tools import log, string_substitution, tr
 
 
 class LayerDataSourceModifier:
 
-    def __init__(self, layer: QgsMapLayer, project: QgsProject, layer_context: QgsVectorLayer, feature: QgsFeature):
+    def __init__(
+            self,
+            layer: QgsMapLayer,
+            project: QgsProject,
+            layer_context: QgsVectorLayer,
+            feature: QgsFeature,
+            feedback: QgsProcessingFeedback = None,
+    ):
         """
         Initialize class instance
         """
@@ -28,6 +37,7 @@ class LayerDataSourceModifier:
         self.layer = layer
         self.layer_context = layer_context
         self.feature = feature
+        self.feedback = feedback
         # Datasource can be changed from dynamicDatasourceContent or not
         self.dynamic_datasource_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
         # Content of the dynamic datasource
@@ -42,13 +52,13 @@ class LayerDataSourceModifier:
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
 
-        # Set the new uri
         new_uri = string_substitution(
             input_string=self.dynamic_datasource_content,
             variables=search_and_replace_dictionary,
             project=self.project,
             layer=self.layer_context,
-            feature=self.feature
+            feature=self.feature,
+            feedback=self.feedback,
         )
 
         if not new_uri:
@@ -66,6 +76,7 @@ class LayerDataSourceModifier:
         """
         Method to apply a new datasource to a vector Layer
         """
+        # TODO :: Change to QgsMapLayer::setDataSource
         context = QgsReadWriteContext()
         new_ds, new_uri = self.split_source(new_source_uri)
         new_datasource_type = new_ds or self.layer.dataProvider().name()
@@ -133,15 +144,15 @@ class LayerDataSourceModifier:
             source_title = title_template
 
         # Search and replace content
-        self.layer.setTitle(
-            string_substitution(
-                input_string=source_title,
-                variables=search_and_replace_dictionary,
-                project=self.project,
-                layer=self.layer,
-                feature=self.feature,
-            ),
+        log(tr("Compute new value for layer title"), Qgis.Info, self.feedback)
+        title = string_substitution(
+            input_string=source_title,
+            variables=search_and_replace_dictionary,
+            project=self.project,
+            layer=self.layer,
+            feature=self.feature,
         )
+        self.layer.setTitle(title)
 
         # Name
         source_name = self.layer.name().strip()
@@ -151,15 +162,15 @@ class LayerDataSourceModifier:
             source_name = name_template
 
         # Search and replace content
-        self.layer.setName(
-            string_substitution(
-                input_string=source_name,
-                variables=search_and_replace_dictionary,
-                project=self.project,
-                layer=self.layer,
-                feature=self.feature,
-            ),
+        log(tr("Compute new value for layer name"), Qgis.Info, self.feedback)
+        name = string_substitution(
+            input_string=source_name,
+            variables=search_and_replace_dictionary,
+            project=self.project,
+            layer=self.layer,
+            feature=self.feature,
         )
+        self.layer.setName(name)
 
         # Abstract
         source_abstract = ''
@@ -171,15 +182,15 @@ class LayerDataSourceModifier:
         if abstract_template and abstract_template not in ("", "''"):
             source_abstract = abstract_template
 
-        self.layer.setAbstract(
-            string_substitution(
-                input_string=source_abstract,
-                variables=search_and_replace_dictionary,
-                project=self.project,
-                layer=self.layer,
-                feature=self.feature,
-            ),
+        log(tr("Compute new value for layer abstract"), Qgis.Info, self.feedback)
+        abstract = string_substitution(
+            input_string=source_abstract,
+            variables=search_and_replace_dictionary,
+            project=self.project,
+            layer=self.layer,
+            feature=self.feature,
         )
+        self.layer.setAbstract(abstract)
 
         # Set fields aliases
         if self.layer.type() == QgsMapLayer.VectorLayer:
@@ -188,6 +199,11 @@ class LayerDataSourceModifier:
                 if not alias:
                     continue
 
+                log(
+                    tr("Compute new value for layer {} field alias {}").format(self.layer.name(), alias),
+                    Qgis.Info,
+                    self.feedback,
+                )
                 new_alias = string_substitution(
                     input_string=alias,
                     variables=search_and_replace_dictionary,
