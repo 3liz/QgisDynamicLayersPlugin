@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dynamic Layers</string>
+   <string notr="true">Dynamic Layers</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
@@ -321,9 +321,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-313</y>
-            <width>770</width>
-            <height>958</height>
+            <y>0</y>
+            <width>373</width>
+            <height>975</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
