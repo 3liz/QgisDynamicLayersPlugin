@@ -2,6 +2,8 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
+import json
+
 from pathlib import Path
 from shutil import copyfile
 
@@ -46,6 +48,7 @@ class GenerateProjects:
 
     def process(self) -> bool:
         """ Generate all projects needed according to the coverage layer. """
+        self.feedback.setProgress(0)
         engine = DynamicLayersEngine(self.feedback)
         engine.discover_dynamic_layers_from_project(self.project)
 
@@ -89,7 +92,7 @@ class GenerateProjects:
             engine.force_refresh_all_layer_extents()
 
             # Set new extent
-            engine.update_project_extent()
+            extent = engine.update_project_extent()
 
             # Output file name
             log_message(tr("Compute new value for output file name"), Qgis.Info, self.feedback)
@@ -109,7 +112,31 @@ class GenerateProjects:
             if self.copy_side_car_files:
                 files = side_car_files(Path(base_path))
                 for a_file in files:
-                    copyfile(a_file, str(new_path) + a_file.suffix)
+                    destination = str(new_path) + a_file.suffix
+                    copyfile(a_file, destination)
+
+                    if a_file.suffix.lower() == '.cfg' and extent:
+                        # Specific for Lizmap file
+                        try:
+                            with open(destination, 'r') as f:
+                                content = json.load(f)
+                            # print(f"File opened {destination}")
+                            content['options']['bbox'] = extent
+                            content['options']['initialExtent'] = [float(f) for f in extent]
+                            with open(destination, 'w') as f:
+                                json.dump(content, f, sort_keys=True, indent=4)
+                                f.write("\n")
+                            log_message(
+                                tr('updating Lizmap configuration file about the extent'),
+                                Qgis.Info,
+                                self.feedback,
+                            )
+                        except Exception as e:
+                            log_message(
+                                tr('Error with the Lizmap configuration file : {}').format(e),
+                                Qgis.Critical,
+                                self.feedback,
+                            )
 
             if self.feedback:
                 self.feedback.setProgress(int(i * total))

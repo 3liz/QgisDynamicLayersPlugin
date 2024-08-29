@@ -277,6 +277,10 @@ class DynamicLayers:
 
     def update_log(self, msg: str):
         """ Update the log. """
+        # Should we deprecate this log panel and instead add a button to open the QGIS log panel ?
+        # noinspection PyTypeChecker
+        QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, Qgis.Success)
+
         self.dlg.txtLog.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
         suffix = '</span>'

@@ -2,7 +2,7 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-from typing import Annotated
+from typing import Annotated, List, Optional
 
 from qgis.core import (
     Qgis,
@@ -134,8 +134,8 @@ class DynamicLayersEngine:
             if hasattr(layer, 'updateExtents'):
                 layer.updateExtents(True)
 
-    def update_project_extent(self):
-        """ Update the project extent according to the property stored in the project.. """
+    def update_project_extent(self) -> Optional[List[str]]:
+        """ Update the project extent according to the property stored in the project. """
         log_message(tr("Update project extent"), Qgis.Info, self.feedback)
 
         extent_layer = self.project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ExtentLayer)
@@ -189,3 +189,5 @@ class DynamicLayersEngine:
             log_message(tr("Refresh map canvas"), Qgis.Info, self.feedback)
             self.iface.mapCanvas().setExtent(p_extent)
             self.iface.mapCanvas().refresh()
+
+        return p_wms_extent
