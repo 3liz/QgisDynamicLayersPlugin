@@ -105,9 +105,9 @@ class DynamicLayersEngine:
             self.set_project_property(WmsProjectProperty.Abstract, val[0])
 
     def set_project_property(self, project_property: Annotated[str, WmsProjectProperty], val: str):
-        """
-        Set a project property
-        And replace variable if found in the properties
+        """ Set a project property.
+
+        It replaces a variable if found in the properties.
         """
         log_message(tr("Compute new project property for {}").format(project_property), Qgis.Info, self.feedback)
         # Replace variable in given val via dictionary
@@ -129,12 +129,13 @@ class DynamicLayersEngine:
         self.project.writeEntry(project_property, '', val)
 
     def force_refresh_all_layer_extents(self):
+        """ Force all layers in the project to refresh its extent. """
         for layer in self.project.mapLayers().values():
             if hasattr(layer, 'updateExtents'):
                 layer.updateExtents(True)
 
     def update_project_extent(self):
-        """ Update the project extent. """
+        """ Update the project extent according to the property stored in the project.. """
         log_message(tr("Update project extent"), Qgis.Info, self.feedback)
 
         extent_layer = self.project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ExtentLayer)

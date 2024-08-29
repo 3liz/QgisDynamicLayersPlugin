@@ -71,9 +71,7 @@ class LayerDataSourceModifier:
         self.set_dynamic_layer_properties(search_and_replace_dictionary)
 
     def set_data_source(self, new_source_uri: str):
-        """
-        Method to apply a new datasource to a vector Layer
-        """
+        """ Method to apply a new datasource to a vector layer. """
         self.layer.setDataSource(new_source_uri, self.layer.name(), self.layer.dataProvider().name())
 
         if not self.layer.isValid():
@@ -101,9 +99,7 @@ class LayerDataSourceModifier:
 
     @staticmethod
     def split_source(source: str) -> typing.Tuple[str, str]:
-        """
-        Split QGIS datasource into meaningful components
-        """
+        """ Split QGIS datasource into meaningful components. """
         # TODO switch to QgsProviderRegistry.instance().decodeUri(layer.dataProvider().name(), layer.source())
         if "|" in source:
             datasource_type = source.split("|")[0]
@@ -114,10 +110,7 @@ class LayerDataSourceModifier:
         return datasource_type, uri
 
     def set_dynamic_layer_properties(self, search_and_replace_dictionary: dict = None):
-        """
-        Set layer title, abstract,
-        and field aliases (for vector layers only)
-        """
+        """ Set layer title, abstract etc. """
         if search_and_replace_dictionary is None:
             search_and_replace_dictionary = {}
 

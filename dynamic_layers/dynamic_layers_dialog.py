@@ -139,6 +139,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
                 widget.textChanged.connect(partial(self.validate_expression, widget.objectName()))
 
     def origin_variable_toggled(self):
+        """ Radio buttons to choose the origin of variables. """
         self.is_table_variable_based = self.radio_variables_from_table.isChecked()
         self.widget_layer.setEnabled(not self.is_table_variable_based)
         self.widget_table.setEnabled(self.is_table_variable_based)
@@ -156,6 +157,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         return data
 
     def source_layer_changed(self):
+        """ Update the feature picker widget when the layer has changed. """
         layer = self.inVariableSourceLayer.currentLayer()
         if not isinstance(layer, QgsVectorLayer):
             return
