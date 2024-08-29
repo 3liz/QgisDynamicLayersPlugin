@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.6.5 - 2024-08-29
+
+* Improve UI
+* Fix the update in Lizmap configuration file
+
 ## 0.6.4 - 2024-08-28
 
 * Fix some Python errors
