@@ -104,39 +104,43 @@ class GenerateProjects:
                 feature=feature,
             )
             new_path = Path(f"{self.destination}/{new_file}")
-            log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
-            self.project.setFileName(str(new_path))
-            self.project.write()
-            self.project.setFileName(base_path)
 
+            # First copy side-car files, to avoid Lizmap to have question about a new project without CFG file
+            cfg_file = None
             if self.copy_side_car_files:
                 files = side_car_files(Path(base_path))
                 for a_file in files:
                     destination = str(new_path) + a_file.suffix
                     copyfile(a_file, destination)
-
                     if a_file.suffix.lower() == '.cfg' and extent:
-                        # Specific for Lizmap file
-                        try:
-                            with open(destination, 'r') as f:
-                                content = json.load(f)
-                            # print(f"File opened {destination}")
-                            content['options']['bbox'] = extent
-                            content['options']['initialExtent'] = [float(f) for f in extent]
-                            with open(destination, 'w') as f:
-                                json.dump(content, f, sort_keys=True, indent=4)
-                                f.write("\n")
-                            log_message(
-                                tr('updating Lizmap configuration file about the extent'),
-                                Qgis.Info,
-                                self.feedback,
-                            )
-                        except Exception as e:
-                            log_message(
-                                tr('Error with the Lizmap configuration file : {}').format(e),
-                                Qgis.Critical,
-                                self.feedback,
-                            )
+                        cfg_file = destination
+
+            log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
+            self.project.setFileName(str(new_path))
+            self.project.write()
+            self.project.setFileName(base_path)
+
+            if cfg_file:
+                # Specific for Lizmap file
+                try:
+                    with open(cfg_file, 'r') as f:
+                        content = json.load(f)
+                    content['options']['bbox'] = extent
+                    content['options']['initialExtent'] = [float(f) for f in extent]
+                    with open(cfg_file, 'w') as f:
+                        json.dump(content, f, sort_keys=False, indent=4)
+                        f.write("\n")
+                    log_message(
+                        tr('updating Lizmap configuration file about the extent'),
+                        Qgis.Info,
+                        self.feedback,
+                    )
+                except Exception as e:
+                    log_message(
+                        tr('Error with the Lizmap configuration file : {}').format(e),
+                        Qgis.Critical,
+                        self.feedback,
+                    )
 
             if self.feedback:
                 self.feedback.setProgress(int(i * total))
