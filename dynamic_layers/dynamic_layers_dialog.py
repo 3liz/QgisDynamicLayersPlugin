@@ -103,7 +103,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             widget: QWidget
             widget.setToolTip(help_variables_table)
 
-        self.is_table_variable_based = True
+        self.is_table_variable_based = False
+        self.radio_variables_from_layer.setChecked(not self.is_table_variable_based)
         self.radio_variables_from_table.setChecked(self.is_table_variable_based)
         self.radio_variables_from_layer.toggled.connect(self.origin_variable_toggled)
         self.origin_variable_toggled()
