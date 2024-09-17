@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.6.6 - 2024-09-17
+
+* Change the default option for layer input in the first panel
+* Copy first side-car files before the QGS, better for the Lizmap plugin
+
 ## 0.6.5 - 2024-08-29
 
 * Improve UI
