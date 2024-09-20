@@ -5,8 +5,6 @@ __email__ = 'info@3liz.org'
 from pathlib import Path
 from typing import List
 
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QDesktopServices
 from qgis.core import (
     Qgis,
     QgsExpression,
@@ -20,7 +18,8 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, QUrl
+from qgis.PyQt.QtGui import QDesktopServices
 
 from dynamic_layers.definitions import PLUGIN_MESSAGE
 

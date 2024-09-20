@@ -62,8 +62,8 @@ class DynamicLayersEngine:
         And the given search&replace dictionary
         """
         for layer in self.dynamic_layers.values():
-            a = LayerDataSourceModifier(layer, self.project, self.layer, self.feature, self.feedback)
-            a.compute_new_uri(self.variables)
+            datasource_modifier = LayerDataSourceModifier(layer, self.project, self.layer, self.feature, self.feedback)
+            datasource_modifier.compute_new_uri(self.variables)
 
             if not self.iface:
                 continue
