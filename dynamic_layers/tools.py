@@ -5,6 +5,8 @@ __email__ = 'info@3liz.org'
 from pathlib import Path
 from typing import List
 
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QDesktopServices
 from qgis.core import (
     Qgis,
     QgsExpression,
@@ -147,3 +149,9 @@ def side_car_files(file_path: Path) -> List[Path]:
 
 def tr(message: str) -> str:
     return QCoreApplication.translate('DynamicLayers', message)
+
+
+def open_help():
+    """Opens the html help file content with default browser"""
+    # noinspection PyArgumentList
+    QDesktopServices.openUrl(QUrl("https://docs.3liz.org/QgisDynamicLayersPlugin/"))
