@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.6.7 - 2024-09-30
+
+* Add a message to restart QGIS
+
 ## 0.6.6 - 2024-09-17
 
 * Change the default option for layer input in the first panel
