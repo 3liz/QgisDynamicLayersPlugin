@@ -671,6 +671,17 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.project.setDirty(True)
         self.message_bar.pushSuccess("👍", tr("Current project has been updated"))
 
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Warning)
+        box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
+        box.setWindowTitle(tr('Reboot your QGIS Desktop'))
+        box.setText(tr(
+            'To avoid your QGIS to crash, we strongly recommend you to restart your QGIS Desktop. The plugin worked as '
+            'expected related the replacement.'
+        ))
+        box.setStandardButtons(QMessageBox.Ok)
+        box.exec_()
+
     def origin_variable_toggled(self):
         """ Radio buttons to choose the origin of variables. """
         self.is_table_variable_based = self.radio_variables_from_table.isChecked()
