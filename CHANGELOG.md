@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix different issues
+
 ## 0.6.7 - 2024-09-30
 
 * Add a message to restart QGIS

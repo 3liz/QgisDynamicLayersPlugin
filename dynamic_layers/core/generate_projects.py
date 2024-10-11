@@ -105,6 +105,10 @@ class GenerateProjects:
             )
             new_path = Path(f"{self.destination}/{new_file}")
 
+            # The new path can contain new folder, specific to the evaluated expression
+            if not new_path.parent.exists():
+                new_path.parent.mkdir()
+
             # First copy side-car files, to avoid Lizmap to have question about a new project without CFG file
             cfg_file = None
             if self.copy_side_car_files:

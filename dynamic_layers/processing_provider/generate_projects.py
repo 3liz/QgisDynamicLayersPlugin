@@ -77,10 +77,13 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
 
         parameter = QgsProcessingParameterExpression(
             self.EXPRESSION_DESTINATION,
-            tr('QGIS Expression to format the final filename. It must end with .qgs or .qgz'),
+            tr('QGIS Expression to format the final filename. It must end with .qgs or .qgz.'),
             parentLayerParameterName=self.INPUT,
         )
-        parameter.setHelp(tr("The template must have the extension."))
+        parameter.setHelp(tr(
+            "The template must have the file extension. A set of new folder can be created on the fly by adding your "
+            "folder separator in the expression."
+        ))
         self.addParameter(parameter)
 
         self.addParameter(

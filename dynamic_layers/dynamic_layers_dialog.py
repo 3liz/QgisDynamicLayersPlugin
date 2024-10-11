@@ -114,9 +114,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             },
         ]
 
-        # Keep record of style widget
-        self.selectedLayerWidget = None
-        self.selectedLayer = None
+        self.selected_layer = None
 
         # Variables
         self.variableList = []
@@ -365,7 +363,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         Toggle the status "dynamicDatasourceActive" for the selected layer
         when the user uses the checkbox
         """
-        if not self.selectedLayer:
+        if not self.selected_layer:
             return
 
         # Get selected lines
@@ -391,7 +389,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.twLayers.item(row, 1).setData(QtVar.EditRole, '✔' if input_value else '')
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty(CustomProperty.DynamicDatasourceActive, input_value)
+        self.selected_layer.setCustomProperty(CustomProperty.DynamicDatasourceActive, input_value)
         self.project.setDirty(True)
 
     def on_layer_property_change(self, key: str):
@@ -400,7 +398,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         when the user change the content
         of the corresponding text input
         """
-        if not self.selectedLayer:
+        if not self.selected_layer:
             return
 
         # Get changed item
@@ -417,21 +415,21 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             input_value = ''
 
         # Record the new value in the project
-        self.selectedLayer.setCustomProperty(item['xml'], input_value.strip())
+        self.selected_layer.setCustomProperty(item['xml'], input_value.strip())
         self.project.setDirty(True)
 
     def on_copy_from_layer(self):
         """
         Get the layer datasource and copy it in the dynamic datasource text input
         """
-        if not self.selectedLayer:
+        if not self.selected_layer:
             return
 
         # Get the layer datasource
-        uri = format_expression(self.selectedLayer.dataProvider().dataSourceUri().split('|')[0], self.is_expression)
-        abstract = format_expression(self.selectedLayer.abstract(), self.is_expression)
-        title = format_expression(self.selectedLayer.title(), self.is_expression)
-        name = format_expression(self.selectedLayer.name(), self.is_expression)
+        uri = format_expression(self.selected_layer.dataProvider().dataSourceUri().split('|')[0], self.is_expression)
+        abstract = format_expression(self.selected_layer.abstract(), self.is_expression)
+        title = format_expression(self.selected_layer.title(), self.is_expression)
+        name = format_expression(self.selected_layer.name(), self.is_expression)
 
         # Previous values
         previous_uri = self.dynamicDatasourceContent.toPlainText()
@@ -450,7 +448,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             ask = True
 
         if ask:
-            box = QMessageBox(self.dlg)
+            box = QMessageBox(self)
             box.setIcon(QMessageBox.Question)
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
             box.setWindowTitle(tr('Replace settings by layer properties'))
@@ -556,7 +554,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             ask = True
 
         if ask:
-            box = QMessageBox(self.dlg)
+            box = QMessageBox(self)
             box.setIcon(QMessageBox.Question)
             # noinspection PyArgumentList
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
@@ -792,41 +790,26 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         Change content of dynamic properties group inputs
         When the user selects a layer in the table
         """
-        show_layer_properties = True
-
         # Get selected lines
         lines = self.twLayers.selectionModel().selectedRows()
         if len(lines) < 1:
             return
 
-        layer = None
-        self.selected_layer = None
-
-        if show_layer_properties:
-            row = lines[0].row()
-
-            # Get layer
-            layer_id = self.twLayers.item(row, 0).data(QtVar.UserRole)
-            layer = self.project.mapLayer(layer_id)
-            if not layer:
-                show_layer_properties = False
-            else:
-                self.selected_layer = layer
-
-        if not lines or len(lines) != 1:
-            show_layer_properties = False
+        row = lines[0].row()
+        layer_id = self.twLayers.item(row, 0).data(QtVar.UserRole)
+        self.selected_layer = self.project.mapLayer(layer_id)
 
         # Toggle the layer properties group
-        self.gbLayerDynamicProperties.setEnabled(show_layer_properties)
+        self.gbLayerDynamicProperties.setEnabled(self.selected_layer is not None)
 
-        if not layer:
+        if not self.selected_layer:
             return
 
         # Set the content of the layer properties inputs
         # dynamic datasource text input content
         for key, item in self.layerPropertiesInputs.items():
             widget = item['widget']
-            val = layer.customProperty(item['xml'])
+            val = self.selected_layer.customProperty(item['xml'])
             if not val:
                 val = ''
             if item['wType'] == WidgetType.Text:
@@ -841,7 +824,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
                     widget.setCurrentIndex(list_dic[val])
 
         # "active" checkbox
-        is_active = layer.customProperty(CustomProperty.DynamicDatasourceActive)
+        is_active = self.selected_layer.customProperty(CustomProperty.DynamicDatasourceActive)
         if is_active is None:
             is_active = False
 
