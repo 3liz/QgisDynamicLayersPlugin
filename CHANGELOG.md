@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.8 - 2024-10-11
+
 * Fix different issues
 
 ## 0.6.7 - 2024-09-30
