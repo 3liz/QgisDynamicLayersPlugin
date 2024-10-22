@@ -5,7 +5,7 @@ __email__ = 'info@3liz.org'
 import json
 
 from pathlib import Path
-from shutil import copyfile
+from shutil import copyfile, copytree
 
 from qgis.core import (
     Qgis,
@@ -112,12 +112,36 @@ class GenerateProjects:
             # First copy side-car files, to avoid Lizmap to have question about a new project without CFG file
             cfg_file = None
             if self.copy_side_car_files:
-                files = side_car_files(Path(base_path))
+                base_path_obj = Path(base_path)
+                files = side_car_files(base_path_obj)
                 for a_file in files:
                     destination = str(new_path) + a_file.suffix
                     copyfile(a_file, destination)
                     if a_file.suffix.lower() == '.cfg' and extent:
                         cfg_file = destination
+
+                try:
+                    from lizmap.toolbelt.lizmap import sidecar_media_dirs
+                    dirs = sidecar_media_dirs(base_path_obj)
+                    for a_dir in dirs:
+                        rel_path = a_dir.relative_to(base_path_obj.parent)
+
+                        new_dir_path = new_path.parent.joinpath(rel_path)
+                        new_dir_path.mkdir(parents=True, exist_ok=True)
+
+                        copytree(a_dir, new_dir_path.parent.joinpath(a_dir.stem), dirs_exist_ok=True)
+
+                        log_message(
+                            tr('Copy of directory : {}').format(str(rel_path)),
+                            Qgis.Info,
+                            self.feedback,
+                        )
+                except ImportError:
+                    log_message(
+                        tr('No latest Lizmap plugin installed, if it is needed in your case.'),
+                        Qgis.Info,
+                        self.feedback,
+                    )
 
             log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
             self.project.setFileName(str(new_path))
