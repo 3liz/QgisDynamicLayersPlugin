@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.6.9 - 2024-10-22
+
+* Add copy of media files if necessary
+* Fix different issues
+
 ## 0.6.8 - 2024-10-11
 
 * Fix different issues
