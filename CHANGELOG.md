@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.7.0 - 2024-11-22
+
+* Add Qt6 support in the source code, for future version of QGIS when Qt6 will be available
+* Improve project shortname generation
+* Implement a proper dialog for the project batch generation
+* Check if the project is "dirty" (not saved), before launching the batch generation
+
 ## 0.6.9 - 2024-10-22
 
 * Add copy of media files if necessary
