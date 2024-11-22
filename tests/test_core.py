@@ -126,7 +126,7 @@ class TestBasicReplacement(BaseTests):
         # Project properties
         # Short name
         self.assertTupleEqual(
-            (f'Shortname folder_2', True),
+            ('shortname_folder_2', True),
             project.readEntry(WmsProjectProperty.ShortName, "/")
         )
         # Abstract
@@ -206,7 +206,7 @@ class TestBasicReplacement(BaseTests):
         # Project properties
         # Short name
         self.assertTupleEqual(
-            (f'Shortname 2', True),
+            (f'shortname_2', True),
             project.readEntry(WmsProjectProperty.ShortName, "/")
         )
         # Abstract

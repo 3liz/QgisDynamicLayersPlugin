@@ -141,7 +141,7 @@ class DynamicLayersEngine:
                 )
                 # Fall back on a quick replace statement
                 # TODO, this is a quick fix
-                val = val.replace(" ", "").replace("  ", "")
+                val = val.replace(" ", "_").replace("  ", "_").lower()
 
         self.project.writeEntry(project_property, '', val)
 
