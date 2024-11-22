@@ -44,9 +44,9 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         self.setWindowTitle(tr("Generate many QGIS projects"))
         self.project = QgsProject.instance()
 
-        self.button_box.button(QDialogButtonBox.Apply).clicked.connect(self.generate_projects)
-        self.button_box.button(QDialogButtonBox.Help).clicked.connect(open_help)
-        self.button_box.button(QDialogButtonBox.Cancel).clicked.connect(self.close)
+        self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(self.generate_projects)
+        self.button_box.button(QDialogButtonBox.StandardButton.Help).clicked.connect(open_help)
+        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(self.close)
 
         self.expression.setText("")
         self.expression.setToolTip(tr("Open the expression builder"))
@@ -62,9 +62,9 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         self.debug_limit.setValue(0)
 
         # DEBUG
-        self.file_name.setText('"schema" || \'/test_\' ||  "schema" || \'.qgs\'')
-        self.destination.setFilePath('/tmp/demo_cartophyl')
-        self.debug_limit.setValue(5)
+        # self.file_name.setText('"schema" || \'/test_\' ||  "schema" || \'.qgs\'')
+        # self.destination.setFilePath('/tmp/demo_cartophyl')
+        # self.debug_limit.setValue(5)
 
     def layer_changed(self):
         self.field.setLayer(self.coverage.currentLayer())
@@ -83,7 +83,7 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         dialog.setExpressionText(self.file_name.text())
         result = dialog.exec()
 
-        if result != QDialog.Accepted:
+        if result != QDialog.DialogCode.Accepted:
             return
 
         content = dialog.expressionText()
@@ -100,7 +100,7 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         if self.project.isDirty():
             feedback.reportError(tr("You must save your project first."))
 
-        self.button_box.button(QDialogButtonBox.Apply).setEnabled(False)
+        self.button_box.button(QDialogButtonBox.StandardButton.Apply).setEnabled(False)
         result = False
         with OverrideCursor(QtVar.WaitCursor):
             self.logs.clear()
@@ -129,7 +129,7 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
             # In case of success, the button is not enabled again
         else:
             feedback.pushWarning(tr("End, but there was an error"))
-            self.button_box.button(QDialogButtonBox.Apply).setEnabled(True)
+            self.button_box.button(QDialogButtonBox.StandardButton.Apply).setEnabled(True)
 
 
 class TextFeedBack(QgsProcessingFeedback):

@@ -27,6 +27,7 @@ from qgis.gui import QgsExpressionBuilderDialog
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import (
+    QApplication,
     QDialog,
     QDialogButtonBox,
     QHeaderView,
@@ -36,7 +37,6 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QTextEdit,
     QWidget,
-    qApp,
 )
 from qgis.utils import OverrideCursor
 
@@ -75,7 +75,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.project = QgsProject.instance()
         self.tab_widget.setCurrentIndex(0)
         self.is_expression = True
-        self.button_box.button(QDialogButtonBox.Close).clicked.connect(self.close)
+        self.button_box.button(QDialogButtonBox.StandardButton.Close).clicked.connect(self.close)
 
         self.btAddVariable.setText("")
         self.btAddVariable.setIcon(QIcon(QgsApplication.iconPath('symbologyAdd.svg')))
@@ -92,10 +92,10 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.btCopyFromLayer.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
         self.btCopyFromProject.setIcon(QIcon(QgsApplication.iconPath('mActionEditCopy.svg')))
 
-        self.inExtentLayer.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.inExtentLayer.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
         self.inExtentLayer.setAllowEmptyLayer(True)
 
-        self.inVariableSourceLayer.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.inVariableSourceLayer.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
         self.inVariableSourceLayer.setAllowEmptyLayer(False)
 
         self.selected_layer = None
@@ -239,8 +239,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.btAddVariable.clicked.connect(self.on_add_variable_clicked)
         self.btRemoveVariable.clicked.connect(self.on_remove_variable_clicked)
 
-        self.button_box.button(QDialogButtonBox.Apply).clicked.connect(self.on_apply_variables_clicked)
-        self.button_box.button(QDialogButtonBox.Help).clicked.connect(open_help)
+        self.button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(self.on_apply_variables_clicked)
+        self.button_box.button(QDialogButtonBox.StandardButton.Help).clicked.connect(open_help)
 
         # Project properties tab
         self.btCopyFromProject.clicked.connect(self.on_copy_from_project_clicked)
@@ -302,8 +302,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.twLayers.setColumnCount(col_count)
         self.twLayers.setHorizontalHeaderLabels(tuple(columns))
         header = self.twLayers.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
         # load content from project layers
         for layer in self.project.mapLayers().values():
@@ -449,15 +449,15 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
         if ask:
             box = QMessageBox(self)
-            box.setIcon(QMessageBox.Question)
+            box.setIcon(QMessageBox.Icon.Question)
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
             box.setWindowTitle(tr('Replace settings by layer properties'))
             box.setText(tr(
                 'You have already set some values for this layer, are you sure you want to reset these ?'))
-            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            box.setDefaultButton(QMessageBox.No)
-            result = box.exec_()
-            if result == QMessageBox.No:
+            box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            box.setDefaultButton(QMessageBox.StandardButton.No)
+            result = box.exec()
+            if result == QMessageBox.StandardButton.No:
                 return
 
         self.dynamicDatasourceContent.setPlainText(uri)
@@ -484,8 +484,8 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.twVariableList.setColumnCount(2)
 
         header = self.twVariableList.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
         # Fill the table
         for i, variable in enumerate(variable_list[0]):
@@ -555,16 +555,16 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
         if ask:
             box = QMessageBox(self)
-            box.setIcon(QMessageBox.Question)
+            box.setIcon(QMessageBox.Icon.Question)
             # noinspection PyArgumentList
             box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
             box.setWindowTitle(tr('Replace settings by project properties'))
             box.setText(tr(
                 'You have already set some values for this project, are you sure you want to reset these ?'))
-            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            box.setDefaultButton(QMessageBox.No)
-            result = box.exec_()
-            if result == QMessageBox.No:
+            box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            box.setDefaultButton(QMessageBox.StandardButton.No)
+            result = box.exec()
+            if result == QMessageBox.StandardButton.No:
                 return
 
         if not self.project.readEntry(WmsProjectProperty.Capabilities, "/")[1]:
@@ -670,15 +670,15 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         self.message_bar.pushSuccess("👍", tr("Current project has been updated"))
 
         box = QMessageBox(self)
-        box.setIcon(QMessageBox.Warning)
+        box.setIcon(QMessageBox.Icon.Warning)
         box.setWindowIcon(QIcon(str(resources_path('icons', 'icon.png'))))
         box.setWindowTitle(tr('Reboot your QGIS Desktop'))
         box.setText(tr(
             'To avoid your QGIS to crash, we strongly recommend you to restart your QGIS Desktop. The plugin worked as '
             'expected related the replacement.'
         ))
-        box.setStandardButtons(QMessageBox.Ok)
-        box.exec_()
+        box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        box.exec()
 
     def origin_variable_toggled(self):
         """ Radio buttons to choose the origin of variables. """
@@ -723,7 +723,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         if text_input and (expression.hasEvalError() or expression.hasParserError()):
             if isinstance(widget, QLineEdit):
                 icon = QIcon(":/images/themes/default/mIconWarning.svg")
-                widget.addAction(icon, QLineEdit.LeadingPosition)
+                widget.addAction(icon, QLineEdit.ActionPosition.LeadingPosition)
             else:
                 widget.setStyleSheet("background-color: #55f3bc3c")
         else:
@@ -771,7 +771,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         dialog.setExpressionText(self.text_widget(widget))
         result = dialog.exec()
 
-        if result != QDialog.Accepted:
+        if result != QDialog.DialogCode.Accepted:
             return
 
         content = dialog.expressionText()
@@ -962,6 +962,6 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         suffix = '</span>'
         self.txtLog.append(f'{prefix} {msg} {suffix}')
         c = self.txtLog.textCursor()
-        c.movePosition(QTextCursor.End, QTextCursor.MoveAnchor)
+        c.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.MoveAnchor)
         self.txtLog.setTextCursor(c)
-        qApp.processEvents()
+        QApplication.instance().processEvents()
