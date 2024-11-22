@@ -5,12 +5,11 @@ __email__ = 'info@3liz.org'
 from pathlib import Path
 from typing import Tuple
 
-from qgis.core import (
+from qgis.core import (  # QgsFeatureRequest,
     QgsExpression,
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
-    # QgsFeatureRequest,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterExpression,
     QgsProcessingParameterFeatureSource,

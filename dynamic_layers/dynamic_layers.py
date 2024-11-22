@@ -2,8 +2,7 @@ __copyright__ = 'Copyright 2024, 3Liz'
 __license__ = 'GPL version 3'
 __email__ = 'info@3liz.org'
 
-from qgis import processing
-from qgis.core import Qgis, QgsApplication, QgsMessageLog, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsMessageLog
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QCoreApplication, QSettings, QTranslator
 from qgis.PyQt.QtGui import QIcon
@@ -11,7 +10,7 @@ from qgis.PyQt.QtWidgets import QAction, QMenu
 
 from dynamic_layers.definitions import PLUGIN_MESSAGE
 from dynamic_layers.dynamic_layers_dialog import DynamicLayersDialog
-from dynamic_layers.processing_provider.provider import Provider
+from dynamic_layers.generate_projects import GenerateProjectsDialog
 from dynamic_layers.tools import open_help, plugin_path, resources_path, tr
 
 
@@ -21,7 +20,7 @@ class DynamicLayers:
     def __init__(self, iface: QgisInterface):
         """Constructor."""
         self.iface = iface
-        self.provider = None
+        # self.provider = None
 
         self.help_action_about_menu = None
         self.menu = None
@@ -40,22 +39,23 @@ class DynamicLayers:
             QCoreApplication.installTranslator(self.translator)
 
     # noinspection PyPep8Naming
-    def initProcessing(self):
-        """ Init processing provider. """
-        self.provider = Provider()
-        # noinspection PyArgumentList
-        QgsApplication.processingRegistry().addProvider(self.provider)
+    # def initProcessing(self):
+    #     """ Init processing provider. """
+    #     self.provider = Provider()
+    #     # noinspection PyArgumentList
+    #     QgsApplication.processingRegistry().addProvider(self.provider)
 
     # noinspection PyPep8Naming
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        # noinspection PyArgumentList
         main_icon = QIcon(str(resources_path('icons', 'icon.png')))
         self.menu = QMenu("Dynamic Layers")
         self.menu.setIcon(main_icon)
 
         self.main_dialog_action = QAction(main_icon, tr("Setup the project"), self.iface.mainWindow())
         # noinspection PyUnresolvedReferences
-        self.main_dialog_action.triggered.connect(self.run)
+        self.main_dialog_action.triggered.connect(self.open_single_project_dialog)
         self.menu.addAction(self.main_dialog_action)
 
         # noinspection PyArgumentList
@@ -65,12 +65,12 @@ class DynamicLayers:
             self.iface.mainWindow()
         )
         # noinspection PyUnresolvedReferences
-        self.generate_projects_action.triggered.connect(self.generate_projects_clicked)
+        self.generate_projects_action.triggered.connect(self.open_generate_projects_dialog)
         self.menu.addAction(self.generate_projects_action)
 
         self.iface.pluginMenu().addMenu(self.menu)
 
-        self.initProcessing()
+        # self.initProcessing()
 
         # Open the online help
         self.help_action_about_menu = QAction(main_icon, tr('Project generator'), self.iface.mainWindow())
@@ -80,9 +80,9 @@ class DynamicLayers:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-        if self.provider:
-            # noinspection PyArgumentList
-            QgsApplication.processingRegistry().removeProvider(self.provider)
+        # if self.provider:
+        #     # noinspection PyArgumentList
+        #     QgsApplication.processingRegistry().removeProvider(self.provider)
 
         if self.generate_projects_action:
             self.iface.removePluginMenu("Dynamic Layers", self.generate_projects_action)
@@ -97,17 +97,15 @@ class DynamicLayers:
             del self.help_action_about_menu
 
     @staticmethod
-    def generate_projects_clicked():
-        """ Open the Processing algorithm dialog. """
-        # noinspection PyUnresolvedReferences
-        processing.execAlgorithmDialog(
-            "dynamic_layers:generate_projects",
-            {}
-        )
+    def open_generate_projects_dialog():
+        """ Open the generate projects dialog. """
+        dialog = GenerateProjectsDialog()
+        dialog.exec()
+        del dialog
 
     @staticmethod
-    def run():
-        """ Open the plugin dialog. """
+    def open_single_project_dialog():
+        """ Open the single project dialog. """
         dialog = DynamicLayersDialog()
         dialog.populate_layer_table()
         dialog.populate_variable_table()

@@ -14,6 +14,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
+from qgis.PyQt.QtWidgets import QApplication
 
 from dynamic_layers.core.dynamic_layers_engine import DynamicLayersEngine
 from dynamic_layers.tools import (
@@ -35,6 +36,7 @@ class GenerateProjects:
             destination: Path,
             copy_side_car_files: bool,
             feedback: QgsProcessingFeedback = None,
+            limit: int = None,
     ):
         """ Constructor. """
         self.project = project
@@ -44,6 +46,7 @@ class GenerateProjects:
         self.expression_destination = expression_destination
         self.copy_side_car_files = copy_side_car_files
         self.feedback = feedback
+        self.limit = limit
 
     def process(self) -> bool:
         """ Generate all projects needed according to the coverage layer. """
@@ -64,11 +67,21 @@ class GenerateProjects:
         request = QgsFeatureRequest()
         # noinspection PyUnresolvedReferences
         request.setFlags(QgsFeatureRequest.NoGeometry)
+        if self.limit and self.limit >= 0:
+            # For debug only
+            request.setLimit(self.limit)
+            if total >= self.limit:
+                total = self.limit
+
         for i, feature in enumerate(self.coverage.getFeatures(request)):
             if self.feedback:
                 if self.feedback.isCanceled():
                     break
                 self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
+
+            if hasattr(self.feedback, 'widget'):
+                # It's the own Feedback object
+                QApplication.processEvents()
 
             engine.set_layer_and_feature(self.coverage, feature)
             engine.update_dynamic_layers_datasource()
