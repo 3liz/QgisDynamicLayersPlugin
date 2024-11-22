@@ -167,7 +167,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
 
         self.expression_widgets = []
         temporary_list_expressions = [
-            # Project
+            # Project server properties
             self.inProjectTitle_exp,
             self.inProjectShortName_exp,
             self.inProjectAbstract_exp,

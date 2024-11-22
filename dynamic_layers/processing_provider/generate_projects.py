@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
+    # QgsFeatureRequest,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterExpression,
     QgsProcessingParameterFeatureSource,
@@ -106,12 +107,40 @@ class GenerateProjectsAlgorithm(QgsProcessingAlgorithm):
             msg = tr("You must have at least one layer with the configuration.")
             return False, msg
 
-        source = self.parameterAsSource(parameters, self.INPUT, context)
-        field = self.parameterAsString(parameters, self.FIELD, context)
-        unique_values = source.uniqueValues(source.fields().indexFromName(field))
-        if len(unique_values) != source.featureCount():
-            msg = tr("You field '{}' does not have unique values within the given layer.")
+        if context.project().isDirty():
+            msg = tr("You must save your project first.")
             return False, msg
+
+        # source = self.parameterAsSource(parameters, self.INPUT, context)
+        # field = self.parameterAsString(parameters, self.FIELD, context)
+        # index = source.fields().indexFromName(field)
+        # unique_values = source.uniqueValues(index)
+        # if len(unique_values) != source.featureCount():
+        #
+        #     request = QgsFeatureRequest()
+        #     request.setSubsetOfAttributes([field], source.fields())
+        #     request.addOrderBy(field)
+        #     request.setFlags(QgsFeatureRequest.NoGeometry)
+        #     count = {}
+        #     for f in source.getFeatures(request):
+        #         if f[field] not in count.keys():
+        #             count[f[field]] = 0
+        #         count[f[field]] += 1
+        #     debug = ''
+        #     for k, v in count.items():
+        #         debug += f'{k} → {v},   '
+        #
+        #     # count = {k: v for k, v in count.items() if v >= 2}
+        #     msg = tr(
+        #         "You field '{}' does not have unique values within the given layer : "
+        #         "{} uniques values versus {} features : {}"
+        #     ).format(
+        #         field,
+        #         len(unique_values),
+        #         source.featureCount(),
+        #         debug
+        #     )
+        #     return False, msg
 
         return super().checkParameterValues(parameters, context)
 
