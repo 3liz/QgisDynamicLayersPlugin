@@ -126,6 +126,23 @@ class DynamicLayersEngine:
                 self.feedback,
             )
             val = ""
+
+        if project_property == WmsProjectProperty.ShortName:
+            # The short name must be valid according to the QGIS regexp
+            # We could use QgsApplication::shortNameRegularExpression()
+            try:
+                from lizmap.ogc_project_validity import OgcProjectValidity
+                val = OgcProjectValidity.short_name(val, [])
+            except ImportError:
+                log_message(
+                    tr('No latest Lizmap plugin installed'),
+                    Qgis.Info,
+                    self.feedback,
+                )
+                # Fall back on a quick replace statement
+                # TODO, this is a quick fix
+                val = val.replace(" ", "").replace("  ", "")
+
         self.project.writeEntry(project_property, '', val)
 
     def force_refresh_all_layer_extents(self):

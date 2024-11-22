@@ -12,3 +12,4 @@ symbology-style.db
 
 # IDE
 .idea/
+.venv/
