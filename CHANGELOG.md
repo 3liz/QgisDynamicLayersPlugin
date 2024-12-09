@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.7.1 - 2024-12-09
+
+* Set the progress bar to 100% at the end of the process
+
 ## 0.7.0 - 2024-11-22
 
 * Add Qt6 support in the source code, for future version of QGIS when Qt6 will be available

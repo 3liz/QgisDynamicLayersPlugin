@@ -186,4 +186,7 @@ class GenerateProjects:
             if self.feedback:
                 self.feedback.setProgress(int(i * total))
 
+        if self.feedback:
+            # Should be OK without it, but let's increase it manually.
+            self.feedback.setProgress(100)
         return True
