@@ -56,6 +56,8 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         self.coverage.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
         self.coverage.layerChanged.connect(self.layer_changed)
 
+        self.copy_side_care_files.setChecked(True)
+
         self.destination.setStorageMode(QgsFileWidget.StorageMode.GetDirectory)
         self.field.setAllowEmptyFieldName(False)
         self.layer_changed()

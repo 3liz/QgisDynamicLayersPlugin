@@ -60,6 +60,8 @@ class GenerateProjects:
         if not self.destination.exists():
             self.destination.mkdir()
 
+        log_message(tr('Copying side-car files : {}').format(self.copy_side_car_files), Qgis.Info, self.feedback)
+
         log_message(tr('Starting the loop over features'), Qgis.Info, self.feedback)
 
         total = 100.0 / self.coverage.featureCount() if self.coverage.featureCount() else 0
@@ -127,6 +129,11 @@ class GenerateProjects:
             if self.copy_side_car_files:
                 base_path_obj = Path(base_path)
                 files = side_car_files(base_path_obj)
+                log_message(
+                    tr('List of side-car files 1/2 : {}').format(str([str(f) for f in files])),
+                    Qgis.Info,
+                    self.feedback,
+                )
                 for a_file in files:
                     destination = str(new_path) + a_file.suffix
                     copyfile(a_file, destination)
@@ -136,6 +143,11 @@ class GenerateProjects:
                 try:
                     from lizmap.toolbelt.lizmap import sidecar_media_dirs
                     dirs = sidecar_media_dirs(base_path_obj)
+                    log_message(
+                        tr('List of side-car files 2/2 : {}').format(str([str(f) for f in files])),
+                        Qgis.Info,
+                        self.feedback
+                    )
                     for a_dir in dirs:
                         rel_path = a_dir.relative_to(base_path_obj.parent)
 
@@ -144,17 +156,18 @@ class GenerateProjects:
 
                         copytree(a_dir, new_dir_path.parent.joinpath(a_dir.stem), dirs_exist_ok=True)
 
-                        log_message(
-                            tr('Copy of directory : {}').format(str(rel_path)),
-                            Qgis.Info,
-                            self.feedback,
-                        )
+                        # log_message(
+                        #     tr('Copy of directory : {}').format(str(rel_path)),
+                        #     Qgis.Info,
+                        #     self.feedback,
+                        # )
                 except ImportError:
                     log_message(
                         tr('No latest Lizmap plugin installed, if it is needed in your case.'),
                         Qgis.Info,
                         self.feedback,
                     )
+
 
             log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
             self.project.setFileName(str(new_path))
