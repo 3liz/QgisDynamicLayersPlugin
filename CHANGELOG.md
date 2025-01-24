@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.7.2 - 2025-01-24
+
+* Be more verbose when copying side-car files
+
 ## 0.7.1 - 2024-12-09
 
 * Set the progress bar to 100% at the end of the process
