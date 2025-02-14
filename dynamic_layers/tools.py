@@ -139,6 +139,9 @@ def side_car_files(file_path: Path) -> List[Path]:
     """ Return a list of all side-car files, having the extension included. """
     results = []
     for iter_file in file_path.parent.iterdir():
+        if iter_file.suffix.endswith('~'):
+            continue
+
         if iter_file.name.startswith(file_path.name) and iter_file != file_path:
             results.append(iter_file)
 

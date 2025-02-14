@@ -66,7 +66,7 @@ class GenerateProjectsDialog(QDialog, FORM_CLASS):
         # DEBUG
         # self.file_name.setText('"schema" || \'/test_\' ||  "schema" || \'.qgs\'')
         # self.destination.setFilePath('/tmp/demo_cartophyl')
-        # self.debug_limit.setValue(5)
+        # self.debug_limit.setValue(1)
 
     def layer_changed(self):
         self.field.setLayer(self.coverage.currentLayer())

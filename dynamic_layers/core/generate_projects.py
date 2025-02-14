@@ -79,7 +79,8 @@ class GenerateProjects:
             if self.feedback:
                 if self.feedback.isCanceled():
                     break
-                self.feedback.pushDebugInfo(tr('Feature : {}').format(feature.id()))
+                self.feedback.pushDebugInfo(tr(
+                    'Feature ID : {} → "{}" = \'{}\'').format(feature.id(), self.field, feature[self.field]))
 
             if hasattr(self.feedback, 'widget'):
                 # It's the own Feedback object
@@ -119,6 +120,7 @@ class GenerateProjects:
                 feature=feature,
             )
             new_path = Path(f"{self.destination}/{new_file}")
+            new_file_name = new_path.stem
 
             # The new path can contain new folder, specific to the evaluated expression
             if not new_path.parent.exists():
@@ -144,17 +146,20 @@ class GenerateProjects:
                     from lizmap.toolbelt.lizmap import sidecar_media_dirs
                     dirs = sidecar_media_dirs(base_path_obj)
                     log_message(
-                        tr('List of side-car files 2/2 : {}').format(str([str(f) for f in files])),
+                        tr('List of side-car files 2/2 : {}').format(str([str(f) for f in dirs])),
                         Qgis.Info,
                         self.feedback
                     )
                     for a_dir in dirs:
                         rel_path = a_dir.relative_to(base_path_obj.parent)
 
+                        # Quick and replace "media/js/project_A/foo.js" to "media/js/project_B/foo.js"
+                        rel_path = Path(str(rel_path).replace(base_path_obj.stem, new_file_name))
+
                         new_dir_path = new_path.parent.joinpath(rel_path)
                         new_dir_path.mkdir(parents=True, exist_ok=True)
 
-                        copytree(a_dir, new_dir_path.parent.joinpath(a_dir.stem), dirs_exist_ok=True)
+                        copytree(a_dir, new_dir_path, dirs_exist_ok=True)
 
                         # log_message(
                         #     tr('Copy of directory : {}').format(str(rel_path)),
