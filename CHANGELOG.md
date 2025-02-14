@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.7.3 - 2025-02-14
+
+* Fix about copying media files
+
 ## 0.7.2 - 2025-01-24
 
 * Be more verbose when copying side-car files
