@@ -60,9 +60,9 @@ class GenerateProjects:
         if not self.destination.exists():
             self.destination.mkdir()
 
-        log_message(tr('Copying side-car files : {}').format(self.copy_side_car_files), Qgis.Info, self.feedback)
+        log_message(tr('Copying side-car files : {}').format(self.copy_side_car_files), Qgis.MessageLevel.Info, self.feedback)
 
-        log_message(tr('Starting the loop over features'), Qgis.Info, self.feedback)
+        log_message(tr('Starting the loop over features'), Qgis.MessageLevel.Info, self.feedback)
 
         total = 100.0 / self.coverage.featureCount() if self.coverage.featureCount() else 0
 
@@ -111,7 +111,7 @@ class GenerateProjects:
             extent = engine.update_project_extent()
 
             # Output file name
-            log_message(tr("Compute new value for output file name"), Qgis.Info, self.feedback)
+            log_message(tr("Compute new value for output file name"), Qgis.MessageLevel.Info, self.feedback)
             new_file = string_substitution(
                 input_string=self.expression_destination,
                 variables={},
@@ -133,7 +133,7 @@ class GenerateProjects:
                 files = side_car_files(base_path_obj)
                 log_message(
                     tr('List of side-car files 1/2 : {}').format(str([str(f) for f in files])),
-                    Qgis.Info,
+                    Qgis.MessageLevel.Info,
                     self.feedback,
                 )
                 for a_file in files:
@@ -147,7 +147,7 @@ class GenerateProjects:
                     dirs = sidecar_media_dirs(base_path_obj)
                     log_message(
                         tr('List of side-car files 2/2 : {}').format(str([str(f) for f in dirs])),
-                        Qgis.Info,
+                        Qgis.MessageLevel.Info,
                         self.feedback
                     )
                     for a_dir in dirs:
@@ -169,12 +169,12 @@ class GenerateProjects:
                 except ImportError:
                     log_message(
                         tr('No latest Lizmap plugin installed, if it is needed in your case.'),
-                        Qgis.Info,
+                        Qgis.MessageLevel.Info,
                         self.feedback,
                     )
 
 
-            log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.Info, self.feedback)
+            log_message(tr('Project written to new file name {}').format(new_path.name), Qgis.MessageLevel.Info, self.feedback)
             self.project.setFileName(str(new_path))
             self.project.write()
             self.project.setFileName(base_path)
@@ -191,13 +191,13 @@ class GenerateProjects:
                         f.write("\n")
                     log_message(
                         tr('updating Lizmap configuration file about the extent'),
-                        Qgis.Info,
+                        Qgis.MessageLevel.Info,
                         self.feedback,
                     )
                 except Exception as e:
                     log_message(
                         tr('Error with the Lizmap configuration file : {}').format(e),
-                        Qgis.Critical,
+                        Qgis.MessageLevel.Critical,
                         self.feedback,
                     )
 

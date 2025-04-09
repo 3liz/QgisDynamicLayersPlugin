@@ -79,7 +79,7 @@ class LayerDataSourceModifier:
                 tr(
                     "Error, layer '{name}' is not valid, error : {error}"
                 ).format(name=self.layer.name(), error=self.layer.error()),
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
                 self.feedback,
             )
             return
@@ -128,7 +128,7 @@ class LayerDataSourceModifier:
             source_title = title_template
 
         # Search and replace content
-        log_message(tr("Compute new value for layer title"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer title"), Qgis.MessageLevel.Info, self.feedback)
         title = string_substitution(
             input_string=source_title,
             variables=search_and_replace_dictionary,
@@ -146,7 +146,7 @@ class LayerDataSourceModifier:
             source_name = name_template
 
         # Search and replace content
-        log_message(tr("Compute new value for layer name"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer name"), Qgis.MessageLevel.Info, self.feedback)
         name = string_substitution(
             input_string=source_name,
             variables=search_and_replace_dictionary,
@@ -166,7 +166,7 @@ class LayerDataSourceModifier:
         if abstract_template and abstract_template not in ("", "''"):
             source_abstract = abstract_template
 
-        log_message(tr("Compute new value for layer abstract"), Qgis.Info, self.feedback)
+        log_message(tr("Compute new value for layer abstract"), Qgis.MessageLevel.Info, self.feedback)
         abstract = string_substitution(
             input_string=source_abstract,
             variables=search_and_replace_dictionary,

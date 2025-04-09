@@ -38,7 +38,7 @@ def string_substitution(
     """ String substitution. """
     if not input_string:
         msg = tr("No expression to evaluate, returning empty string")
-        log_message(msg, Qgis.Info, feedback)
+        log_message(msg, Qgis.MessageLevel.Info, feedback)
         return ""
 
     msg = tr(
@@ -70,7 +70,7 @@ def string_substitution(
 
     context.appendScope(scope)
 
-    log_message(msg, Qgis.Info, feedback)
+    log_message(msg, Qgis.MessageLevel.Info, feedback)
 
     if is_template:
         # noinspection PyArgumentList
@@ -80,17 +80,17 @@ def string_substitution(
     expression = QgsExpression(input_string)
     if expression.hasEvalError() or expression.hasParserError():
         msg = tr("Invalid QGIS expression : {}").format(input_string)
-        log_message(msg, Qgis.Critical, feedback)
+        log_message(msg, Qgis.MessageLevel.Critical, feedback)
         raise QgsProcessingException(msg)
 
     output = expression.evaluate(context)
     msg = tr("Output is {}").format(output)
-    log_message(msg, Qgis.Info, feedback)
+    log_message(msg, Qgis.MessageLevel.Info, feedback)
 
     return output
 
 
-def log_message(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsProcessingFeedback = None):
+def log_message(msg: str, level: Qgis.MessageLevel = Qgis.MessageLevel.Info, feedback: QgsProcessingFeedback = None):
     """ Log a message, either in the log panel, or in the Processing UI panel. """
     # noinspection PyTypeChecker
     QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, level)
@@ -98,13 +98,13 @@ def log_message(msg: str, level: Qgis.MessageLevel = Qgis.Info, feedback: QgsPro
     if not feedback:
         return
 
-    if level == Qgis.Warning:
+    if level == Qgis.MessageLevel.Warning:
         feedback.reportError(msg)
-    elif level == Qgis.Critical:
+    elif level == Qgis.MessageLevel.Critical:
         feedback.reportError(msg)
-    elif level == Qgis.Info:
+    elif level == Qgis.MessageLevel.Info:
         feedback.pushDebugInfo(msg)
-    elif level == Qgis.Success:
+    elif level == Qgis.MessageLevel.Success:
         feedback.pushInfo(msg)
     else:
         feedback.pushDebugInfo(msg)

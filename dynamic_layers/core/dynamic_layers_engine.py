@@ -109,7 +109,7 @@ class DynamicLayersEngine:
 
         It replaces a variable if found in the properties.
         """
-        log_message(tr("Compute new project property for {}").format(project_property), Qgis.Info, self.feedback)
+        log_message(tr("Compute new project property for {}").format(project_property), Qgis.MessageLevel.Info, self.feedback)
         # Replace variable in given val via dictionary
         val = string_substitution(
             input_string=val,
@@ -122,7 +122,7 @@ class DynamicLayersEngine:
             log_message(
                 f'The expression evaluation "{val}" for the project property "{project_property}" was None/NULL, '
                 f'it has been set to an empty string.',
-                Qgis.Warning,
+                Qgis.MessageLevel.Warning,
                 self.feedback,
             )
             val = ""
@@ -136,7 +136,7 @@ class DynamicLayersEngine:
             except ImportError:
                 log_message(
                     tr('No latest Lizmap plugin installed'),
-                    Qgis.Info,
+                    Qgis.MessageLevel.Info,
                     self.feedback,
                 )
                 # Fall back on a quick replace statement
@@ -153,7 +153,7 @@ class DynamicLayersEngine:
 
     def update_project_extent(self) -> Optional[List[str]]:
         """ Update the project extent according to the property stored in the project. """
-        log_message(tr("Update project extent"), Qgis.Info, self.feedback)
+        log_message(tr("Update project extent"), Qgis.MessageLevel.Info, self.feedback)
 
         extent_layer = self.project.readEntry(PLUGIN_SCOPE, PluginProjectProperty.ExtentLayer)
         if extent_layer:
@@ -168,14 +168,14 @@ class DynamicLayersEngine:
         if extent_layer:
             extent_layer.updateExtents(True)
             p_extent = extent_layer.extent()
-            log_message(tr("Extent from layer : {}").format(extent_layer.name()), Qgis.Info, self.feedback)
+            log_message(tr("Extent from layer : {}").format(extent_layer.name()), Qgis.MessageLevel.Info, self.feedback)
 
         if p_extent and p_extent.width() <= 0 and self.iface:
-            log_message(tr("Extent from iface"), Qgis.Info, self.feedback)
+            log_message(tr("Extent from iface"), Qgis.MessageLevel.Info, self.feedback)
             p_extent = self.iface.mapCanvas().extent()
 
         if not p_extent:
-            return
+            return None
 
         if extent_margin:
             margin_x = p_extent.width() * extent_margin / 100
@@ -185,7 +185,7 @@ class DynamicLayersEngine:
             # TODO add unit
             log_message(
                 tr("with a margin of {}, unit {}").format(margin, extent_layer.crs().mapUnits()),
-                Qgis.Info,
+                Qgis.MessageLevel.Info,
                 self.feedback,
             )
 
@@ -193,7 +193,7 @@ class DynamicLayersEngine:
         p_wms_extent = [p_extent.xMinimum(), p_extent.yMinimum(), p_extent.xMaximum(), p_extent.yMaximum()]
         p_wms_extent = [str(i) for i in p_wms_extent]
         self.project.writeEntry(WmsProjectProperty.Extent, '', p_wms_extent)
-        log_message(tr("Writing the new extent to {}").format(WmsProjectProperty.Extent), Qgis.Info, self.feedback)
+        log_message(tr("Writing the new extent to {}").format(WmsProjectProperty.Extent), Qgis.MessageLevel.Info, self.feedback)
 
         if extent_layer:
             georef_rectangle = QgsReferencedRectangle(p_extent, extent_layer.crs())
@@ -203,7 +203,7 @@ class DynamicLayersEngine:
 
         # Zoom canvas to extent
         if self.iface:
-            log_message(tr("Refresh map canvas"), Qgis.Info, self.feedback)
+            log_message(tr("Refresh map canvas"), Qgis.MessageLevel.Info, self.feedback)
             self.iface.mapCanvas().setExtent(p_extent)
             self.iface.mapCanvas().refresh()
 

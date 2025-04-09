@@ -589,7 +589,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         elif prop == 'extentMargin':
             val = widget.value()
         else:
-            log_message(f'Unknown widget {prop}, please ask the developer', Qgis.Critical, None)
+            log_message(f'Unknown widget {prop}, please ask the developer', Qgis.MessageLevel.Critical, None)
             return None
 
         # Store value into the project
@@ -661,7 +661,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
                 engine.update_project_extent()
 
         except QgsProcessingException as e:
-            log_message(str(e), Qgis.Critical, None)
+            log_message(str(e), Qgis.MessageLevel.Critical, None)
             self.message_bar.pushCritical(tr("Parsing expression error"), str(e))
             return
 
@@ -747,13 +747,13 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
             QgsMessageLog.logMessage(
                 f'Layer set in the expression builder : {layer.name()}',
                 PLUGIN_MESSAGE,
-                Qgis.Info,
+                Qgis.MessageLevel.Info,
             )
         else:
             QgsMessageLog.logMessage(
                 f'List of variables : {",".join([j for j in self.variables().keys()])}',
                 PLUGIN_MESSAGE,
-                Qgis.Info,
+                Qgis.MessageLevel.Info,
             )
 
         dialog = QgsExpressionBuilderDialog(layer, context=context)
@@ -944,7 +944,7 @@ class DynamicLayersDialog(QDialog, FORM_CLASS):
         """ Update the log. """
         # Should we deprecate this log panel and instead add a button to open the QGIS log panel ?
         # noinspection PyTypeChecker
-        QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, Qgis.Success)
+        QgsMessageLog.logMessage(msg, PLUGIN_MESSAGE, Qgis.MessageLevel.Success)
 
         self.txtLog.ensureCursorVisible()
         prefix = '<span style="font-weight:normal;">'
