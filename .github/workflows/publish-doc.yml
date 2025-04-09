@@ -40,7 +40,7 @@ jobs:
 
     - name: Copy CHANGELOG.md and CONTRIBUTING.md
       run: |
-        cp CHANGELOG.md docs/
+        cp CHANGELOG.md docs/changelog.md
 #        cp CONTRIBUTING.md docs/
 
     - name: Deploy to Github Pages
