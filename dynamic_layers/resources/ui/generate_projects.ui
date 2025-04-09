@@ -44,7 +44,7 @@
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>QGS Expression to format the final filename. It must end with .qgs or .qgz.</string>
+      <string>QGIS Expression to format the final filename. It must end with .qgs or .qgz.</string>
      </property>
     </widget>
    </item>
