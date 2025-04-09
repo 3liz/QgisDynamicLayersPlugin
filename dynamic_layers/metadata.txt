@@ -1,8 +1,8 @@
 [general]
 name=Dynamic Layers
 qgisMinimumVersion=3.28
-description=Change the datasource of chosen layers dynamically by searching and replacing user defined variables.
-about=This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables such as {$myvar} inside the layer datasource, and then define theses variables (from a table or from an input vector source). Finally you apply the variables values on every configured layer via the apply button, and you can see the changes before saving the project.
+description=Change the datasource of many layers dynamically by searching and replacing user defined variables.
+about=A kind of atlas, but at the project levels. This plugin helps to change the datasources of many layers at once, for example to create different versions of the same project on different extents. You can use some variables using QGIS expressions inside the layer datasource, and then define theses variables (from a table or from an input vector source as coverage). You can generate QGIS projects in bulk.
 # Done automatically by qgis-plugin-ci
 version=master
 commitNumber=
@@ -16,7 +16,7 @@ email=info@3liz.com
 # End of mandatory metadata
 
 # Tags are comma separated with spaces allowed
-tags=feature, layers, project, dynamic, datasource
+tags=feature, layers, project, dynamic, datasource, atlas, generate, datasource, expressions, bulk
 
 homepage=https://docs.3liz.org/QgisDynamicLayersPlugin/
 tracker=https://github.com/3liz/QgisDynamicLayersPlugin/issues
