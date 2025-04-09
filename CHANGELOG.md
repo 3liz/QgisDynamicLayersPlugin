@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.8.0 - 2025-04-09
+
+* Remove a possible warning after updating the current project
+* Review some PyQGIS source coe about enums
+
 ## 0.7.3 - 2025-02-14
 
 * Fix about copying media files
