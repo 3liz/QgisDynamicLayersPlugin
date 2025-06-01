@@ -16,7 +16,7 @@ email=info@3liz.com
 # End of mandatory metadata
 
 # Tags are comma separated with spaces allowed
-tags=feature, layers, project, dynamic, datasource, atlas, generate, datasource, expressions, bulk
+tags=feature, layers, project, dynamic, datasource, atlas, generate, datasource, expression, expressions, bulk, dynamiclayers, replacement, provider, variable
 
 homepage=https://docs.3liz.org/QgisDynamicLayersPlugin/
 tracker=https://github.com/3liz/QgisDynamicLayersPlugin/issues
